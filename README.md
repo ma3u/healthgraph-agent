@@ -194,6 +194,8 @@ Generates an 8-panel dashboard and individual high-res charts with longevity zon
 | Workout Types | Distribution of activity types |
 | Composite Trend | All metrics normalized, higher = better |
 
+![Python Longevity Dashboard](docs/images/python_dashboard.png)
+
 See [docs/DASHBOARD.md](docs/DASHBOARD.md) for detailed documentation and longevity science behind each metric.
 
 ### NeoDash Interactive Dashboard
@@ -203,6 +205,8 @@ For interactive, browser-based charts directly from Neo4j:
 1. Install **NeoDash** from Neo4j Desktop plugin gallery
 2. Import `neodash/longevity_dashboard.json`
 3. Explore 3 pages: Longevity Overview, Recovery & Training, Graph Exploration
+
+![NeoDash Longevity Dashboard](docs/images/neodash_dashboard.png)
 
 ---
 
