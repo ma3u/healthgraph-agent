@@ -290,13 +290,13 @@ METHOD=csv bash scripts/run_pipeline.sh
 
 ## Hackathon checklist
 
-- [ ] Complete [Building Agents in Neo4j Aura Course](https://dev.neo4j.com/aura-agent-hackathon-community) (by May 15)
-- [ ] Register for [$100 Aura Credits](https://dev.neo4j.com/credit-claim-aura-agent-hackathon-2026)
+- [X] Complete [Building Agents in Neo4j Aura Course](https://dev.neo4j.com/aura-agent-hackathon-community) (by May 15)
+- [X] Register for [$100 Aura Credits](https://dev.neo4j.com/credit-claim-aura-agent-hackathon-2026)
 - [ ] Create AuraDB instance
 - [x] Build ETL pipeline (Method 1: Python, Method 2: CSV)
 - [x] Synthetic test data generator (4 personas)
 - [x] 20 longevity-focused Cypher queries
-- [ ] Load health data into Neo4j
+- [X] Load health data into Neo4j
 - [ ] Configure Aura Agent with tools
 - [ ] Test agent with longevity questions
 - [ ] Take screenshots (console + agent demo)
