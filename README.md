@@ -167,6 +167,45 @@ The file `cypher/longevity_queries.cypher` contains 20 ready-to-run queries focu
 
 ---
 
+## Longevity Dashboard
+
+Two visualization options for exploring your health data:
+
+### Python Charts
+
+```bash
+# Generate all charts (full history)
+python3 scripts/visualize_longevity.py
+
+# Last 6 months only
+python3 scripts/visualize_longevity.py --months 6
+```
+
+Generates an 8-panel dashboard and individual high-res charts with longevity zone coloring:
+
+| Chart | What it shows |
+|-------|--------------|
+| Resting Heart Rate | Trend with zones: green (< 55), yellow (55-65), red (> 65 bpm) |
+| HRV (SDNN) | Autonomic resilience: green (> 40ms), yellow (25-40), red (< 25) |
+| VO2max | #1 longevity predictor: green (> 45), yellow (35-45), red (< 35) |
+| Daily Steps | Bar chart with 7k minimum and 10k target lines |
+| Sleep Duration | Green optimal zone at 7-9 hours |
+| Workout Volume | Monthly minutes, green when exceeding 150 min/week target |
+| Workout Types | Distribution of activity types |
+| Composite Trend | All metrics normalized, higher = better |
+
+See [docs/DASHBOARD.md](docs/DASHBOARD.md) for detailed documentation and longevity science behind each metric.
+
+### NeoDash Interactive Dashboard
+
+For interactive, browser-based charts directly from Neo4j:
+
+1. Install **NeoDash** from Neo4j Desktop plugin gallery
+2. Import `neodash/longevity_dashboard.json`
+3. Explore 3 pages: Longevity Overview, Recovery & Training, Graph Exploration
+
+---
+
 ## Repo structure
 
 ```
@@ -176,7 +215,8 @@ healthgraph-agent/
 ├── .env.example                     # Connection config for Desktop + Aura
 │
 ├── docs/
-│   └── export_instructions.md       # How to export from iPhone
+│   ├── export_instructions.md       # How to export from iPhone
+│   └── DASHBOARD.md                 # Dashboard documentation + longevity science
 │
 ├── etl/
 │   ├── requirements.txt             # lxml, neo4j, python-dotenv, tqdm
@@ -191,13 +231,16 @@ healthgraph-agent/
 │   ├── longevity_queries.cypher     # 20 longevity-focused analysis queries
 │   └── load_csv_import.cypher       # Method 2: LOAD CSV import script
 │
-├── agent/
-│   └── agent_config.md              # Aura Agent system prompt + tool definitions
+├── scripts/
+│   ├── run_pipeline.sh              # End-to-end orchestration (both methods)
+│   └── visualize_longevity.py       # Python chart generator (8 panels + individual)
 │
-└── scripts/
-    └── run_pipeline.sh              # End-to-end orchestration (both methods)
+├── neodash/
+│   └── longevity_dashboard.json     # Interactive NeoDash dashboard (3 pages)
+│
+└── agent/
+    └── agent_config.md              # Aura Agent system prompt + tool definitions
 ```
-
 ---
 
 ## Getting started
@@ -288,17 +331,23 @@ METHOD=csv bash scripts/run_pipeline.sh
 
 ---
 
+## Next steps
+
+See [Issue #1: Deploy to Neo4j Aura and configure Aura Agent](https://github.com/ma3u/healthgraph-agent/issues/1) for the detailed roadmap.
+
 ## Hackathon checklist
 
-- [X] Complete [Building Agents in Neo4j Aura Course](https://dev.neo4j.com/aura-agent-hackathon-community) (by May 15)
-- [X] Register for [$100 Aura Credits](https://dev.neo4j.com/credit-claim-aura-agent-hackathon-2026)
-- [ ] Create AuraDB instance
+- [x] Complete [Building Agents in Neo4j Aura Course](https://dev.neo4j.com/aura-agent-hackathon-community) (by May 15)
+- [x] Register for [$100 Aura Credits](https://dev.neo4j.com/credit-claim-aura-agent-hackathon-2026)
 - [x] Build ETL pipeline (Method 1: Python, Method 2: CSV)
 - [x] Synthetic test data generator (4 personas)
 - [x] 20 longevity-focused Cypher queries
-- [X] Load health data into Neo4j
-- [ ] Configure Aura Agent with tools
-- [ ] Test agent with longevity questions
+- [x] Load health data into Neo4j Desktop (3,087 days, 3,180 workouts)
+- [x] Longevity dashboard (Python charts + NeoDash)
+- [ ] Create AuraDB instance and load data ([#1](https://github.com/ma3u/healthgraph-agent/issues/1))
+- [ ] Configure Aura Agent with tools ([#1](https://github.com/ma3u/healthgraph-agent/issues/1))
+- [ ] Generate vector embeddings for similarity search ([#1](https://github.com/ma3u/healthgraph-agent/issues/1))
+- [ ] Test agent with longevity questions ([#1](https://github.com/ma3u/healthgraph-agent/issues/1))
 - [ ] Take screenshots (console + agent demo)
-- [X] Submit to [community thread](https://community.neo4j.com/t/start-here-register-get-aura-credits-aura-agent-hackathon-2026/77191)
+- [x] Submit to [community thread](https://community.neo4j.com/t/start-here-register-get-aura-credits-aura-agent-hackathon-2026/77191)
 
