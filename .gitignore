@@ -1,11 +1,11 @@
-# Apple Health data — NEVER commit personal health data
-data/
-*.xml
-export.zip
-apple_health_export/
+# Real Apple Health data — NEVER commit personal health data
+data/export.xml
+data/export.zip
+data/apple_health_export/
 
-# CSV exports (generated from personal health data)
-csv/
+# Synthetic data and CSV exports ARE allowed to commit
+# data/export_*.xml  — checked in
+# data/csv*/         — checked in
 
 # Environment
 .env
