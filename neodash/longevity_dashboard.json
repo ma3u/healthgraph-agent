@@ -1,0 +1,181 @@
+{
+  "title": "HealthGraph — Longevity Dashboard",
+  "version": "2.4",
+  "settings": {
+    "pagenumber": 0,
+    "editable": true,
+    "fullscreenEnabled": false,
+    "parameters": {}
+  },
+  "pages": [
+    {
+      "title": "Longevity Overview",
+      "reports": [
+        {
+          "title": "Resting Heart Rate Trend (Weekly)",
+          "query": "MATCH (d:Day)-[:PART_OF]->(w:Week)\nMATCH (d)-[:HAS_SUMMARY]->(s:DailySummary)\nWHERE s.resting_heart_rate IS NOT NULL\nRETURN w.start_date AS date,\n       round(avg(s.resting_heart_rate), 1) AS `Resting HR (bpm)`\nORDER BY w.start_date",
+          "width": 6,
+          "height": 3,
+          "x": 0,
+          "y": 0,
+          "type": "line",
+          "selection": { "x": "date", "value": ["Resting HR (bpm)"] },
+          "settings": { "colors": ["#ef4444"], "legend": true, "showGrid": true }
+        },
+        {
+          "title": "HRV Trend (Weekly)",
+          "query": "MATCH (d:Day)-[:PART_OF]->(w:Week)\nMATCH (d)-[:HAS_SUMMARY]->(s:DailySummary)\nWHERE s.hrv_mean IS NOT NULL\nRETURN w.start_date AS date,\n       round(avg(s.hrv_mean), 1) AS `HRV (ms)`\nORDER BY w.start_date",
+          "width": 6,
+          "height": 3,
+          "x": 6,
+          "y": 0,
+          "type": "line",
+          "selection": { "x": "date", "value": ["HRV (ms)"] },
+          "settings": { "colors": ["#22c55e"], "legend": true, "showGrid": true }
+        },
+        {
+          "title": "VO2max Progression",
+          "query": "MATCH (d:Day)-[:HAS_SUMMARY]->(s:DailySummary)\nWHERE s.vo2max IS NOT NULL\nRETURN d.date AS date,\n       s.vo2max AS `VO2max (mL/kg/min)`\nORDER BY d.date",
+          "width": 6,
+          "height": 3,
+          "x": 0,
+          "y": 3,
+          "type": "line",
+          "selection": { "x": "date", "value": ["VO2max (mL/kg/min)"] },
+          "settings": { "colors": ["#3b82f6"], "legend": true, "showGrid": true }
+        },
+        {
+          "title": "Daily Steps",
+          "query": "MATCH (d:Day)-[:PART_OF]->(w:Week)\nMATCH (d)-[:HAS_SUMMARY]->(s:DailySummary)\nWHERE s.total_steps IS NOT NULL\nRETURN w.start_date AS date,\n       round(avg(s.total_steps)) AS `Avg Daily Steps`\nORDER BY w.start_date",
+          "width": 6,
+          "height": 3,
+          "x": 6,
+          "y": 3,
+          "type": "bar",
+          "selection": { "x": "date", "value": ["Avg Daily Steps"] },
+          "settings": { "colors": ["#f59e0b"], "legend": true, "showGrid": true }
+        },
+        {
+          "title": "Monthly Workout Volume (minutes)",
+          "query": "MATCH (d:Day)-[:HAS_SUMMARY]->(s:DailySummary)\nWITH d.date.year AS year, d.date.month AS month, s\nRETURN year + '-' + right('0' + toString(month), 2) AS month,\n       round(sum(s.workout_minutes), 0) AS `Workout Minutes`\nORDER BY month",
+          "width": 6,
+          "height": 3,
+          "x": 0,
+          "y": 6,
+          "type": "bar",
+          "selection": { "x": "month", "value": ["Workout Minutes"] },
+          "settings": { "colors": ["#06b6d4"], "legend": true, "showGrid": true }
+        },
+        {
+          "title": "Sleep Duration (Weekly Average)",
+          "query": "MATCH (d:Day)-[:PART_OF]->(w:Week)\nMATCH (d)-[:HAS_SUMMARY]->(s:DailySummary)\nWHERE s.sleep_hours IS NOT NULL\nRETURN w.start_date AS date,\n       round(avg(s.sleep_hours), 1) AS `Sleep (hours)`\nORDER BY w.start_date",
+          "width": 6,
+          "height": 3,
+          "x": 6,
+          "y": 6,
+          "type": "line",
+          "selection": { "x": "date", "value": ["Sleep (hours)"] },
+          "settings": { "colors": ["#8b5cf6"], "legend": true, "showGrid": true }
+        },
+        {
+          "title": "Workout Type Distribution",
+          "query": "MATCH (w:Workout)\nRETURN w.activity_type AS type, count(*) AS count\nORDER BY count DESC\nLIMIT 10",
+          "width": 6,
+          "height": 3,
+          "x": 0,
+          "y": 9,
+          "type": "pie",
+          "selection": { "index": "type", "value": "count", "key": "type" },
+          "settings": { "legend": true, "showLabels": true }
+        },
+        {
+          "title": "Monthly Longevity Dashboard",
+          "query": "MATCH (d:Day)-[:HAS_SUMMARY]->(s:DailySummary)\nWITH d.date.year AS year, d.date.month AS month, s\nRETURN year + '-' + right('0' + toString(month), 2) AS Month,\n       round(avg(s.resting_heart_rate), 1) AS `RHR`,\n       round(avg(s.hrv_mean), 1) AS `HRV`,\n       round(avg(s.vo2max), 1) AS `VO2max`,\n       round(avg(s.sleep_hours), 1) AS `Sleep (h)`,\n       round(avg(s.total_steps), 0) AS `Avg Steps`,\n       sum(s.workout_count) AS `Workouts`,\n       round(sum(s.workout_minutes), 0) AS `Workout Min`,\n       count(*) AS `Days`\nORDER BY Month DESC\nLIMIT 12",
+          "width": 6,
+          "height": 3,
+          "x": 6,
+          "y": 9,
+          "type": "table",
+          "selection": {},
+          "settings": { "compact": true, "columnWidths": "[1,1,1,1,1,1,1,1,1]" }
+        }
+      ]
+    },
+    {
+      "title": "Recovery & Training",
+      "reports": [
+        {
+          "title": "Workout Impact on Next-Day HRV",
+          "query": "MATCH (w:Workout)-[:ON_DAY]->(d1:Day)-[:HAS_SUMMARY]->(s1:DailySummary)\nMATCH (d1)-[:NEXT_DAY]->(d2:Day)-[:HAS_SUMMARY]->(s2:DailySummary)\nWHERE s1.hrv_mean IS NOT NULL AND s2.hrv_mean IS NOT NULL\nRETURN w.activity_type AS `Workout Type`,\n       count(*) AS `Count`,\n       round(avg(s1.hrv_mean), 1) AS `HRV Workout Day`,\n       round(avg(s2.hrv_mean), 1) AS `HRV Next Day`,\n       round(avg(s2.hrv_mean - s1.hrv_mean), 1) AS `HRV Change`\nORDER BY `HRV Change` DESC",
+          "width": 6,
+          "height": 4,
+          "x": 0,
+          "y": 0,
+          "type": "table",
+          "selection": {},
+          "settings": { "compact": true }
+        },
+        {
+          "title": "Training Load vs Recovery (Weekly)",
+          "query": "MATCH (d:Day)-[:PART_OF]->(w:Week)\nMATCH (d)-[:HAS_SUMMARY]->(s:DailySummary)\nWHERE s.hrv_mean IS NOT NULL\nWITH w,\n     sum(s.workout_minutes) AS train_min,\n     round(avg(s.hrv_mean), 1) AS avg_hrv\nRETURN w.start_date AS date,\n       train_min AS `Training Min`,\n       avg_hrv AS `Avg HRV`\nORDER BY w.start_date",
+          "width": 6,
+          "height": 4,
+          "x": 6,
+          "y": 0,
+          "type": "line",
+          "selection": { "x": "date", "value": ["Training Min", "Avg HRV"] },
+          "settings": { "colors": ["#06b6d4", "#22c55e"], "legend": true }
+        },
+        {
+          "title": "Rest Day Recovery (HRV on non-workout days)",
+          "query": "MATCH (d:Day)-[:HAS_SUMMARY]->(s:DailySummary)\nWHERE s.workout_count = 0 AND s.hrv_mean IS NOT NULL\nOPTIONAL MATCH (d_prev:Day)-[:NEXT_DAY]->(d)\nOPTIONAL MATCH (d_prev)-[:HAS_SUMMARY]->(s_prev:DailySummary)\nRETURN d.date AS `Rest Day`,\n       s.hrv_mean AS `HRV`,\n       s.resting_heart_rate AS `RHR`,\n       s.sleep_hours AS `Sleep`,\n       s_prev.workout_count AS `Prev Day Workouts`\nORDER BY d.date DESC\nLIMIT 30",
+          "width": 6,
+          "height": 4,
+          "x": 0,
+          "y": 4,
+          "type": "table",
+          "selection": {},
+          "settings": { "compact": true }
+        },
+        {
+          "title": "Overtraining Risk (Weekly)",
+          "query": "MATCH (d:Day)-[:PART_OF]->(w:Week)\nMATCH (d)-[:HAS_SUMMARY]->(s:DailySummary)\nWHERE s.hrv_mean IS NOT NULL\nWITH w,\n     sum(s.workout_minutes) AS weekly_training_min,\n     avg(s.hrv_mean) AS weekly_avg_hrv,\n     avg(s.resting_heart_rate) AS weekly_avg_rhr\nRETURN w.iso AS Week,\n       round(weekly_training_min, 0) AS `Training Min`,\n       round(weekly_avg_hrv, 1) AS `Avg HRV`,\n       round(weekly_avg_rhr, 1) AS `Avg RHR`,\n       CASE\n         WHEN weekly_training_min > 300 AND weekly_avg_hrv < 30 THEN 'OVERTRAINING RISK'\n         WHEN weekly_training_min > 200 AND weekly_avg_hrv < 35 THEN 'CAUTION'\n         ELSE 'OK'\n       END AS Alert\nORDER BY w.iso DESC\nLIMIT 12",
+          "width": 6,
+          "height": 4,
+          "x": 6,
+          "y": 4,
+          "type": "table",
+          "selection": {},
+          "settings": { "compact": true }
+        }
+      ]
+    },
+    {
+      "title": "Graph Exploration",
+      "reports": [
+        {
+          "title": "Health Graph — Last 7 Days",
+          "query": "MATCH (d:Day)-[:HAS_SUMMARY]->(s:DailySummary)\nWHERE d.date >= date() - duration('P7D')\nOPTIONAL MATCH (d)<-[:ON_DAY]-(w:Workout)\nOPTIONAL MATCH (d)<-[:ON_DAY]-(sl:SleepSession)\nOPTIONAL MATCH (d)-[:NEXT_DAY]->(d2:Day)\nRETURN d, s, w, sl, d2\nLIMIT 50",
+          "width": 12,
+          "height": 5,
+          "x": 0,
+          "y": 0,
+          "type": "graph",
+          "selection": { "Person": "name", "Day": "date", "Workout": "activity_type", "DailySummary": "(label)", "SleepSession": "date" },
+          "settings": { "nodePositions": {}, "frozen": false }
+        },
+        {
+          "title": "Person → Device → Workout Network",
+          "query": "MATCH (p:Person)-[:USES]->(dev:Device)\nOPTIONAL MATCH (dev)-[:RECORDED]->(w:Workout)\nWITH p, dev, count(w) AS workouts\nRETURN p, dev, workouts\nORDER BY workouts DESC\nLIMIT 50",
+          "width": 12,
+          "height": 5,
+          "x": 0,
+          "y": 5,
+          "type": "graph",
+          "selection": { "Person": "name", "Device": "name" },
+          "settings": {}
+        }
+      ]
+    }
+  ]
+}

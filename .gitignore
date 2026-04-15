@@ -7,6 +7,9 @@ data/apple_health_export/
 # data/export_*.xml  — checked in
 # data/csv*/         — checked in
 
+# Generated charts (may contain personal health data)
+data/charts/
+
 # Environment
 .env
 .venv/
@@ -29,3 +32,4 @@ Thumbs.db
 # Output
 *.json
 !package.json
+!neodash/*.json
