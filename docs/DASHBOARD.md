@@ -2,6 +2,8 @@
 
 HealthGraph Agent provides two visualization approaches for exploring your health data as longevity biomarkers: a **Python-generated chart dashboard** and an **interactive NeoDash dashboard** running inside Neo4j.
 
+For a personalized analysis with actionable health advice, see the **[Longevity Health Analysis Report](HEALTH_REPORT.md)**.
+
 ---
 
 ## Python Chart Dashboard

@@ -198,6 +198,16 @@ Generates an 8-panel dashboard and individual high-res charts with longevity zon
 
 See [docs/DASHBOARD.md](docs/DASHBOARD.md) for detailed documentation and longevity science behind each metric.
 
+### Health Analysis Report
+
+Beyond charts, generate a personalized analysis with actionable advice:
+
+```bash
+python3 scripts/analyze_longevity.py
+```
+
+See the latest report: **[Longevity Health Analysis Report](docs/HEALTH_REPORT.md)** — includes trend analysis, exercise balance, overtraining detection, workout-HRV impact ranking, and specific action items.
+
 ### NeoDash Interactive Dashboard
 
 For interactive, browser-based charts directly from Neo4j:
