@@ -42,11 +42,13 @@ Charts are saved to `data/charts/` by default:
 | `workout_volume.png` | Monthly workout minutes with 150 min/week target |
 | `composite_trend.png` | Normalized composite of all key metrics |
 
+### Dashboard preview
+
+![Longevity Dashboard](images/python_dashboard.png)
+
 ### Dashboard panels explained
 
 #### 1. Resting Heart Rate (lower = better)
-
-![RHR Trend](../data/charts/rhr_trend.png)
 
 Tracks your resting heart rate over time. Color zones:
 - **Green (< 55 bpm)**: Excellent cardiovascular fitness
@@ -59,8 +61,6 @@ RHR > 75 bpm is associated with doubled all-cause mortality risk compared to < 5
 
 #### 2. Heart Rate Variability (higher = better)
 
-![HRV Trend](../data/charts/hrv_trend.png)
-
 HRV (SDNN) measures the variation in time between heartbeats — a proxy for autonomic nervous system health. Color zones:
 - **Green (> 40 ms)**: Good parasympathetic tone
 - **Yellow (25-40 ms)**: Moderate
@@ -69,8 +69,6 @@ HRV (SDNN) measures the variation in time between heartbeats — a proxy for aut
 **Longevity science**: Higher HRV indicates greater parasympathetic (rest-and-digest) activity. HRV naturally declines with age, but maintaining it through sleep quality, stress management, and exercise is protective. Acute drops often signal illness, overtraining, or poor sleep.
 
 #### 3. VO2max — #1 Longevity Predictor (higher = better)
-
-![VO2max Trend](../data/charts/vo2max_trend.png)
 
 VO2max measures your body's maximum oxygen uptake during exercise. It is the single strongest predictor of all-cause mortality. Color zones:
 - **Green (> 45)**: Excellent / superior
@@ -81,8 +79,6 @@ VO2max measures your body's maximum oxygen uptake during exercise. It is the sin
 
 #### 4. Daily Steps (7k-10k+ optimal)
 
-![Steps Trend](../data/charts/steps_trend.png)
-
 Daily step count with reference lines:
 - **Dashed green**: 10,000 steps/day target
 - **Dotted yellow**: 7,000 steps/day minimum for longevity benefit
@@ -91,15 +87,11 @@ Daily step count with reference lines:
 
 #### 5. Sleep Duration (7-8h optimal zone)
 
-![Sleep Trend](../data/charts/sleep_trend.png)
-
 Sleep hours per night with the green optimal zone (7-9 hours).
 
 **Longevity science**: Both short sleep (< 6h) and long sleep (> 9h) are associated with increased mortality in a U-shaped curve. The sweet spot is 7-8 hours. Sleep consistency (regular bed/wake times) is an independent factor — irregular sleepers have higher cardiovascular risk even at adequate duration.
 
 #### 6. Monthly Workout Volume
-
-![Workout Volume](../data/charts/workout_volume.png)
 
 Total workout minutes per month. Bars turn green when exceeding 600 minutes/month (equivalent to 150 minutes/week).
 
@@ -110,8 +102,6 @@ Total workout minutes per month. Bars turn green when exceeding 600 minutes/mont
 Horizontal bar chart showing the breakdown of workout types by count. Helps assess exercise variety — longevity benefits from a mix of cardio, strength, flexibility, and zone 2 training.
 
 #### 8. Monthly Longevity Composite
-
-![Composite Trend](../data/charts/composite_trend.png)
 
 All key metrics normalized to 0-1 scale (higher = better for all lines, RHR is inverted). This shows how your biomarkers move together or diverge over time:
 - **RHR (inverted)** — red line
@@ -126,6 +116,8 @@ When lines converge upward: everything is trending well. When they diverge: some
 ## NeoDash Interactive Dashboard
 
 For an interactive, browser-based experience with clickable charts and graph visualizations.
+
+![NeoDash Dashboard](images/neodash_dashboard.png)
 
 ### Setup
 
