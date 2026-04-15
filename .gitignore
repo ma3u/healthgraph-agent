@@ -1,0 +1,31 @@
+# Apple Health data — NEVER commit personal health data
+data/
+*.xml
+export.zip
+apple_health_export/
+
+# CSV exports (generated from personal health data)
+csv/
+
+# Environment
+.env
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Output
+*.json
+!package.json
