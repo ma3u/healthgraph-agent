@@ -1,4 +1,4 @@
-# HealthGraph Agent
+# Apple HealthGraph Agent
 
 **[Neo4j Aura Agent Hackathon 2026](https://community.neo4j.com/t/start-here-register-get-aura-credits-aura-agent-hackathon-2026/77191) — Submission**
 
@@ -300,17 +300,5 @@ METHOD=csv bash scripts/run_pipeline.sh
 - [ ] Configure Aura Agent with tools
 - [ ] Test agent with longevity questions
 - [ ] Take screenshots (console + agent demo)
-- [ ] Submit to [community thread](https://community.neo4j.com/t/start-here-register-get-aura-credits-aura-agent-hackathon-2026/77191)
+- [X] Submit to [community thread](https://community.neo4j.com/t/start-here-register-get-aura-credits-aura-agent-hackathon-2026/77191)
 
----
-
-## Submission deadline
-
-**June 15, 2026**
-
----
-
-## Author
-
-**Matthias Buchhorn-Roth** ([@ma3u](https://github.com/ma3u))
-Consultant, Sopra Steria · Berlin
