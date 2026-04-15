@@ -1,6 +1,6 @@
 # HealthGraph Agent
 
-**Neo4j Aura Agent Hackathon 2026 — Submission**
+**[Neo4j Aura Agent Hackathon 2026](https://community.neo4j.com/t/start-here-register-get-aura-credits-aura-agent-hackathon-2026/77191) — Submission**
 
 > _Your Apple Health data, finally connected. An AI agent that reasons over your health as a knowledge graph._
 
