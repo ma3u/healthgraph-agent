@@ -208,6 +208,8 @@ python3 scripts/analyze_longevity.py
 
 See the latest report: **[Longevity Health Analysis Report](docs/HEALTH_REPORT.md)** — includes trend analysis, exercise balance, overtraining detection, workout-HRV impact ranking, and specific action items.
 
+For a deep-dive on **exercise-duration data quality** (runaway watch sessions, cross-app double tracking, and the cleaning rules used to produce credible weekly totals) see **[Exercise Duration Report](docs/EXERCISE_REPORT.md)** and the corresponding Cypher in [`cypher/exercise_duration_clean.cypher`](cypher/exercise_duration_clean.cypher). The NeoDash dashboard now includes a dedicated **Exercise Duration (Cleaned)** page with weekly/monthly/yearly cleaned trends and a raw-vs-cleaned audit.
+
 ### NeoDash Interactive Dashboard
 
 For interactive, browser-based charts directly from Neo4j:

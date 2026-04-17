@@ -1,6 +1,6 @@
 {
   "title": "HealthGraph — Longevity Dashboard",
-  "version": "2.4",
+  "version": "2.5",
   "settings": {
     "pagenumber": 0,
     "editable": true,
@@ -144,6 +144,99 @@
           "height": 4,
           "x": 6,
           "y": 4,
+          "type": "table",
+          "selection": {},
+          "settings": { "compact": true }
+        }
+      ]
+    },
+    {
+      "title": "Exercise Duration (Cleaned)",
+      "reports": [
+        {
+          "title": "Cleaning rules & caveats",
+          "query": "**Raw `Workout.duration_min` is unreliable.** This page applies two cleaning rules before aggregating:\n\n- **R1 — Clamp at 240 min (4 h)** per workout. Removes ~50 'watch-forgot-to-stop' sessions where `end_date` drifts to midnight.\n- **R2 — Per `(day, activity_type)`, MAX across sources.** Removes cross-app double-tracking (Komoot + Watch cycling, Home Workouts + Watch strength, Runkeeper + Watch running, BEAT81 + Watch cycling).\n\nResidual limits: genuine 5–8 h rides are capped at 4 h, so 2025 totals are still conservatively low. See `docs/EXERCISE_REPORT.md` for details and `cypher/exercise_duration_clean.cypher` for the queries.",
+          "width": 12,
+          "height": 2,
+          "x": 0,
+          "y": 0,
+          "type": "text",
+          "selection": {},
+          "settings": { "replaceGlobalParameters": true }
+        },
+        {
+          "title": "Weekly exercise hours (cleaned)",
+          "query": "MATCH (w:Workout)-[:ON_DAY]->(d:Day)\nWITH d, w,\n     CASE WHEN w.duration_min > 240 THEN 240.0 ELSE w.duration_min END AS mins_clean\nWITH d.date AS day, w.activity_type AS type, w.source_name AS source,\n     sum(mins_clean) AS source_min\nWITH day, type, max(source_min) AS type_min\nWITH day, sum(type_min) AS day_min\nWITH date.truncate('week', day) AS week_start, sum(day_min) AS week_min\nRETURN week_start AS date,\n       round(week_min / 60.0, 2) AS `Hours / Week`\nORDER BY week_start",
+          "width": 8,
+          "height": 4,
+          "x": 0,
+          "y": 2,
+          "type": "line",
+          "selection": { "x": "date", "value": ["Hours / Week"] },
+          "settings": { "colors": ["#06b6d4"], "legend": true, "showGrid": true, "curve": "linear" }
+        },
+        {
+          "title": "Yearly summary (cleaned)",
+          "query": "MATCH (w:Workout)-[:ON_DAY]->(d:Day)\nWITH d, w,\n     CASE WHEN w.duration_min > 240 THEN 240.0 ELSE w.duration_min END AS mins_clean\nWITH d.date AS day, w.activity_type AS type, w.source_name AS source,\n     sum(mins_clean) AS source_min\nWITH day, type, max(source_min) AS type_min\nWITH day, sum(type_min) AS day_min\nWITH day.year AS yr,\n     sum(day_min) AS year_min,\n     count(DISTINCT day) AS active_days,\n     count(DISTINCT day.week) AS weeks_covered\nRETURN toString(yr) AS Year,\n       active_days AS `Active Days`,\n       toInteger(year_min) / 60 AS `Total h`,\n       toInteger(year_min) % 60 AS `Total m`,\n       round(year_min / active_days, 0) AS `Avg min / Active Day`,\n       round(year_min / weeks_covered / 60.0, 1) AS `Avg h / Week`\nORDER BY Year",
+          "width": 4,
+          "height": 4,
+          "x": 8,
+          "y": 2,
+          "type": "table",
+          "selection": {},
+          "settings": { "compact": true }
+        },
+        {
+          "title": "Monthly exercise hours (cleaned)",
+          "query": "MATCH (w:Workout)-[:ON_DAY]->(d:Day)\nWITH d, w,\n     CASE WHEN w.duration_min > 240 THEN 240.0 ELSE w.duration_min END AS mins_clean\nWITH d.date AS day, w.activity_type AS type, w.source_name AS source,\n     sum(mins_clean) AS source_min\nWITH day, type, max(source_min) AS type_min\nWITH day, sum(type_min) AS day_min\nWITH day.year AS yr, day.month AS mo, sum(day_min) AS month_min\nRETURN toString(yr) + '-' + right('0' + toString(mo), 2) AS month,\n       round(month_min / 60.0, 1) AS `Hours`\nORDER BY month",
+          "width": 8,
+          "height": 4,
+          "x": 0,
+          "y": 6,
+          "type": "bar",
+          "selection": { "x": "month", "value": ["Hours"] },
+          "settings": { "colors": ["#10b981"], "legend": false, "showGrid": true }
+        },
+        {
+          "title": "Last 12 weeks — detail (cleaned)",
+          "query": "MATCH (w:Workout)-[:ON_DAY]->(d:Day)\nWITH d, w,\n     CASE WHEN w.duration_min > 240 THEN 240.0 ELSE w.duration_min END AS mins_clean\nWITH d.date AS day, w.activity_type AS type, w.source_name AS source,\n     sum(mins_clean) AS source_min\nWITH day, type, max(source_min) AS type_min\nWITH day, sum(type_min) AS day_min\nWITH day.year AS yr, day.week AS wk,\n     date.truncate('week', day) AS week_start,\n     sum(day_min) AS week_min, count(DISTINCT day) AS active_days\nRETURN toString(yr) + '-W' + right('0' + toString(wk), 2) AS Week,\n       week_start AS `Week Start`,\n       active_days AS `Active Days`,\n       toInteger(week_min) / 60 AS `h`,\n       toInteger(week_min) % 60 AS `m`,\n       round(week_min / active_days, 0) AS `Avg min / Active Day`\nORDER BY week_start DESC\nLIMIT 12",
+          "width": 4,
+          "height": 4,
+          "x": 8,
+          "y": 6,
+          "type": "table",
+          "selection": {},
+          "settings": { "compact": true }
+        },
+        {
+          "title": "Raw vs cleaned per month (audit)",
+          "query": "MATCH (w:Workout)-[:ON_DAY]->(d:Day)\nWITH d.date.year AS yr, d.date.month AS mo, sum(w.duration_min) AS raw_min\nMATCH (w2:Workout)-[:ON_DAY]->(d2:Day)\nWHERE d2.date.year = yr AND d2.date.month = mo\nWITH yr, mo, raw_min, d2, w2,\n     CASE WHEN w2.duration_min > 240 THEN 240.0 ELSE w2.duration_min END AS mc\nWITH yr, mo, raw_min, d2.date AS day, w2.activity_type AS t, w2.source_name AS s,\n     sum(mc) AS src_min\nWITH yr, mo, raw_min, day, t, max(src_min) AS tm\nWITH yr, mo, raw_min, sum(tm) AS clean_min\nRETURN toString(yr) + '-' + right('0' + toString(mo), 2) AS month,\n       round(raw_min / 60.0, 1) AS `Raw h`,\n       round(clean_min / 60.0, 1) AS `Cleaned h`,\n       round((raw_min - clean_min) / 60.0, 1) AS `Removed h`,\n       round(100.0 * (raw_min - clean_min) / raw_min, 1) AS `Removed %`\nORDER BY month",
+          "width": 12,
+          "height": 4,
+          "x": 0,
+          "y": 10,
+          "type": "table",
+          "selection": {},
+          "settings": { "compact": true }
+        },
+        {
+          "title": "Runaway sessions (> 4 h) — data-quality flags",
+          "query": "MATCH (w:Workout)-[:ON_DAY]->(d:Day)\nWHERE w.duration_min > 240\nRETURN d.date AS Day,\n       w.activity_type AS Type,\n       w.source_name AS Source,\n       toInteger(w.duration_min) / 60 AS h,\n       toInteger(w.duration_min) % 60 AS m,\n       w.start_date AS Start,\n       w.end_date AS End\nORDER BY w.duration_min DESC\nLIMIT 25",
+          "width": 6,
+          "height": 4,
+          "x": 0,
+          "y": 14,
+          "type": "table",
+          "selection": {},
+          "settings": { "compact": true }
+        },
+        {
+          "title": "Cross-source overlaps (double-tracking) — with timestamps",
+          "query": "MATCH (w1:Workout)-[:ON_DAY]->(d:Day)<-[:ON_DAY]-(w2:Workout)\nWHERE w1.uid < w2.uid\n  AND w1.source_name <> w2.source_name\n  AND w1.start_date  <  w2.end_date\n  AND w2.start_date  <  w1.end_date\nWITH d, w1, w2,\n     duration.inSeconds(\n       CASE WHEN w1.start_date > w2.start_date THEN w1.start_date ELSE w2.start_date END,\n       CASE WHEN w1.end_date   < w2.end_date   THEN w1.end_date   ELSE w2.end_date   END\n     ).seconds / 60.0 AS overlap_min\nRETURN d.date AS Day,\n       w1.source_name + ' / ' + w1.activity_type AS `Source A`,\n       w1.start_date AS `A start`,\n       w1.end_date   AS `A end`,\n       round(w1.duration_min, 1) AS `A min`,\n       w2.source_name + ' / ' + w2.activity_type AS `Source B`,\n       w2.start_date AS `B start`,\n       w2.end_date   AS `B end`,\n       round(w2.duration_min, 1) AS `B min`,\n       round(overlap_min, 1) AS `Overlap min`,\n       CASE\n         WHEN w1.start_date <= w2.start_date AND w1.end_date >= w2.end_date THEN 'B inside A'\n         WHEN w2.start_date <= w1.start_date AND w2.end_date >= w1.end_date THEN 'A inside B'\n         ELSE 'partial'\n       END AS `Kind`\nORDER BY Day DESC\nLIMIT 25",
+          "width": 12,
+          "height": 4,
+          "x": 0,
+          "y": 18,
           "type": "table",
           "selection": {},
           "settings": { "compact": true }
