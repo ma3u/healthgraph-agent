@@ -4,6 +4,23 @@
 
 > _Your Apple Health data, finally connected. An AI agent that reasons over your health as a knowledge graph._
 
+<p align="center">
+  <img src="docs/app-icon-1024.png" alt="HealthGraphSync app icon" width="160" />
+</p>
+
+| Piece | What it is | Where |
+| --- | --- | --- |
+| 🐍 ETL pipeline | One-shot Python parse + load of an Apple Health export.xml | [`etl/`](etl/), [`scripts/run_pipeline.sh`](scripts/run_pipeline.sh) |
+| 📱 iPhone app | Reads HealthKit on-device, uploads only the delta to **your own** Aura via GraphQL mutations | [`ios/`](ios/), [`docs/IOS_APP.md`](docs/IOS_APP.md), [`docs/IOS_PLAN.md`](docs/IOS_PLAN.md) |
+| 🔐 Auth | Auth0 universal login (Apple / Google / GitHub / Microsoft) → JWT → Aura GraphQL Data API | [`docs/AUTH_RESEARCH.md`](docs/AUTH_RESEARCH.md), [`docs/AUTH_SETUP.md`](docs/AUTH_SETUP.md) |
+| 🔍 GraphQL schema | Curated SDL with `@cypher` MERGE mutations | [`cypher/graphql_schema.graphql`](cypher/graphql_schema.graphql), [`cypher/README.md`](cypher/README.md) |
+| 🌐 Public dashboard | Daily recovery snapshot + project docs on GitHub Pages | [https://ma3u.github.io/healthgraph-agent/](https://ma3u.github.io/healthgraph-agent/) |
+
+**BYO Aura** — every installer brings their own Neo4j Aura instance. There is
+no shared backend; the dev's Aura is for development only.
+
+---
+
 ## The idea
 
 Apple Health collects thousands of data points daily — heart rate, HRV, steps, sleep, workouts, respiratory rate, blood oxygen — but stores them as flat, disconnected time series. You can see _what_ happened, but never _why_ or _how things relate_.
