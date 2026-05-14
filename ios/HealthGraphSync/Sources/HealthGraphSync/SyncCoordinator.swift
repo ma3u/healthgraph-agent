@@ -9,80 +9,155 @@ final class SyncCoordinator: ObservableObject {
         case awaitingConfirmation
         case uploading(progress: Double)
         case error(String)
-        case done(samples: Int, days: Int)
+        case done(daysWritten: Int, workouts: Int, sleepSessions: Int)
     }
 
     @Published var phase: Phase = .idle
-    @Published var auraPreview: SyncPreviewResponse?
+    @Published var auraLatestDay: String?
     @Published var delta: HealthKitService.DeltaScan?
-    @Published var lastResponse: IngestResponse?
-    /// Signals MainTabsView to switch to the Dashboard tab once an upload
-    /// finishes successfully.
+    @Published var lastDaysWritten = 0
     @Published var shouldShowDashboard = false
 
     private let healthKit = HealthKitService.shared
 
-    /// Step 1: Fetch the latest day from Aura, scan HealthKit locally, and
-    /// present a summary the user can confirm before any upload happens.
-    func loadPreview(token: String) async {
+    func loadPreview(token: String, endpoint: URL) async {
         phase = .loadingPreview
         do {
-            let preview = try await APIClient.shared.syncPreview(token: token)
-            auraPreview = preview
+            // Ask Aura for the most recent Day.date
+            struct LatestDayResult: Decodable {
+                let max: String?
+            }
+            // GraphQL query: a single aggregation that returns max(date) from Day nodes
+            let query = """
+            query LatestDay {
+              days(options: { sort: [{ date: DESC }], limit: 1 }) {
+                date
+              }
+            }
+            """
+            struct Day: Decodable { let date: String }
+            let days: [Day] = try await GraphQLClient.shared.run(
+                query: query,
+                token: token,
+                endpoint: endpoint,
+                decodeUnder: "days"
+            )
+            auraLatestDay = days.first?.date
 
             let since: Date = {
-                if let isoString = preview.latestDayInAura,
+                if let isoString = auraLatestDay,
                    let date = ISO8601DateFormatter.dateOnly.date(from: isoString) {
-                    // Re-scan from the START of that day to catch late-arriving samples
                     return Calendar.current.startOfDay(for: date)
                 }
-                // No history in Aura yet — go back a default of 30 days for an
-                // initial demo. (For a true initial sync the user can still
-                // use the older "full history" path; this is the v1 default.)
                 return Calendar.current.date(byAdding: .day, value: -30, to: Date()) ?? Date()
             }()
-
             let scan = try await healthKit.deltaScan(since: since)
             delta = scan
             phase = .awaitingConfirmation
         } catch {
-            phase = .error((error as? APIError)?.userFacing ?? error.localizedDescription)
+            phase = .error((error as? LocalizedError)?.errorDescription ?? error.localizedDescription)
         }
     }
 
-    /// Step 2: User tapped Confirm. Build the payload covering the delta
-    /// range, POST it, and on success auto-switch to the Dashboard tab.
-    func confirmUpload(token: String) async {
+    func confirmUpload(token: String, endpoint: URL) async {
         guard let scan = delta else { return }
         phase = .uploading(progress: 0)
         do {
             let payload = try await healthKit.buildPayload(since: scan.since, until: scan.until)
-            phase = .uploading(progress: 0.5)
-            let resp = try await APIClient.shared.ingest(payload, token: token)
-            lastResponse = resp
-            phase = .done(samples: resp.acceptedSamples + resp.acceptedWorkouts, days: resp.daysAffected.count)
+            let days = AuraIngest.uniqueDays(in: payload)
+            let workouts = AuraIngest.workoutInputs(from: payload)
+            let sleeps = AuraIngest.sleepInputs(from: payload)
+
+            let totalSteps = Double(days.count + workouts.count + sleeps.count)
+            var stepsDone: Double = 0
+            func tick() {
+                stepsDone += 1
+                phase = .uploading(progress: stepsDone / max(totalSteps, 1))
+            }
+
+            // Days
+            for day in days {
+                let summary = AuraIngest.summary(from: payload, on: day)
+                _ = try await runIngestDay(summary, token: token, endpoint: endpoint)
+                tick()
+            }
+            // Workouts
+            for w in workouts {
+                _ = try await runIngestWorkout(w, token: token, endpoint: endpoint)
+                tick()
+            }
+            // Sleep sessions
+            for sl in sleeps {
+                _ = try await runIngestSleep(sl, token: token, endpoint: endpoint)
+                tick()
+            }
+
+            lastDaysWritten = days.count
+            phase = .done(daysWritten: days.count, workouts: workouts.count, sleepSessions: sleeps.count)
             shouldShowDashboard = true
         } catch {
-            phase = .error((error as? APIError)?.userFacing ?? error.localizedDescription)
+            phase = .error((error as? LocalizedError)?.errorDescription ?? error.localizedDescription)
         }
     }
 
     func cancelPreview() {
         delta = nil
-        auraPreview = nil
+        auraLatestDay = nil
         phase = .idle
+    }
+
+    // MARK: - Mutation runners
+
+    private func runIngestDay(_ input: AuraIngest.DailySummaryUpsertInput,
+                              token: String, endpoint: URL) async throws -> String {
+        let mutation = """
+        mutation IngestDay($input: DailySummaryUpsertInput!) {
+          ingestDay(input: $input)
+        }
+        """
+        return try await GraphQLClient.shared.run(
+            query: mutation,
+            variables: ["input": AnyEncodable(value: input)],
+            token: token,
+            endpoint: endpoint,
+            decodeUnder: "ingestDay"
+        )
+    }
+
+    private func runIngestWorkout(_ input: AuraIngest.WorkoutUpsertInput,
+                                  token: String, endpoint: URL) async throws -> String {
+        let mutation = """
+        mutation IngestWorkout($input: WorkoutUpsertInput!) {
+          ingestWorkout(input: $input)
+        }
+        """
+        return try await GraphQLClient.shared.run(
+            query: mutation,
+            variables: ["input": AnyEncodable(value: input)],
+            token: token,
+            endpoint: endpoint,
+            decodeUnder: "ingestWorkout"
+        )
+    }
+
+    private func runIngestSleep(_ input: AuraIngest.SleepUpsertInput,
+                                token: String, endpoint: URL) async throws -> String {
+        let mutation = """
+        mutation IngestSleep($input: SleepUpsertInput!) {
+          ingestSleep(input: $input)
+        }
+        """
+        return try await GraphQLClient.shared.run(
+            query: mutation,
+            variables: ["input": AnyEncodable(value: input)],
+            token: token,
+            endpoint: endpoint,
+            decodeUnder: "ingestSleep"
+        )
     }
 }
 
 extension ISO8601DateFormatter {
-    /// Thread-safe per-call factory so Swift 6 strict concurrency is happy.
-    /// ISO8601DateFormatter itself is not Sendable.
-    static func dateOnlyFormatter() -> ISO8601DateFormatter {
-        let f = ISO8601DateFormatter()
-        f.formatOptions = [.withFullDate, .withDashSeparatorInDate]
-        return f
-    }
-
     nonisolated(unsafe) static let dateOnly: ISO8601DateFormatter = {
         let f = ISO8601DateFormatter()
         f.formatOptions = [.withFullDate, .withDashSeparatorInDate]

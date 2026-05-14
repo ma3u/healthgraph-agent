@@ -8,14 +8,16 @@ import Foundation
 ///   API_BASE_URL   e.g. "https://healthgraph.example.com"
 ///   NEODASH_URL    e.g. "https://neodash.example.com/?dashboardName=Whoop"
 enum AppConfig {
-    static var apiBaseURL: URL {
-        guard
-            let raw = Bundle.main.object(forInfoDictionaryKey: "API_BASE_URL") as? String,
-            let url = URL(string: raw)
-        else {
-            fatalError("API_BASE_URL missing or invalid in Info.plist")
-        }
-        return url
+    static var auth0Domain: String {
+        (Bundle.main.object(forInfoDictionaryKey: "AUTH0_DOMAIN") as? String) ?? ""
+    }
+
+    static var auth0ClientId: String {
+        (Bundle.main.object(forInfoDictionaryKey: "AUTH0_CLIENT_ID") as? String) ?? ""
+    }
+
+    static var auth0Audience: String {
+        (Bundle.main.object(forInfoDictionaryKey: "AUTH0_AUDIENCE") as? String) ?? ""
     }
 
     static var neodashURL: URL? {

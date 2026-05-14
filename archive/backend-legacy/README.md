@@ -1,4 +1,9 @@
-# HealthGraph Sync Backend
+# HealthGraph Sync Backend (ARCHIVED)
+
+> **Status:** archived 2026-05-14. The iOS app now talks **directly** to the
+> user's Aura GraphQL Data API with an Auth0 JWT — no FastAPI middleman.
+> See [`../../docs/AUTH_RESEARCH.md`](../../docs/AUTH_RESEARCH.md) for the
+> reasoning. This directory is kept for reference only.
 
 A small FastAPI service that the **HealthGraphSync** iOS app talks to. Reuses
 the existing `etl/` code so HealthKit JSON deltas land as the same graph shape

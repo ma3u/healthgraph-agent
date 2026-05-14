@@ -181,18 +181,11 @@ final class HealthKitService: ObservableObject {
             workouts += partial.workouts
         }
 
-        let earliest = touchedDays.min().flatMap { isoDateOnly.date(from: $0) }
-        let latest = touchedDays.max().flatMap { isoDateOnly.date(from: $0) }
-            .flatMap { calendar.date(byAdding: .day, value: 1, to: $0) }
-
         return IngestPayload(
             person: nil,
             quantitySamples: quantitySamples,
             categorySamples: categorySamples,
-            workouts: workouts,
-            dateRangeStart: earliest,
-            dateRangeEnd: latest,
-            clientAnchor: nil
+            workouts: workouts
         )
     }
 
@@ -275,10 +268,7 @@ final class HealthKitService: ObservableObject {
             person: person,
             quantitySamples: quantitySamples,
             categorySamples: categorySamples,
-            workouts: workouts,
-            dateRangeStart: start,
-            dateRangeEnd: end,
-            clientAnchor: nil
+            workouts: workouts
         )
     }
 

@@ -4,41 +4,52 @@ Replaces the manual "export Apple Health → unzip → run `etl/`" loop with a
 native iOS app that reads HealthKit on-device and syncs incrementally to
 Neo4j Aura via a small FastAPI backend.
 
+> **Architecture update — 2026-05-14:** the FastAPI backend has been retired
+> in favor of a direct iOS ↔ Aura GraphQL Data API path with Auth0
+> social sign-in (Apple / Google / GitHub / Microsoft). See
+> [`AUTH_RESEARCH.md`](AUTH_RESEARCH.md) and [`AUTH_SETUP.md`](AUTH_SETUP.md).
+> The diagram below describes the new shape.
+
 ## Architecture at a glance
 
 ```
 ┌──────────────────────────┐
 │  HealthGraphSync.app     │  reads HKQuantitySample / HKCategorySample /
-│  (iPhone, Apple Watch)   │  HKWorkout via HealthKit. Stores per-type
-│                          │  HKQueryAnchor in UserDefaults for incremental
-│  - LoginView             │  sync.
-│  - SyncView              │
+│  (iPhone, Apple Watch)   │  HKWorkout via HealthKit; aggregates locally
+│                          │  into DailySummary mutations.
+│  - LoginView             │
+│  - ConnectView           │
+│  - SyncView (delta)      │
 │  - DashboardView (WKWeb) │
 │  - SettingsView          │
 └────────────┬─────────────┘
-             │ HTTPS, Bearer JWT
-             │ JSON: { quantity_samples, category_samples, workouts, ... }
+             │ Bearer JWT (id_token from Auth0)
+             │ GraphQL: ingestDay / ingestWorkout / ingestSleep mutations
+             ▼
+┌──────────────────────────────────────┐
+│  Aura GraphQL Data API               │  Custom @cypher mutations defined in
+│  (the user's own instance)           │  cypher/graphql_schema.graphql do
+│                                      │  the MERGE upserts.
+│  Auth = JWKS provider →              │
+│    Auth0 .well-known/jwks.json       │
+└────────────┬─────────────────────────┘
+             │ Cypher (managed by the GraphQL Data API)
              ▼
 ┌──────────────────────────┐
-│  backend/ (FastAPI)      │  Translates JSON → HealthRecord / WorkoutRecord
-│                          │  dataclasses, builds a HealthExport, runs
-│  - /auth/login           │  etl/transform.py, then etl/load_to_neo4j.py
-│  - /ingest/healthkit     │  load_all() to MERGE into Aura.
-│  - /sync/state           │
+│  Neo4j Aura DB           │  Same graph etl/load_to_neo4j.py produces:
+│                          │  Person, Device, MetricType, Day, Week,
+│                          │  DailySummary, Workout, SleepSession,
+│                          │  + temporal relationships.
 └────────────┬─────────────┘
-             │ neo4j+s://
-             ▼
-┌──────────────────────────┐
-│  Neo4j Aura              │  Same graph the offline run_pipeline.sh produces:
-│                          │  Person, Device, MetricType, Day, Week, DailySummary,
-│                          │  Workout, SleepSession + temporal relationships.
-└────────────┬─────────────┘
-             │ Cypher
+             │ Cypher (NeoDash queries)
              ▼
 ┌──────────────────────────┐
 │  NeoDash dashboard       │  Embedded in the app's Dashboard tab via WKWebView.
-│  (your existing one)     │
 └──────────────────────────┘
+
+Sign-in flow:
+  Continue → Auth0 universal sheet (Apple / Google / GitHub / Microsoft)
+          → id_token in iOS Keychain → user pastes Aura endpoint once → ready.
 ```
 
 ## Why this shape

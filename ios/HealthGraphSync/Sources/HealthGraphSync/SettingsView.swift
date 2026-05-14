@@ -6,18 +6,23 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             List {
+                Section("Aura connection") {
+                    LabeledContent("GraphQL endpoint",
+                                   value: auth.connection?.graphqlURL.host ?? "—")
+                    Button("Forget endpoint", role: .destructive) {
+                        AuraConnection.clear()
+                        auth.connection = nil
+                    }
+                }
                 Section("Account") {
-                    LabeledContent("Signed in as", value: auth.email ?? "—")
+                    if let exp = auth.idTokenExpiresAt {
+                        LabeledContent("Session expires",
+                                       value: exp.formatted(date: .abbreviated, time: .shortened))
+                    }
                     Button("Sign out", role: .destructive) { auth.logout() }
                 }
-                Section("Server") {
-                    LabeledContent("API", value: AppConfig.apiBaseURL.absoluteString)
-                    LabeledContent("Dashboard", value: AppConfig.neodashURL?.absoluteString ?? "—")
-                        .lineLimit(1)
-                        .truncationMode(.middle)
-                }
                 Section {
-                    Text("HealthGraphSync v0.1 — Aura Agent Hackathon")
+                    Text("HealthGraphSync v0.2 — Aura Agent Hackathon")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }

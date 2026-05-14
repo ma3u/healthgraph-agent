@@ -17,8 +17,10 @@ struct RootView: View {
 
     var body: some View {
         Group {
-            if auth.token == nil {
+            if auth.idToken == nil {
                 LoginView()
+            } else if auth.connection == nil {
+                ConnectView()
             } else {
                 MainTabsView()
             }

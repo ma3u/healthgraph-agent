@@ -116,3 +116,121 @@ type MetricType @node {
   unit: String
   category: String
 }
+
+# ---------------------------------------------------------------------------
+# Custom mutations — upsert (MERGE) semantics
+# ---------------------------------------------------------------------------
+#
+# Auto-generated mutations (createDays, updateDays, ...) only CREATE or
+# UPDATE existing — they don't MERGE. The iOS app sends one of these per day
+# / workout / sleep session it wants to persist, idempotently.
+#
+# Authorization is gated by the JWKS provider configured on the Data API.
+# Any caller with a valid JWT can write — when we extend to multi-user, add
+# @authorization(validate: [...]) directives that check $jwt.sub.
+
+input DailySummaryUpsertInput {
+  date: Date!
+  dayOfWeek: String
+  weekIso: String
+
+  avgHeartRate: Float
+  minHeartRate: Float
+  maxHeartRate: Float
+  restingHeartRate: Float
+  hrvMean: Float
+  totalSteps: Float
+  totalDistanceKm: Float
+  activeEnergyKcal: Float
+  basalEnergyKcal: Float
+  flightsClimbed: Float
+  exerciseMinutes: Float
+  standHours: Float
+  avgBloodOxygen: Float
+  avgRespiratoryRate: Float
+  bodyMassKg: Float
+  vo2max: Float
+  sleepHours: Float
+  workoutCount: Int
+  workoutMinutes: Float
+  description: String
+}
+
+input WorkoutUpsertInput {
+  uid: ID!
+  activityType: String!
+  startDate: DateTime!
+  endDate: DateTime!
+  durationMin: Float
+  device: String
+  sourceName: String
+}
+
+input SleepUpsertInput {
+  date: Date!
+  asleepMinutes: Float!
+  inBedMinutes: Float
+  sourceName: String
+}
+
+type Mutation {
+  """Upsert one Day + its DailySummary in a single MERGE. Returns the updated date."""
+  ingestDay(input: DailySummaryUpsertInput!): String!
+    @cypher(statement: """
+      MERGE (d:Day {date: date($input.date)})
+        ON CREATE SET d.day_of_week = $input.dayOfWeek
+      MERGE (s:DailySummary {date: date($input.date)})
+      SET s.avg_heart_rate     = $input.avgHeartRate,
+          s.min_heart_rate     = $input.minHeartRate,
+          s.max_heart_rate     = $input.maxHeartRate,
+          s.resting_heart_rate = $input.restingHeartRate,
+          s.hrv_mean           = $input.hrvMean,
+          s.total_steps        = $input.totalSteps,
+          s.total_distance_km  = $input.totalDistanceKm,
+          s.active_energy_kcal = $input.activeEnergyKcal,
+          s.basal_energy_kcal  = $input.basalEnergyKcal,
+          s.flights_climbed    = $input.flightsClimbed,
+          s.avg_blood_oxygen   = $input.avgBloodOxygen,
+          s.avg_respiratory_rate = $input.avgRespiratoryRate,
+          s.body_mass_kg       = $input.bodyMassKg,
+          s.vo2max             = $input.vo2max,
+          s.sleep_hours        = $input.sleepHours,
+          s.workout_count      = $input.workoutCount,
+          s.workout_minutes    = $input.workoutMinutes,
+          s.description        = $input.description
+      MERGE (d)-[:HAS_SUMMARY]->(s)
+      FOREACH (_ IN CASE WHEN $input.weekIso IS NULL THEN [] ELSE [1] END |
+        MERGE (w:Week {iso: $input.weekIso})
+        MERGE (d)-[:PART_OF]->(w)
+      )
+      RETURN toString(d.date) AS date
+    """, columnName: "date")
+
+  """Upsert a Workout. Returns the workout uid."""
+  ingestWorkout(input: WorkoutUpsertInput!): String!
+    @cypher(statement: """
+      MERGE (w:Workout {uid: $input.uid})
+      SET w.activity_type = $input.activityType,
+          w.start_date    = datetime($input.startDate),
+          w.end_date      = datetime($input.endDate),
+          w.duration_min  = $input.durationMin,
+          w.device        = $input.device,
+          w.source_name   = $input.sourceName
+      WITH w, date(datetime($input.startDate)) AS dayDate
+      MERGE (d:Day {date: dayDate})
+      MERGE (w)-[:ON_DAY]->(d)
+      RETURN w.uid AS uid
+    """, columnName: "uid")
+
+  """Upsert a SleepSession keyed by date."""
+  ingestSleep(input: SleepUpsertInput!): String!
+    @cypher(statement: """
+      MERGE (s:SleepSession {date: date($input.date)})
+      SET s.asleep_minutes = $input.asleepMinutes,
+          s.in_bed_minutes = $input.inBedMinutes,
+          s.source_name    = $input.sourceName
+      MERGE (d:Day {date: date($input.date)})
+      MERGE (s)-[:ON_DAY]->(d)
+      RETURN toString(s.date) AS date
+    """, columnName: "date")
+}

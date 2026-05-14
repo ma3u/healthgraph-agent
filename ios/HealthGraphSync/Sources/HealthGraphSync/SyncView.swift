@@ -7,21 +7,20 @@ struct SyncView: View {
     var body: some View {
         NavigationStack {
             List {
-                Section("Sync to Aura") {
+                Section("Sync to your Aura") {
                     Button {
-                        guard let token = auth.token else { return }
-                        Task { await sync.loadPreview(token: token) }
+                        guard let token = auth.idToken,
+                              let endpoint = auth.connection?.graphqlURL else { return }
+                        Task { await sync.loadPreview(token: token, endpoint: endpoint) }
                     } label: {
                         Label("Check what's missing", systemImage: "magnifyingglass")
                     }
                     .disabled(isBusy)
                 }
 
-                if let preview = sync.auraPreview {
+                if let latest = sync.auraLatestDay {
                     Section("Currently in Aura") {
-                        LabeledContent("Latest day", value: preview.latestDayInAura ?? "—")
-                        LabeledContent("Total days", value: "\(preview.totalDaysInAura)")
-                        LabeledContent("Total workouts", value: "\(preview.totalWorkoutsInAura)")
+                        LabeledContent("Latest day", value: latest)
                     }
                 }
 
@@ -32,7 +31,7 @@ struct SyncView: View {
                         LabeledContent("To",
                                        value: ISO8601DateFormatter.dateOnly.string(from: delta.until))
                         LabeledContent("Days", value: "\(delta.daysCovered)")
-                        LabeledContent("Samples (all types)", value: "\(delta.totalSamples)")
+                        LabeledContent("Samples", value: "\(delta.totalSamples)")
                         LabeledContent("Workouts", value: "\(delta.workoutCount)")
                     }
 
@@ -54,8 +53,9 @@ struct SyncView: View {
                     if sync.phase == .awaitingConfirmation {
                         Section {
                             Button {
-                                guard let token = auth.token else { return }
-                                Task { await sync.confirmUpload(token: token) }
+                                guard let token = auth.idToken,
+                                      let endpoint = auth.connection?.graphqlURL else { return }
+                                Task { await sync.confirmUpload(token: token, endpoint: endpoint) }
                             } label: {
                                 Label("Confirm & Upload", systemImage: "icloud.and.arrow.up.fill")
                                     .frame(maxWidth: .infinity)
@@ -69,17 +69,7 @@ struct SyncView: View {
                     }
                 }
 
-                Section("Status") {
-                    statusView
-                }
-
-                if let resp = sync.lastResponse {
-                    Section("Last upload") {
-                        LabeledContent("Samples", value: "\(resp.acceptedSamples)")
-                        LabeledContent("Workouts", value: "\(resp.acceptedWorkouts)")
-                        LabeledContent("Days touched", value: "\(resp.daysAffected.count)")
-                    }
-                }
+                Section("Status") { statusView }
             }
             .navigationTitle("Sync")
         }
@@ -101,17 +91,17 @@ struct SyncView: View {
         case .loadingPreview:
             HStack { ProgressView(); Text("Loading preview…") }
         case .awaitingConfirmation:
-            Text("Review the summary above and tap *Confirm & Upload* to send.")
+            Text("Review and tap *Confirm & Upload*.")
                 .foregroundStyle(.secondary)
         case .uploading(let p):
             VStack(alignment: .leading, spacing: 8) {
-                Text("Uploading…")
+                Text("Uploading to Aura…")
                 ProgressView(value: p)
             }
         case .error(let msg):
             Text(msg).foregroundStyle(.red)
-        case .done(let samples, let days):
-            Text("Done — \(samples) samples across \(days) days. Switching to Dashboard…")
+        case .done(let days, let workouts, let sleep):
+            Text("Done — \(days) days · \(workouts) workouts · \(sleep) sleep sessions. Opening Dashboard…")
                 .foregroundStyle(.green)
         }
     }
