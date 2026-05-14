@@ -1,0 +1,50 @@
+name: HealthGraphSync
+options:
+  bundleIdPrefix: io.healthgraph
+  deploymentTarget:
+    iOS: "17.0"
+  createIntermediateGroups: true
+
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    DEVELOPMENT_TEAM: "" # set this to your Apple developer team ID before signing
+    CODE_SIGN_STYLE: Automatic
+
+targets:
+  HealthGraphSync:
+    type: application
+    platform: iOS
+    sources:
+      - path: HealthGraphSync/Sources/HealthGraphSync
+    resources:
+      - path: HealthGraphSync/Resources
+        optional: true
+    info:
+      path: HealthGraphSync/Resources/Info.plist
+      properties:
+        CFBundleDisplayName: HealthGraph Sync
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        UILaunchScreen:
+          UIColorName: ""
+        UIRequiredDeviceCapabilities: [healthkit]
+        # HealthKit usage strings — required by Apple, displayed in the permission prompt.
+        NSHealthShareUsageDescription: "HealthGraph Sync reads your HealthKit data so it can upload it to your private Aura graph for personal analysis."
+        NSHealthUpdateUsageDescription: "HealthGraph Sync does not write data back to HealthKit, but iOS requires this string."
+        # Custom config the app reads via AppConfig.swift
+        API_BASE_URL: "http://localhost:8000"
+        NEODASH_URL: ""
+    entitlements:
+      path: HealthGraphSync/Resources/HealthGraphSync.entitlements
+      properties:
+        com.apple.developer.healthkit: true
+        com.apple.developer.healthkit.access: []
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: io.healthgraph.sync
+        TARGETED_DEVICE_FAMILY: "1"
+        ENABLE_PREVIEWS: YES
+        SWIFT_EMIT_LOC_STRINGS: YES

@@ -49,7 +49,7 @@ fi
 cd "$ETL_DIR"
 echo ""
 echo "Checking Python dependencies..."
-pip install -q -r requirements.txt
+python3 -m pip install -q -r requirements.txt
 
 # File info
 FILE_SIZE=$(du -h "$EXPORT_XML" | cut -f1)

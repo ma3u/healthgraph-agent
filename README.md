@@ -210,15 +210,47 @@ See the latest report: **[Longevity Health Analysis Report](docs/HEALTH_REPORT.m
 
 For a deep-dive on **exercise-duration data quality** (runaway watch sessions, cross-app double tracking, and the cleaning rules used to produce credible weekly totals) see **[Exercise Duration Report](docs/EXERCISE_REPORT.md)** and the corresponding Cypher in [`cypher/exercise_duration_clean.cypher`](cypher/exercise_duration_clean.cypher). The NeoDash dashboard now includes a dedicated **Exercise Duration (Cleaned)** page with weekly/monthly/yearly cleaned trends and a raw-vs-cleaned audit.
 
-### NeoDash Interactive Dashboard
+### Interactive Dashboards
 
-For interactive, browser-based charts directly from Neo4j:
+Two dashboards are bundled:
 
-1. Install **NeoDash** from Neo4j Desktop plugin gallery
-2. Import `neodash/longevity_dashboard.json`
-3. Explore 3 pages: Longevity Overview, Recovery & Training, Graph Exploration
+1. `neodash/longevity_dashboard.json` — 4 pages of longevity biomarkers (RHR/HRV/VO2max/sleep/workout trends, recovery analysis, cleaned exercise duration, graph exploration).
+2. `neodash/whoop_dashboard.json` — **5 pages, 35 panels** in a Whoop-style layout: daily hero card (Recovery %, Strain 0–21, Sleep %), Recovery deep-dive, Strain deep-dive, Sleep deep-dive, Health Monitor (8.5-year trends). Formulas: [docs/SCORING.md](docs/SCORING.md). Panel-by-panel: [docs/DASHBOARD.md](docs/DASHBOARD.md).
+
+Both files are exported in NeoDash JSON v2.5, which is the format that **both** the open-source NeoDash app and Aura's built-in Dashboards can consume.
+
+#### Three ways to view them
+
+**A. Open-source NeoDash (fastest, no install)**
+
+```bash
+# 1. Upload the dashboard into your graph as a _Neodash_Dashboard node
+python3 scripts/upload_dashboard.py
+```
+
+Then open https://neodash.graphapp.io → connect with your `.env` credentials → *Load Dashboard from Neo4j* → pick *HealthGraph — Whoop-style View*. The dashboard renders directly from the node we just inserted.
+
+The script is idempotent (deterministic UUID per title — re-running updates rather than duplicates).
+
+**B. Aura's built-in Dashboards (web Console)**
+
+Aura's *Tools → Dashboards* feature stores dashboards in its own managed service (separate from your graph), so the CLI upload above isn't enough — you have to *import* once via the UI:
+
+1. Aura Console → Tools → **Dashboards** → **Import**
+2. Either drag in `neodash/whoop_dashboard.json` or choose *"Select from database"* (it will find the node `scripts/upload_dashboard.py` wrote)
+
+After the one-time import, the dashboard lives in Aura's storage and reopens instantly.
+
+**C. NeoDash via Neo4j Desktop**
+
+1. Install **NeoDash** from the Desktop plugin gallery
+2. *Load Dashboard* → browse to `neodash/whoop_dashboard.json` (or run the upload script and pick from DB)
 
 ![NeoDash Longevity Dashboard](docs/images/neodash_dashboard.png)
+
+#### Why two products?
+
+Aura's built-in Dashboards (`/tools/dashboards`) is a separate, newer product from the legacy NeoDash. The two have different storage and APIs but share the same JSON import format. We can fully automate option A via `cypher-shell` + the upload script; option B requires one UI click because Aura's managed-storage endpoints aren't exposed to service-account tokens.
 
 ---
 
@@ -232,7 +264,8 @@ healthgraph-agent/
 │
 ├── docs/
 │   ├── export_instructions.md       # How to export from iPhone
-│   └── DASHBOARD.md                 # Dashboard documentation + longevity science
+│   ├── DASHBOARD.md                 # Dashboard documentation + longevity science
+│   └── SCORING.md                   # Whoop-equivalent Recovery / Strain / Sleep formulas
 │
 ├── etl/
 │   ├── requirements.txt             # lxml, neo4j, python-dotenv, tqdm
@@ -245,14 +278,19 @@ healthgraph-agent/
 ├── cypher/
 │   ├── sample_queries.cypher        # 7 general-purpose Aura Agent templates
 │   ├── longevity_queries.cypher     # 20 longevity-focused analysis queries
+│   ├── whoop_queries.cypher         # Recovery/Strain/Sleep score Cypher (standalone)
+│   ├── exercise_duration_clean.cypher
 │   └── load_csv_import.cypher       # Method 2: LOAD CSV import script
 │
 ├── scripts/
 │   ├── run_pipeline.sh              # End-to-end orchestration (both methods)
+│   ├── upload_dashboard.py          # Push a NeoDash JSON into Aura as _Neodash_Dashboard
+│   ├── analyze_longevity.py         # Generates docs/HEALTH_REPORT.md from the live graph
 │   └── visualize_longevity.py       # Python chart generator (8 panels + individual)
 │
 ├── neodash/
-│   └── longevity_dashboard.json     # Interactive NeoDash dashboard (3 pages)
+│   ├── longevity_dashboard.json     # Interactive NeoDash dashboard (4 pages)
+│   └── whoop_dashboard.json         # Whoop-style dashboard (5 pages, 35 panels)
 │
 └── agent/
     └── agent_config.md              # Aura Agent system prompt + tool definitions

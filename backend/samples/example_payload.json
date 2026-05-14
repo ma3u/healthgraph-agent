@@ -1,0 +1,73 @@
+{
+  "person": {
+    "date_of_birth": "1985-06-12",
+    "biological_sex": "Male"
+  },
+  "quantity_samples": [
+    {
+      "type": "HeartRate",
+      "raw_type": "HKQuantityTypeIdentifierHeartRate",
+      "value": 64,
+      "unit": "count/min",
+      "start_date": "2026-05-13T07:14:00+02:00",
+      "end_date": "2026-05-13T07:14:00+02:00",
+      "source_name": "Apple Watch",
+      "device": "Apple Watch Series 10"
+    },
+    {
+      "type": "RestingHeartRate",
+      "value": 52,
+      "unit": "count/min",
+      "start_date": "2026-05-13T00:00:00+02:00",
+      "end_date": "2026-05-13T23:59:59+02:00",
+      "source_name": "Apple Watch"
+    },
+    {
+      "type": "StepCount",
+      "value": 11342,
+      "unit": "count",
+      "start_date": "2026-05-13T00:00:00+02:00",
+      "end_date": "2026-05-13T23:59:59+02:00",
+      "source_name": "iPhone"
+    },
+    {
+      "type": "ActiveEnergyBurned",
+      "value": 612,
+      "unit": "kcal",
+      "start_date": "2026-05-13T00:00:00+02:00",
+      "end_date": "2026-05-13T23:59:59+02:00",
+      "source_name": "Apple Watch"
+    },
+    {
+      "type": "HeartRateVariabilitySDNN",
+      "value": 48.7,
+      "unit": "ms",
+      "start_date": "2026-05-13T04:30:00+02:00",
+      "end_date": "2026-05-13T04:30:00+02:00",
+      "source_name": "Apple Watch"
+    }
+  ],
+  "category_samples": [
+    {
+      "type": "SleepAnalysis",
+      "category_value": "AsleepCore",
+      "start_date": "2026-05-12T23:30:00+02:00",
+      "end_date": "2026-05-13T07:10:00+02:00",
+      "source_name": "Apple Watch"
+    }
+  ],
+  "workouts": [
+    {
+      "activity_type": "Running",
+      "raw_activity_type": "HKWorkoutActivityTypeRunning",
+      "duration_seconds": 1860,
+      "total_distance_meters": 5240,
+      "total_energy_kcal": 412,
+      "start_date": "2026-05-13T18:05:00+02:00",
+      "end_date": "2026-05-13T18:36:00+02:00",
+      "source_name": "Apple Watch"
+    }
+  ],
+  "date_range_start": "2026-05-13T00:00:00+02:00",
+  "date_range_end": "2026-05-13T23:59:59+02:00"
+}

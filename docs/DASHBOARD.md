@@ -151,6 +151,158 @@ For an interactive, browser-based experience with clickable charts and graph vis
 - Interactive graph visualization of the last 7 days (Day → Workout → Sleep → Summary nodes)
 - Person → Device → Workout network (which devices recorded which activities)
 
+---
+
+## Whoop-style Dashboard
+
+A second NeoDash dashboard (`neodash/whoop_dashboard.json`) that mirrors the daily card layout from Whoop, computing **Recovery %**, **Strain (0–21)**, and **Sleep Performance %** on the fly from existing `:DailySummary` properties — no schema changes.
+
+### Setup — three deployment paths
+
+The same `neodash/whoop_dashboard.json` works with three renderers. Pick whichever you have access to.
+
+#### Path A — Open-source NeoDash via the cloud (no install) *(Recommended)*
+
+```bash
+python3 scripts/upload_dashboard.py
+```
+
+The script reads `neodash/whoop_dashboard.json`, computes a stable UUID per dashboard title, and `MERGE`s a `_Neodash_Dashboard` node into your graph. Idempotent: re-running updates the same node instead of duplicating.
+
+Then:
+
+1. Open https://neodash.graphapp.io
+2. Connect with the values from `.env` (`NEO4J_URI`, user, password)
+3. *Load Dashboard from Neo4j* → pick **HealthGraph — Whoop-style View**
+
+#### Path B — Aura Console → Tools → Dashboards (full CLI upload possible with a user-session token)
+
+Aura's built-in Dashboards is a **separate product** from NeoDash. It stores dashboards in Aura's managed `shared-storage` service (not in your graph). The public Aura API (`api.neo4j.io/v1/*`) does **not** expose any dashboard endpoints — the only routed resources are `/v1/instances` and `/v1/tenants`. The official `neo4j/aura-cli` likewise has no `dashboard` subcommand (confirmed against its `subcommands/` directory).
+
+There **is** an undocumented internal API used by the Aura Console UI itself:
+
+```
+POST   https://console.neo4j.io/api/shared-storage/v1/dashboards/dashboards
+POST   /v1/dashboards/dashboards/:dashboardId/pages
+POST   /v1/dashboards/dashboards/:dashboardId/pages/:pageId/widgets
+PATCH  /v1/dashboards/dashboards/:dashboardId
+DELETE /v1/dashboards/dashboards/:dashboardId
+```
+
+It accepts a `Bearer` token in `Authorization` and a `Project-Id` header — but only tokens minted by the interactive user OIDC flow (`login.neo4j.com` audience `https://console.neo4j.io`). Aura's public service-account tokens (`api.neo4j.io/oauth/token`, audience also `https://console.neo4j.io`) come from a different Auth0 tenant and are rejected with `"token is not signed by a trusted key"`.
+
+A working CLI upload using a session token grabbed from the browser:
+
+```bash
+# 1. In Chrome on https://console.neo4j.io, open DevTools Console and run:
+#       (() => {
+#         const k = Object.keys(localStorage).find(k => k.startsWith('oidc.user:'));
+#         copy(JSON.parse(localStorage.getItem(k)).access_token);
+#       })();
+#
+# 2. Paste it into the env var (15-min TTL):
+export AURA_SESSION_TOKEN=eyJhbGciOiJSUzI1NiIs...
+export PROJECT_ID=326809f3-c351-4eb7-8770-fcf5d0b6adc1
+export INSTANCE_ID=7d4ba607
+
+# 3. Run:
+python3 scripts/upload_aura_dashboard.py
+```
+
+The script:
+- Reads `neodash/whoop_dashboard.json` (NeoDash 2.5 format)
+- Converts to Aura's widget schema (different keys: `reports → widgets`, `width/height → w/h`, `value → singleValue`, etc.)
+- POSTs the shell dashboard, then each page, then each widget
+- Returns the full URL of the created dashboard
+
+The dashboard then appears immediately in the Aura Console's *Tools → Dashboards* tile page — no UI import step.
+
+**Caveat:** session tokens rotate every 15 min. For repeated runs, regrab the token. Service-account automation isn't possible until Neo4j adds dashboards to the public Aura API or CLI.
+
+#### Path B (alternative) — Manual UI import
+
+If you don't want to deal with browser tokens, the same JSON can be dragged into the Aura *Tools → Dashboards → Import* dialog. Note: the *"Select from database"* option there reads NeoDash's `_Neodash_Dashboard` node label, so running `scripts/upload_dashboard.py` first makes the dashboard appear in that picker (then click once to copy it into Aura's storage).
+
+#### Path C — NeoDash via Neo4j Desktop
+
+1. Install **NeoDash** from the Desktop plugin gallery
+2. *Load Dashboard* → either browse to `neodash/whoop_dashboard.json` or use *Load from Neo4j* (after running the upload script)
+
+#### What `upload_dashboard.py` does, in Cypher
+
+The script is roughly:
+
+```cypher
+MERGE (n:_Neodash_Dashboard {uuid: $uuid})
+SET   n.title   = $title,
+      n.version = "2.5",
+      n.user    = "cli-upload",
+      n.content = $contentJson,
+      n.date    = datetime();
+```
+
+Schema source: [NeoDash `DashboardThunks.ts`](https://github.com/neo4j-labs/neodash/blob/master/src/dashboard/DashboardThunks.ts).
+
+Verify after upload:
+
+```bash
+cypher-shell -a "$NEO4J_URI" -u "$NEO4J_USER" -p "$NEO4J_PASSWORD" \
+  "MATCH (n:_Neodash_Dashboard) RETURN n.title, n.version, size(n.content) AS bytes;"
+```
+
+### Pages (5 total, 35 panels)
+
+**Page 1 — Whoop View** *(daily hero card + trends)*
+- Hero card: Recovery %, Strain (0–21), Sleep %
+- Recovery % 90-day trend, Strain 30-day history + 365-day calendar
+- Strain vs Recovery scatter — *"did I take it easy when my body asked?"*
+- HRV and RHR with 7-day rolling averages (180 days)
+- Sleep Performance + Hours Asleep vs the 7.5h need line
+
+**Page 2 — Recovery deep-dive**
+- HRV by day-of-week
+- Recovery zone distribution (last 365 days)
+- Workout type → next-day HRV impact (top 12)
+- Best recovery days (top 10)
+- HRV baseline drift (monthly mean over full history)
+
+**Page 3 — Strain deep-dive**
+- Weekly training load (active kcal + workout min, last 26 weeks)
+- Monthly strain trend (full history)
+- Activity-type total hours (top 12 lifetime)
+- Strain by day-of-week
+- Strain zone distribution (Light / Moderate / Strenuous / All-out)
+
+**Page 4 — Sleep deep-dive** *(sparse data noted)*
+- Sleep duration histogram
+- Sleep by day-of-week
+- Monthly avg + rolling std-dev (consistency)
+- Cumulative sleep debt vs 7.5h need
+
+**Page 5 — Health Monitor** *(full 8.5-year history)*
+- VO2max trend
+- RHR + HRV side-by-side
+- SpO2 + Respiratory rate side-by-side
+- Body mass
+
+### Formulas
+
+All three score formulas are documented in [SCORING.md](SCORING.md). Summary:
+
+| Score | Formula |
+|-------|---------|
+| Recovery % | `0.60·HRV_z + 0.20·RHR_z + 0.20·Sleep_perf` against a 30-day rolling baseline |
+| Strain 0–21 | TRIMP-inspired: `21·(1 − exp(−load/220))` with `load = minutes · (intensity/8)^1.92` |
+| Sleep % | `clamp(asleep_min/450, 0, 1) · (asleep/in_bed) · 100` |
+
+All queries anchor on the latest date in your export, so they remain useful even if data is a few weeks stale.
+
+### Raw queries
+
+The standalone Cypher (also runnable in cypher-shell) lives at [`cypher/whoop_queries.cypher`](../cypher/whoop_queries.cypher).
+
+---
+
 ### Customizing queries
 
 All NeoDash queries can be edited directly in the dashboard. Click the edit (pencil) icon on any panel to modify the Cypher query. Common modifications:

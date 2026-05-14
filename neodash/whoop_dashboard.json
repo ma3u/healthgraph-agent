@@ -1,0 +1,884 @@
+{
+  "title": "HealthGraph \u2014 Whoop-style View",
+  "version": "2.5",
+  "settings": {
+    "pagenumber": 0,
+    "editable": true,
+    "fullscreenEnabled": true,
+    "parameters": {}
+  },
+  "pages": [
+    {
+      "title": "Whoop View",
+      "reports": [
+        {
+          "title": "",
+          "query": "**Whoop-style daily view** \u2014 Recovery %, Strain (0\u201321), Sleep Performance %.\nFormulas in [docs/SCORING.md](https://github.com/ma3u/healthgraph-agent/blob/main/docs/SCORING.md).\nAll scores anchored on the latest day in your export (data through 2026-04-15).",
+          "width": 12,
+          "height": 1,
+          "x": 0,
+          "y": 0,
+          "type": "text",
+          "selection": {},
+          "settings": {
+            "replaceGlobalParameters": true
+          }
+        },
+        {
+          "title": "Recovery",
+          "query": "MATCH (s:DailySummary)\nWHERE s.hrv_mean IS NOT NULL AND s.resting_heart_rate IS NOT NULL\nWITH s ORDER BY s.date DESC LIMIT 1\nMATCH (b:DailySummary)\nWHERE b.date >= s.date - duration({days:30}) AND b.date < s.date\n  AND b.hrv_mean IS NOT NULL AND b.resting_heart_rate IS NOT NULL\nWITH s,\n     collect(b.hrv_mean) AS hrv_base,\n     collect(b.resting_heart_rate) AS rhr_base\nWITH s, hrv_base, rhr_base,\n     reduce(t=0.0, x IN hrv_base | t+x)/size(hrv_base) AS hrv_mu,\n     reduce(t=0.0, x IN rhr_base | t+x)/size(rhr_base) AS rhr_mu\nWITH s, hrv_base, rhr_base, hrv_mu, rhr_mu,\n     sqrt(reduce(t=0.0, x IN hrv_base | t+(x-hrv_mu)*(x-hrv_mu))/size(hrv_base)) AS hrv_sd,\n     sqrt(reduce(t=0.0, x IN rhr_base | t+(x-rhr_mu)*(x-rhr_mu))/size(rhr_base)) AS rhr_sd\nWITH s,\n     CASE WHEN hrv_sd > 0 THEN (s.hrv_mean - hrv_mu)/hrv_sd ELSE 0 END AS hrv_z,\n     CASE WHEN rhr_sd > 0 THEN (s.resting_heart_rate - rhr_mu)/rhr_sd ELSE 0 END AS rhr_z\nWITH s,\n     CASE WHEN 50 + 25*hrv_z > 100 THEN 100 WHEN 50 + 25*hrv_z < 0 THEN 0 ELSE 50 + 25*hrv_z END AS hrv_c,\n     CASE WHEN 50 - 25*rhr_z > 100 THEN 100 WHEN 50 - 25*rhr_z < 0 THEN 0 ELSE 50 - 25*rhr_z END AS rhr_c,\n     CASE WHEN s.sleep_hours IS NULL THEN 50\n          WHEN s.sleep_hours >= 7.5 THEN 92\n          ELSE (s.sleep_hours / 7.5) * 92 END AS sleep_c\nRETURN round(0.60*hrv_c + 0.20*rhr_c + 0.20*sleep_c) AS `Recovery %`",
+          "width": 4,
+          "height": 3,
+          "x": 0,
+          "y": 1,
+          "type": "value",
+          "selection": {},
+          "settings": {
+            "fontSize": 64,
+            "verticalAlign": "middle",
+            "horizontalAlign": "center",
+            "color": "#10b981",
+            "type": "Single Value"
+          }
+        },
+        {
+          "title": "Strain (0\u201321)",
+          "query": "MATCH (s:DailySummary)\nWHERE s.active_energy_kcal IS NOT NULL\nWITH s ORDER BY s.date DESC LIMIT 1\nWITH s,\n     CASE WHEN coalesce(s.workout_minutes,0) > 0\n          THEN s.active_energy_kcal / s.workout_minutes\n          ELSE s.active_energy_kcal / 480.0\n     END AS intensity,\n     CASE WHEN coalesce(s.workout_minutes,0) > 0 THEN s.workout_minutes ELSE 30.0 END AS load_minutes\nWITH 21.0 * (1.0 - exp(-(load_minutes * (intensity/8.0)^1.92) / 220.0)) AS strain\nRETURN round(strain * 10) / 10.0 AS Strain",
+          "width": 4,
+          "height": 3,
+          "x": 4,
+          "y": 1,
+          "type": "value",
+          "selection": {},
+          "settings": {
+            "fontSize": 64,
+            "verticalAlign": "middle",
+            "horizontalAlign": "center",
+            "color": "#3b82f6",
+            "type": "Single Value"
+          }
+        },
+        {
+          "title": "Sleep %",
+          "query": "MATCH (d:Day)-[:HAS_SUMMARY]->(s:DailySummary)\nWHERE s.sleep_hours IS NOT NULL\nWITH s, d ORDER BY s.date DESC LIMIT 1\nOPTIONAL MATCH (ss:SleepSession {date: d.date})\nWITH s, ss,\n     coalesce(ss.asleep_minutes, s.sleep_hours * 60) AS asleep_min,\n     coalesce(ss.in_bed_minutes, s.sleep_hours * 60 / 0.92) AS in_bed_min\nWITH (CASE WHEN asleep_min/450.0 > 1.0 THEN 1.0 ELSE asleep_min/450.0 END) * 100 AS dur_score,\n     CASE WHEN in_bed_min > 0 THEN asleep_min/in_bed_min ELSE 0.92 END AS efficiency\nRETURN round(dur_score * efficiency) AS `Sleep %`",
+          "width": 4,
+          "height": 3,
+          "x": 8,
+          "y": 1,
+          "type": "value",
+          "selection": {},
+          "settings": {
+            "fontSize": 64,
+            "verticalAlign": "middle",
+            "horizontalAlign": "center",
+            "color": "#8b5cf6",
+            "type": "Single Value"
+          }
+        },
+        {
+          "title": "Recovery % \u2014 last 90 days",
+          "query": "MATCH (m:DailySummary) WITH max(m.date) AS anchor\nMATCH (s:DailySummary)\nWHERE s.hrv_mean IS NOT NULL AND s.resting_heart_rate IS NOT NULL\n  AND s.date >= anchor - duration({days:90})\nWITH s\nMATCH (b:DailySummary)\nWHERE b.date >= s.date - duration({days:30}) AND b.date < s.date\n  AND b.hrv_mean IS NOT NULL AND b.resting_heart_rate IS NOT NULL\nWITH s, collect(b.hrv_mean) AS hrv_base, collect(b.resting_heart_rate) AS rhr_base\nWHERE size(hrv_base) >= 7\nWITH s, hrv_base, rhr_base,\n     reduce(t=0.0, x IN hrv_base | t+x)/size(hrv_base) AS hrv_mu,\n     reduce(t=0.0, x IN rhr_base | t+x)/size(rhr_base) AS rhr_mu\nWITH s, hrv_base, rhr_base, hrv_mu, rhr_mu,\n     sqrt(reduce(t=0.0, x IN hrv_base | t+(x-hrv_mu)*(x-hrv_mu))/size(hrv_base)) AS hrv_sd,\n     sqrt(reduce(t=0.0, x IN rhr_base | t+(x-rhr_mu)*(x-rhr_mu))/size(rhr_base)) AS rhr_sd\nWITH s,\n     CASE WHEN hrv_sd > 0 THEN (s.hrv_mean - hrv_mu)/hrv_sd ELSE 0 END AS hrv_z,\n     CASE WHEN rhr_sd > 0 THEN (s.resting_heart_rate - rhr_mu)/rhr_sd ELSE 0 END AS rhr_z\nWITH s,\n     CASE WHEN 50 + 25*hrv_z > 100 THEN 100 WHEN 50 + 25*hrv_z < 0 THEN 0 ELSE 50 + 25*hrv_z END AS hrv_c,\n     CASE WHEN 50 - 25*rhr_z > 100 THEN 100 WHEN 50 - 25*rhr_z < 0 THEN 0 ELSE 50 - 25*rhr_z END AS rhr_c,\n     CASE WHEN s.sleep_hours IS NULL THEN 50\n          WHEN s.sleep_hours >= 7.5 THEN 92\n          ELSE (s.sleep_hours / 7.5) * 92 END AS sleep_c\nRETURN s.date AS date,\n       round(0.60*hrv_c + 0.20*rhr_c + 0.20*sleep_c) AS `Recovery %`\nORDER BY date",
+          "width": 12,
+          "height": 3,
+          "x": 0,
+          "y": 4,
+          "type": "line",
+          "selection": {
+            "x": "date",
+            "value": [
+              "Recovery %"
+            ]
+          },
+          "settings": {
+            "colors": [
+              "#10b981"
+            ],
+            "legend": true,
+            "showGrid": true,
+            "minYValue": 0,
+            "maxYValue": 100
+          }
+        },
+        {
+          "title": "Strain \u2014 last 30 days",
+          "query": "MATCH (m:DailySummary) WITH max(m.date) AS anchor\nMATCH (s:DailySummary)\nWHERE s.active_energy_kcal IS NOT NULL\n  AND s.date >= anchor - duration({days:30})\nWITH s,\n     CASE WHEN coalesce(s.workout_minutes,0) > 0\n          THEN s.active_energy_kcal / s.workout_minutes\n          ELSE s.active_energy_kcal / 480.0\n     END AS intensity,\n     CASE WHEN coalesce(s.workout_minutes,0) > 0 THEN s.workout_minutes ELSE 30.0 END AS load_min\nRETURN s.date AS date,\n       round(21.0 * (1.0 - exp(-(load_min * (intensity/8.0)^1.92) / 220.0)) * 10) / 10.0 AS Strain\nORDER BY date",
+          "width": 6,
+          "height": 3,
+          "x": 0,
+          "y": 7,
+          "type": "bar",
+          "selection": {
+            "x": "date",
+            "value": [
+              "Strain"
+            ]
+          },
+          "settings": {
+            "colors": [
+              "#3b82f6"
+            ],
+            "legend": false,
+            "showGrid": true,
+            "minYValue": 0,
+            "maxYValue": 21
+          }
+        },
+        {
+          "title": "Did I take it easy when my body asked? (Strain vs Recovery)",
+          "query": "MATCH (m:DailySummary) WITH max(m.date) AS anchor\nMATCH (today:DailySummary)\nWHERE today.active_energy_kcal IS NOT NULL\n  AND today.date >= anchor - duration({days:180})\nMATCH (yest:DailySummary {date: today.date - duration({days:1})})\nWHERE yest.hrv_mean IS NOT NULL AND yest.resting_heart_rate IS NOT NULL\nMATCH (b:DailySummary)\nWHERE b.date >= yest.date - duration({days:30}) AND b.date < yest.date\n  AND b.hrv_mean IS NOT NULL AND b.resting_heart_rate IS NOT NULL\nWITH today, yest, collect(b.hrv_mean) AS hrv_base, collect(b.resting_heart_rate) AS rhr_base\nWHERE size(hrv_base) >= 7\nWITH today, yest, hrv_base, rhr_base,\n     reduce(t=0.0, x IN hrv_base | t+x)/size(hrv_base) AS hrv_mu,\n     reduce(t=0.0, x IN rhr_base | t+x)/size(rhr_base) AS rhr_mu\nWITH today, yest, hrv_base, rhr_base, hrv_mu, rhr_mu,\n     sqrt(reduce(t=0.0, x IN hrv_base | t+(x-hrv_mu)*(x-hrv_mu))/size(hrv_base)) AS hrv_sd,\n     sqrt(reduce(t=0.0, x IN rhr_base | t+(x-rhr_mu)*(x-rhr_mu))/size(rhr_base)) AS rhr_sd\nWITH today, yest,\n     CASE WHEN hrv_sd > 0 THEN (yest.hrv_mean - hrv_mu)/hrv_sd ELSE 0 END AS hrv_z,\n     CASE WHEN rhr_sd > 0 THEN (yest.resting_heart_rate - rhr_mu)/rhr_sd ELSE 0 END AS rhr_z\nWITH today, yest,\n     CASE WHEN 50 + 25*hrv_z > 100 THEN 100 WHEN 50 + 25*hrv_z < 0 THEN 0 ELSE 50 + 25*hrv_z END AS hrv_c,\n     CASE WHEN 50 - 25*rhr_z > 100 THEN 100 WHEN 50 - 25*rhr_z < 0 THEN 0 ELSE 50 - 25*rhr_z END AS rhr_c,\n     CASE WHEN yest.sleep_hours IS NULL THEN 50\n          WHEN yest.sleep_hours >= 7.5 THEN 92\n          ELSE (yest.sleep_hours / 7.5) * 92 END AS sleep_c\nWITH today,\n     round(0.60*hrv_c + 0.20*rhr_c + 0.20*sleep_c) AS `Recovery yesterday`,\n     CASE WHEN coalesce(today.workout_minutes,0) > 0\n          THEN today.active_energy_kcal / today.workout_minutes\n          ELSE today.active_energy_kcal / 480.0 END AS intensity,\n     CASE WHEN coalesce(today.workout_minutes,0) > 0 THEN today.workout_minutes ELSE 30.0 END AS load_min\nRETURN `Recovery yesterday`,\n       round(21.0 * (1.0 - exp(-(load_min * (intensity/8.0)^1.92) / 220.0)) * 10) / 10.0 AS `Strain today`",
+          "width": 6,
+          "height": 3,
+          "x": 6,
+          "y": 7,
+          "type": "scatter",
+          "selection": {
+            "x": "Recovery yesterday",
+            "value": [
+              "Strain today"
+            ]
+          },
+          "settings": {
+            "colors": [
+              "#f59e0b"
+            ],
+            "legend": false,
+            "showGrid": true,
+            "minXValue": 0,
+            "maxXValue": 100,
+            "minYValue": 0,
+            "maxYValue": 21
+          }
+        },
+        {
+          "title": "HRV trend \u2014 7-day rolling (last 180 days)",
+          "query": "MATCH (m:DailySummary) WITH max(m.date) AS anchor\nMATCH (s:DailySummary)\nWHERE s.hrv_mean IS NOT NULL\n  AND s.date >= anchor - duration({days:180})\nWITH s\nMATCH (b:DailySummary)\nWHERE b.date >= s.date - duration({days:6}) AND b.date <= s.date\n  AND b.hrv_mean IS NOT NULL\nWITH s.date AS date, s.hrv_mean AS daily, collect(b.hrv_mean) AS w\nRETURN date,\n       round(daily * 10)/10.0 AS `HRV (ms)`,\n       round((reduce(t=0.0, x IN w | t+x)/size(w)) * 10)/10.0 AS `7-day avg`\nORDER BY date",
+          "width": 6,
+          "height": 3,
+          "x": 0,
+          "y": 10,
+          "type": "line",
+          "selection": {
+            "x": "date",
+            "value": [
+              "HRV (ms)",
+              "7-day avg"
+            ]
+          },
+          "settings": {
+            "colors": [
+              "#a78bfa",
+              "#7c3aed"
+            ],
+            "legend": true,
+            "showGrid": true
+          }
+        },
+        {
+          "title": "Resting HR trend \u2014 7-day rolling (last 180 days)",
+          "query": "MATCH (m:DailySummary) WITH max(m.date) AS anchor\nMATCH (s:DailySummary)\nWHERE s.resting_heart_rate IS NOT NULL\n  AND s.date >= anchor - duration({days:180})\nWITH s\nMATCH (b:DailySummary)\nWHERE b.date >= s.date - duration({days:6}) AND b.date <= s.date\n  AND b.resting_heart_rate IS NOT NULL\nWITH s.date AS date, s.resting_heart_rate AS daily, collect(b.resting_heart_rate) AS w\nRETURN date,\n       round(daily * 10)/10.0 AS `RHR (bpm)`,\n       round((reduce(t=0.0, x IN w | t+x)/size(w)) * 10)/10.0 AS `7-day avg`\nORDER BY date",
+          "width": 6,
+          "height": 3,
+          "x": 6,
+          "y": 10,
+          "type": "line",
+          "selection": {
+            "x": "date",
+            "value": [
+              "RHR (bpm)",
+              "7-day avg"
+            ]
+          },
+          "settings": {
+            "colors": [
+              "#fca5a5",
+              "#dc2626"
+            ],
+            "legend": true,
+            "showGrid": true
+          }
+        },
+        {
+          "title": "Sleep Performance & Hours Asleep (90 days, sparse \u2014 watch worn overnight only)",
+          "query": "MATCH (m:DailySummary) WITH max(m.date) AS anchor\nMATCH (d:Day)-[:HAS_SUMMARY]->(s:DailySummary)\nWHERE s.sleep_hours IS NOT NULL\n  AND s.date >= anchor - duration({days:90})\nOPTIONAL MATCH (ss:SleepSession {date: d.date})\nWITH s,\n     coalesce(ss.asleep_minutes, s.sleep_hours * 60) AS asleep_min,\n     coalesce(ss.in_bed_minutes, s.sleep_hours * 60 / 0.92) AS in_bed_min\nWITH s.date AS date,\n     (CASE WHEN asleep_min/450.0 > 1.0 THEN 1.0 ELSE asleep_min/450.0 END) * 100 AS dur_score,\n     CASE WHEN in_bed_min > 0 THEN asleep_min/in_bed_min ELSE 0.92 END AS efficiency,\n     asleep_min/60.0 AS sleep_hours\nRETURN date,\n       round(dur_score * efficiency) AS `Sleep %`,\n       round(sleep_hours * 10)/10.0 AS `Hours asleep`,\n       7.5 AS `Need (h)`\nORDER BY date",
+          "width": 12,
+          "height": 3,
+          "x": 0,
+          "y": 13,
+          "type": "line",
+          "selection": {
+            "x": "date",
+            "value": [
+              "Sleep %",
+              "Hours asleep",
+              "Need (h)"
+            ]
+          },
+          "settings": {
+            "colors": [
+              "#8b5cf6",
+              "#06b6d4",
+              "#94a3b8"
+            ],
+            "legend": true,
+            "showGrid": true
+          }
+        },
+        {
+          "title": "Strain calendar \u2014 last 365 days",
+          "query": "MATCH (m:DailySummary) WITH max(m.date) AS anchor\nMATCH (s:DailySummary)\nWHERE s.active_energy_kcal IS NOT NULL\n  AND s.date >= anchor - duration({days:365})\nWITH s,\n     CASE WHEN coalesce(s.workout_minutes,0) > 0\n          THEN s.active_energy_kcal / s.workout_minutes\n          ELSE s.active_energy_kcal / 480.0\n     END AS intensity,\n     CASE WHEN coalesce(s.workout_minutes,0) > 0 THEN s.workout_minutes ELSE 30.0 END AS load_min\nRETURN s.date AS date,\n       round(21.0 * (1.0 - exp(-(load_min * (intensity/8.0)^1.92) / 220.0)) * 10) / 10.0 AS strain\nORDER BY date",
+          "width": 12,
+          "height": 3,
+          "x": 0,
+          "y": 16,
+          "type": "bar",
+          "selection": {
+            "x": "date",
+            "value": [
+              "strain"
+            ]
+          },
+          "settings": {
+            "colors": [
+              "#3b82f6"
+            ],
+            "legend": false,
+            "showGrid": false,
+            "minYValue": 0,
+            "maxYValue": 21
+          }
+        }
+      ]
+    },
+    {
+      "title": "Recovery",
+      "reports": [
+        {
+          "title": "",
+          "query": "**Recovery deep-dive** \u2014 patterns by day, zone distribution, workout impact, best days, and how your HRV baseline has drifted over the years.",
+          "width": 12,
+          "height": 1,
+          "x": 0,
+          "y": 0,
+          "type": "text",
+          "selection": {},
+          "settings": {
+            "replaceGlobalParameters": true
+          }
+        },
+        {
+          "title": "HRV by day-of-week (averaged across full history)",
+          "query": "MATCH (d:Day)-[:HAS_SUMMARY]->(s:DailySummary)\nWHERE s.hrv_mean IS NOT NULL\nWITH d.day_of_week AS dow, avg(s.hrv_mean) AS avg_hrv, count(*) AS n\nRETURN\n  CASE dow\n    WHEN 'Monday' THEN '1-Mon' WHEN 'Tuesday' THEN '2-Tue'\n    WHEN 'Wednesday' THEN '3-Wed' WHEN 'Thursday' THEN '4-Thu'\n    WHEN 'Friday' THEN '5-Fri' WHEN 'Saturday' THEN '6-Sat'\n    WHEN 'Sunday' THEN '7-Sun' END AS day,\n  round(avg_hrv * 10)/10.0 AS `Avg HRV (ms)`,\n  n AS `Days`\nORDER BY day",
+          "width": 6,
+          "height": 3,
+          "x": 0,
+          "y": 1,
+          "type": "bar",
+          "selection": {
+            "x": "day",
+            "value": [
+              "Avg HRV (ms)"
+            ]
+          },
+          "settings": {
+            "colors": [
+              "#a78bfa"
+            ],
+            "legend": false,
+            "showGrid": true
+          }
+        },
+        {
+          "title": "Recovery zone distribution (last 365 days) \u2014 pie/bar",
+          "query": "MATCH (m:DailySummary) WITH max(m.date) AS anchor\nMATCH (s:DailySummary)\nWHERE s.hrv_mean IS NOT NULL AND s.resting_heart_rate IS NOT NULL\n  AND s.date >= anchor - duration({days:365})\nWITH s\nMATCH (b:DailySummary)\nWHERE b.date >= s.date - duration({days:30}) AND b.date < s.date\n  AND b.hrv_mean IS NOT NULL AND b.resting_heart_rate IS NOT NULL\nWITH s, collect(b.hrv_mean) AS hrv_base, collect(b.resting_heart_rate) AS rhr_base\nWHERE size(hrv_base) >= 7\nWITH s, hrv_base, rhr_base,\n     reduce(t=0.0, x IN hrv_base | t+x)/size(hrv_base) AS hrv_mu,\n     reduce(t=0.0, x IN rhr_base | t+x)/size(rhr_base) AS rhr_mu\nWITH s, hrv_base, rhr_base, hrv_mu, rhr_mu,\n     sqrt(reduce(t=0.0, x IN hrv_base | t+(x-hrv_mu)*(x-hrv_mu))/size(hrv_base)) AS hrv_sd,\n     sqrt(reduce(t=0.0, x IN rhr_base | t+(x-rhr_mu)*(x-rhr_mu))/size(rhr_base)) AS rhr_sd\nWITH s,\n     CASE WHEN hrv_sd > 0 THEN (s.hrv_mean - hrv_mu)/hrv_sd ELSE 0 END AS hrv_z,\n     CASE WHEN rhr_sd > 0 THEN (s.resting_heart_rate - rhr_mu)/rhr_sd ELSE 0 END AS rhr_z\nWITH s,\n     CASE WHEN 50 + 25*hrv_z > 100 THEN 100 WHEN 50 + 25*hrv_z < 0 THEN 0 ELSE 50 + 25*hrv_z END AS hrv_c,\n     CASE WHEN 50 - 25*rhr_z > 100 THEN 100 WHEN 50 - 25*rhr_z < 0 THEN 0 ELSE 50 - 25*rhr_z END AS rhr_c,\n     CASE WHEN s.sleep_hours IS NULL THEN 50\n          WHEN s.sleep_hours >= 7.5 THEN 92\n          ELSE (s.sleep_hours / 7.5) * 92 END AS sleep_c\nWITH 0.60*hrv_c + 0.20*rhr_c + 0.20*sleep_c AS recovery\nWITH CASE WHEN recovery >= 67 THEN '1-Green (67+)'\n          WHEN recovery >= 34 THEN '2-Yellow (34-66)'\n          ELSE '3-Red (0-33)' END AS zone\nRETURN zone AS `Recovery zone`, count(*) AS `Days`\nORDER BY zone",
+          "width": 6,
+          "height": 3,
+          "x": 6,
+          "y": 1,
+          "type": "pie",
+          "selection": {
+            "index": "Recovery zone",
+            "value": "Days",
+            "key": "Recovery zone"
+          },
+          "settings": {
+            "legend": true
+          }
+        },
+        {
+          "title": "Workout type \u2192 next-day HRV impact (top 10)",
+          "query": "MATCH (w:Workout)-[:ON_DAY]->(d:Day)\nMATCH (next:Day {date: d.date + duration({days:1})})-[:HAS_SUMMARY]->(ns:DailySummary)\nWHERE ns.hrv_mean IS NOT NULL\nWITH w.activity_type AS activity, ns.hrv_mean AS next_hrv, w\nWITH activity, avg(next_hrv) AS avg_next_hrv, count(DISTINCT w) AS sessions\nWHERE sessions >= 5\nRETURN activity AS `Activity type`,\n       round(avg_next_hrv * 10)/10.0 AS `Avg next-day HRV (ms)`,\n       sessions AS `Sessions`\nORDER BY avg_next_hrv DESC LIMIT 12",
+          "width": 12,
+          "height": 4,
+          "x": 0,
+          "y": 4,
+          "type": "table",
+          "selection": {},
+          "settings": {
+            "compact": true
+          }
+        },
+        {
+          "title": "Best recovery days (top 10 of last 365)",
+          "query": "MATCH (m:DailySummary) WITH max(m.date) AS anchor\nMATCH (s:DailySummary)\nWHERE s.hrv_mean IS NOT NULL AND s.resting_heart_rate IS NOT NULL\n  AND s.date >= anchor - duration({days:365})\nWITH s\nMATCH (b:DailySummary)\nWHERE b.date >= s.date - duration({days:30}) AND b.date < s.date\n  AND b.hrv_mean IS NOT NULL AND b.resting_heart_rate IS NOT NULL\nWITH s, collect(b.hrv_mean) AS hrv_base, collect(b.resting_heart_rate) AS rhr_base\nWHERE size(hrv_base) >= 14\nWITH s, hrv_base, rhr_base,\n     reduce(t=0.0, x IN hrv_base | t+x)/size(hrv_base) AS hrv_mu,\n     reduce(t=0.0, x IN rhr_base | t+x)/size(rhr_base) AS rhr_mu\nWITH s, hrv_base, rhr_base, hrv_mu, rhr_mu,\n     sqrt(reduce(t=0.0, x IN hrv_base | t+(x-hrv_mu)*(x-hrv_mu))/size(hrv_base)) AS hrv_sd,\n     sqrt(reduce(t=0.0, x IN rhr_base | t+(x-rhr_mu)*(x-rhr_mu))/size(rhr_base)) AS rhr_sd\nWITH s,\n     CASE WHEN hrv_sd > 0 THEN (s.hrv_mean - hrv_mu)/hrv_sd ELSE 0 END AS hrv_z,\n     CASE WHEN rhr_sd > 0 THEN (s.resting_heart_rate - rhr_mu)/rhr_sd ELSE 0 END AS rhr_z\nWITH s,\n     CASE WHEN 50 + 25*hrv_z > 100 THEN 100 WHEN 50 + 25*hrv_z < 0 THEN 0 ELSE 50 + 25*hrv_z END AS hrv_c,\n     CASE WHEN 50 - 25*rhr_z > 100 THEN 100 WHEN 50 - 25*rhr_z < 0 THEN 0 ELSE 50 - 25*rhr_z END AS rhr_c,\n     CASE WHEN s.sleep_hours IS NULL THEN 50\n          WHEN s.sleep_hours >= 7.5 THEN 92\n          ELSE (s.sleep_hours / 7.5) * 92 END AS sleep_c\nRETURN s.date AS date,\n       round(0.60*hrv_c + 0.20*rhr_c + 0.20*sleep_c) AS `Recovery %`,\n       round(s.hrv_mean * 10)/10.0 AS `HRV`,\n       round(s.resting_heart_rate) AS `RHR`,\n       round((s.sleep_hours)*10)/10.0 AS `Sleep h`\nORDER BY `Recovery %` DESC LIMIT 10",
+          "width": 12,
+          "height": 4,
+          "x": 0,
+          "y": 8,
+          "type": "table",
+          "selection": {},
+          "settings": {
+            "compact": true
+          }
+        },
+        {
+          "title": "HRV baseline drift \u2014 monthly avg HRV over full history",
+          "query": "MATCH (s:DailySummary) WHERE s.hrv_mean IS NOT NULL\nWITH date.truncate('month', s.date) AS month, avg(s.hrv_mean) AS avg_hrv, count(*) AS days\nWHERE days >= 5\nRETURN month AS date,\n       round(avg_hrv * 10)/10.0 AS `Monthly HRV mean (ms)`\nORDER BY date",
+          "width": 12,
+          "height": 3,
+          "x": 0,
+          "y": 12,
+          "type": "line",
+          "selection": {
+            "x": "date",
+            "value": [
+              "Monthly HRV mean (ms)"
+            ]
+          },
+          "settings": {
+            "colors": [
+              "#7c3aed"
+            ],
+            "legend": true,
+            "showGrid": true
+          }
+        }
+      ]
+    },
+    {
+      "title": "Strain",
+      "reports": [
+        {
+          "title": "",
+          "query": "**Strain deep-dive** \u2014 weekly training load, monthly strain trend, where you spend your training time, and how strain varies by day of the week and zone.",
+          "width": 12,
+          "height": 1,
+          "x": 0,
+          "y": 0,
+          "type": "text",
+          "selection": {},
+          "settings": {
+            "replaceGlobalParameters": true
+          }
+        },
+        {
+          "title": "Weekly training load (workout minutes \u00d7 intensity proxy) last 26 weeks",
+          "query": "MATCH (m:DailySummary) WITH max(m.date) AS anchor\nMATCH (d:Day)-[:PART_OF]->(w:Week)\nMATCH (d)-[:HAS_SUMMARY]->(s:DailySummary)\nWHERE s.active_energy_kcal IS NOT NULL\n  AND w.start_date >= anchor - duration({days:182})\nWITH w.start_date AS week,\n     sum(s.active_energy_kcal) AS active_kcal,\n     sum(coalesce(s.workout_minutes,0)) AS workout_min\nRETURN week AS date,\n       round(active_kcal) AS `Active kcal`,\n       round(workout_min) AS `Workout min`\nORDER BY week",
+          "width": 12,
+          "height": 3,
+          "x": 0,
+          "y": 1,
+          "type": "bar",
+          "selection": {
+            "x": "date",
+            "value": [
+              "Active kcal",
+              "Workout min"
+            ]
+          },
+          "settings": {
+            "colors": [
+              "#3b82f6",
+              "#06b6d4"
+            ],
+            "legend": true,
+            "showGrid": true,
+            "groupMode": "grouped"
+          }
+        },
+        {
+          "title": "Monthly strain calendar \u2014 avg strain per month",
+          "query": "MATCH (s:DailySummary) WHERE s.active_energy_kcal IS NOT NULL AND s.active_energy_kcal > 0\nWITH s,\n     CASE WHEN coalesce(s.workout_minutes,0) > 0\n          THEN s.active_energy_kcal / s.workout_minutes\n          ELSE s.active_energy_kcal / 480.0 END AS intensity,\n     CASE WHEN coalesce(s.workout_minutes,0) > 0 THEN s.workout_minutes ELSE 30.0 END AS load_min\nWITH s, intensity, load_min,\n     CASE WHEN intensity > 0 THEN load_min * (intensity/8.0)^1.92 ELSE 0 END AS raw_load\nWITH date.truncate('month', s.date) AS month,\n     21.0 * (1.0 - exp(-raw_load / 220.0)) AS daily_strain\nWHERE daily_strain = daily_strain\nWITH month, avg(daily_strain) AS avg_strain\nRETURN month AS date,\n       round(avg_strain * 10)/10.0 AS `Avg daily strain`\nORDER BY date",
+          "width": 12,
+          "height": 3,
+          "x": 0,
+          "y": 4,
+          "type": "line",
+          "selection": {
+            "x": "date",
+            "value": [
+              "Avg daily strain"
+            ]
+          },
+          "settings": {
+            "colors": [
+              "#3b82f6"
+            ],
+            "legend": false,
+            "showGrid": true,
+            "minYValue": 0,
+            "maxYValue": 21
+          }
+        },
+        {
+          "title": "Activity type total volume \u2014 top 12 lifetime",
+          "query": "MATCH (w:Workout)\nWHERE w.duration_min IS NOT NULL\nWITH w.activity_type AS activity, sum(w.duration_min)/60.0 AS hours, count(*) AS sessions\nWHERE sessions >= 5\nRETURN activity AS `Activity type`,\n       round(hours * 10)/10.0 AS `Total hours`,\n       sessions AS `Sessions`\nORDER BY hours DESC LIMIT 12",
+          "width": 6,
+          "height": 4,
+          "x": 0,
+          "y": 7,
+          "type": "bar",
+          "selection": {
+            "x": "Activity type",
+            "value": [
+              "Total hours"
+            ]
+          },
+          "settings": {
+            "colors": [
+              "#06b6d4"
+            ],
+            "legend": false,
+            "showGrid": true
+          }
+        },
+        {
+          "title": "Strain by day-of-week (full history)",
+          "query": "MATCH (d:Day)-[:HAS_SUMMARY]->(s:DailySummary)\nWHERE s.active_energy_kcal IS NOT NULL AND s.active_energy_kcal > 0\nWITH d.day_of_week AS dow, s,\n     CASE WHEN coalesce(s.workout_minutes,0) > 0\n          THEN s.active_energy_kcal / s.workout_minutes\n          ELSE s.active_energy_kcal / 480.0 END AS intensity,\n     CASE WHEN coalesce(s.workout_minutes,0) > 0 THEN s.workout_minutes ELSE 30.0 END AS load_min\nWITH dow, intensity, load_min,\n     CASE WHEN intensity > 0 THEN load_min * (intensity/8.0)^1.92 ELSE 0 END AS raw_load\nWITH dow, 21.0 * (1.0 - exp(-raw_load / 220.0)) AS strain\nWHERE strain = strain  // exclude NaN\nWITH dow, avg(strain) AS avg_strain, count(*) AS days\nRETURN\n  CASE dow\n    WHEN 'Monday' THEN '1-Mon' WHEN 'Tuesday' THEN '2-Tue'\n    WHEN 'Wednesday' THEN '3-Wed' WHEN 'Thursday' THEN '4-Thu'\n    WHEN 'Friday' THEN '5-Fri' WHEN 'Saturday' THEN '6-Sat'\n    WHEN 'Sunday' THEN '7-Sun' END AS day,\n  round(avg_strain * 10)/10.0 AS `Avg strain`\nORDER BY day",
+          "width": 6,
+          "height": 4,
+          "x": 6,
+          "y": 7,
+          "type": "bar",
+          "selection": {
+            "x": "day",
+            "value": [
+              "Avg strain"
+            ]
+          },
+          "settings": {
+            "colors": [
+              "#3b82f6"
+            ],
+            "legend": false,
+            "showGrid": true,
+            "minYValue": 0,
+            "maxYValue": 21
+          }
+        },
+        {
+          "title": "Strain zone distribution (last 365 days)",
+          "query": "MATCH (m:DailySummary) WITH max(m.date) AS anchor\nMATCH (s:DailySummary)\nWHERE s.active_energy_kcal IS NOT NULL\n  AND s.date >= anchor - duration({days:365})\nWITH s,\n     CASE WHEN coalesce(s.workout_minutes,0) > 0\n          THEN s.active_energy_kcal / s.workout_minutes\n          ELSE s.active_energy_kcal / 480.0 END AS intensity,\n     CASE WHEN coalesce(s.workout_minutes,0) > 0 THEN s.workout_minutes ELSE 30.0 END AS load_min\nWITH 21.0 * (1.0 - exp(-(load_min * (intensity/8.0)^1.92) / 220.0)) AS strain\nWITH CASE WHEN strain >= 18 THEN '4-All-out (18-21)'\n          WHEN strain >= 14 THEN '3-Strenuous (14-17)'\n          WHEN strain >= 10 THEN '2-Moderate (10-13)'\n          ELSE '1-Light (0-9)' END AS zone\nRETURN zone AS `Strain zone`, count(*) AS Days\nORDER BY zone",
+          "width": 12,
+          "height": 3,
+          "x": 0,
+          "y": 11,
+          "type": "bar",
+          "selection": {
+            "x": "Strain zone",
+            "value": [
+              "Days"
+            ]
+          },
+          "settings": {
+            "colors": [
+              "#3b82f6"
+            ],
+            "legend": false,
+            "showGrid": true
+          }
+        }
+      ]
+    },
+    {
+      "title": "Sleep",
+      "reports": [
+        {
+          "title": "",
+          "query": "**Sleep deep-dive** \u2014 note: sleep data is sparse (78/3087 days with sleep_hours). Apple Watch is not consistently worn overnight, so trends here are illustrative rather than complete.",
+          "width": 12,
+          "height": 2,
+          "x": 0,
+          "y": 0,
+          "type": "text",
+          "selection": {},
+          "settings": {
+            "replaceGlobalParameters": true
+          }
+        },
+        {
+          "title": "Sleep duration histogram (1h buckets)",
+          "query": "MATCH (s:DailySummary) WHERE s.sleep_hours IS NOT NULL\nWITH toInteger(floor(s.sleep_hours)) AS bucket\nWITH bucket, count(*) AS n\nRETURN\n  toString(bucket) + '-' + toString(bucket+1) + 'h' AS `Sleep duration`,\n  n AS Nights\nORDER BY bucket",
+          "width": 6,
+          "height": 3,
+          "x": 0,
+          "y": 2,
+          "type": "bar",
+          "selection": {
+            "x": "Sleep duration",
+            "value": [
+              "Nights"
+            ]
+          },
+          "settings": {
+            "colors": [
+              "#8b5cf6"
+            ],
+            "legend": false,
+            "showGrid": true
+          }
+        },
+        {
+          "title": "Avg sleep hours by day-of-week",
+          "query": "MATCH (d:Day)-[:HAS_SUMMARY]->(s:DailySummary)\nWHERE s.sleep_hours IS NOT NULL\nWITH d.day_of_week AS dow, avg(s.sleep_hours) AS avg_h, count(*) AS n\nRETURN\n  CASE dow\n    WHEN 'Monday' THEN '1-Mon' WHEN 'Tuesday' THEN '2-Tue'\n    WHEN 'Wednesday' THEN '3-Wed' WHEN 'Thursday' THEN '4-Thu'\n    WHEN 'Friday' THEN '5-Fri' WHEN 'Saturday' THEN '6-Sat'\n    WHEN 'Sunday' THEN '7-Sun' END AS day,\n  round(avg_h * 10)/10.0 AS `Avg sleep (h)`,\n  n AS Nights\nORDER BY day",
+          "width": 6,
+          "height": 3,
+          "x": 6,
+          "y": 2,
+          "type": "bar",
+          "selection": {
+            "x": "day",
+            "value": [
+              "Avg sleep (h)"
+            ]
+          },
+          "settings": {
+            "colors": [
+              "#8b5cf6"
+            ],
+            "legend": false,
+            "showGrid": true
+          }
+        },
+        {
+          "title": "Monthly avg sleep \u2014 full history with rolling consistency",
+          "query": "MATCH (s:DailySummary) WHERE s.sleep_hours IS NOT NULL\nWITH date.truncate('month', s.date) AS month, collect(s.sleep_hours) AS hrs\nWITH month, hrs,\n     reduce(t=0.0, x IN hrs | t+x)/size(hrs) AS mu\nWITH month, hrs, mu,\n     sqrt(reduce(t=0.0, x IN hrs | t+(x-mu)*(x-mu))/size(hrs)) AS sd, size(hrs) AS n\nWHERE n >= 3\nRETURN month AS date,\n       round(mu * 10)/10.0 AS `Avg sleep (h)`,\n       round(sd * 100)/100.0 AS `Std dev (h)`\nORDER BY date",
+          "width": 12,
+          "height": 3,
+          "x": 0,
+          "y": 5,
+          "type": "line",
+          "selection": {
+            "x": "date",
+            "value": [
+              "Avg sleep (h)",
+              "Std dev (h)"
+            ]
+          },
+          "settings": {
+            "colors": [
+              "#8b5cf6",
+              "#fca5a5"
+            ],
+            "legend": true,
+            "showGrid": true
+          }
+        },
+        {
+          "title": "Cumulative sleep debt vs 7.5h need (last 90 nights of data)",
+          "query": "MATCH (s:DailySummary) WHERE s.sleep_hours IS NOT NULL\nWITH s ORDER BY s.date DESC LIMIT 90\nWITH s ORDER BY s.date ASC\nWITH collect({date: s.date, h: s.sleep_hours}) AS rows\nUNWIND range(0, size(rows)-1) AS i\nWITH rows[i] AS row,\n     reduce(t=0.0, j IN range(0,i) | t + (rows[j].h - 7.5)) AS cum_debt\nRETURN row.date AS date,\n       round(row.h * 10)/10.0 AS `Hours`,\n       round(cum_debt * 10)/10.0 AS `Cumulative vs 7.5h`\nORDER BY date",
+          "width": 12,
+          "height": 4,
+          "x": 0,
+          "y": 8,
+          "type": "line",
+          "selection": {
+            "x": "date",
+            "value": [
+              "Hours",
+              "Cumulative vs 7.5h"
+            ]
+          },
+          "settings": {
+            "colors": [
+              "#06b6d4",
+              "#ef4444"
+            ],
+            "legend": true,
+            "showGrid": true
+          }
+        }
+      ]
+    },
+    {
+      "title": "Health Monitor",
+      "reports": [
+        {
+          "title": "",
+          "query": "**Health Monitor** \u2014 your cardiovascular markers and body composition over the full 8.5-year export. The metrics that move slowly and matter most for longevity.",
+          "width": 12,
+          "height": 1,
+          "x": 0,
+          "y": 0,
+          "type": "text",
+          "selection": {},
+          "settings": {
+            "replaceGlobalParameters": true
+          }
+        },
+        {
+          "title": "VO2max \u2014 monthly over full history",
+          "query": "MATCH (s:DailySummary) WHERE s.vo2max IS NOT NULL\nWITH date.truncate('month', s.date) AS month, avg(s.vo2max) AS v\nRETURN month AS date, round(v * 10)/10.0 AS `VO2max`\nORDER BY date",
+          "width": 12,
+          "height": 3,
+          "x": 0,
+          "y": 1,
+          "type": "line",
+          "selection": {
+            "x": "date",
+            "value": [
+              "VO2max"
+            ]
+          },
+          "settings": {
+            "colors": [
+              "#10b981"
+            ],
+            "legend": true,
+            "showGrid": true
+          }
+        },
+        {
+          "title": "RHR with 30-day rolling (full history, sampled monthly)",
+          "query": "MATCH (s:DailySummary) WHERE s.resting_heart_rate IS NOT NULL\nWITH date.truncate('month', s.date) AS month, avg(s.resting_heart_rate) AS v\nRETURN month AS date, round(v * 10)/10.0 AS `RHR (bpm)`\nORDER BY date",
+          "width": 6,
+          "height": 3,
+          "x": 0,
+          "y": 4,
+          "type": "line",
+          "selection": {
+            "x": "date",
+            "value": [
+              "RHR (bpm)"
+            ]
+          },
+          "settings": {
+            "colors": [
+              "#ef4444"
+            ],
+            "legend": true,
+            "showGrid": true
+          }
+        },
+        {
+          "title": "HRV monthly \u2014 full history",
+          "query": "MATCH (s:DailySummary) WHERE s.hrv_mean IS NOT NULL\nWITH date.truncate('month', s.date) AS month, avg(s.hrv_mean) AS v\nRETURN month AS date, round(v * 10)/10.0 AS `HRV (ms)`\nORDER BY date",
+          "width": 6,
+          "height": 3,
+          "x": 6,
+          "y": 4,
+          "type": "line",
+          "selection": {
+            "x": "date",
+            "value": [
+              "HRV (ms)"
+            ]
+          },
+          "settings": {
+            "colors": [
+              "#a78bfa"
+            ],
+            "legend": true,
+            "showGrid": true
+          }
+        },
+        {
+          "title": "SpO2 monthly \u2014 full history",
+          "query": "MATCH (s:DailySummary) WHERE s.avg_blood_oxygen IS NOT NULL\nWITH date.truncate('month', s.date) AS month, avg(s.avg_blood_oxygen) AS v\nRETURN month AS date, round(v * 100)/100.0 AS `SpO2 (%)`\nORDER BY date",
+          "width": 6,
+          "height": 3,
+          "x": 0,
+          "y": 7,
+          "type": "line",
+          "selection": {
+            "x": "date",
+            "value": [
+              "SpO2 (%)"
+            ]
+          },
+          "settings": {
+            "colors": [
+              "#06b6d4"
+            ],
+            "legend": true,
+            "showGrid": true
+          }
+        },
+        {
+          "title": "Respiratory rate monthly \u2014 full history",
+          "query": "MATCH (s:DailySummary) WHERE s.avg_respiratory_rate IS NOT NULL\nWITH date.truncate('month', s.date) AS month, avg(s.avg_respiratory_rate) AS v\nRETURN month AS date, round(v * 10)/10.0 AS `Respiratory rate (brpm)`\nORDER BY date",
+          "width": 6,
+          "height": 3,
+          "x": 6,
+          "y": 7,
+          "type": "line",
+          "selection": {
+            "x": "date",
+            "value": [
+              "Respiratory rate (brpm)"
+            ]
+          },
+          "settings": {
+            "colors": [
+              "#94a3b8"
+            ],
+            "legend": true,
+            "showGrid": true
+          }
+        },
+        {
+          "title": "Body mass monthly \u2014 full history",
+          "query": "MATCH (s:DailySummary) WHERE s.body_mass_kg IS NOT NULL\nWITH date.truncate('month', s.date) AS month, avg(s.body_mass_kg) AS v\nRETURN month AS date, round(v * 10)/10.0 AS `Body mass (kg)`\nORDER BY date",
+          "width": 12,
+          "height": 3,
+          "x": 0,
+          "y": 10,
+          "type": "line",
+          "selection": {
+            "x": "date",
+            "value": [
+              "Body mass (kg)"
+            ]
+          },
+          "settings": {
+            "colors": [
+              "#f59e0b"
+            ],
+            "legend": true,
+            "showGrid": true
+          }
+        }
+      ]
+    },
+    {
+      "title": "Anomalies",
+      "reports": [
+        {
+          "title": "",
+          "query": "**Anomalies & patterns** \u2014 illness signatures, stress streaks, overtraining flags, best-day patterns, and energy anomalies. All from pure Cypher (no Graph Analytics session needed). See `docs/HEALTH_ANALYTICS.md` for what each detects.",
+          "width": 12,
+          "height": 2,
+          "x": 0,
+          "y": 0,
+          "type": "text",
+          "selection": {},
+          "settings": {
+            "replaceGlobalParameters": true
+          }
+        },
+        {
+          "title": "Illness signature days (HRV crash + RHR spike + resp \u2191)",
+          "query": "MATCH (s:DailySummary)\nWHERE s.hrv_mean IS NOT NULL AND s.resting_heart_rate IS NOT NULL\n  AND s.avg_respiratory_rate IS NOT NULL\nWITH s\nMATCH (b:DailySummary)\nWHERE b.date >= s.date - duration({days:30}) AND b.date < s.date\n  AND b.hrv_mean IS NOT NULL AND b.resting_heart_rate IS NOT NULL\n  AND b.avg_respiratory_rate IS NOT NULL\nWITH s, collect(b.hrv_mean) AS hb, collect(b.resting_heart_rate) AS rb, collect(b.avg_respiratory_rate) AS rrb\nWHERE size(hb) >= 14\nWITH s, hb, rb, rrb,\n     reduce(t=0.0,x IN hb|t+x)/size(hb) AS hmu,\n     reduce(t=0.0,x IN rb|t+x)/size(rb) AS rmu,\n     reduce(t=0.0,x IN rrb|t+x)/size(rrb) AS rrmu\nWITH s, hb, rb, rrb, hmu, rmu, rrmu,\n     sqrt(reduce(t=0.0,x IN hb|t+(x-hmu)*(x-hmu))/size(hb)) AS hsd,\n     sqrt(reduce(t=0.0,x IN rb|t+(x-rmu)*(x-rmu))/size(rb)) AS rsd,\n     sqrt(reduce(t=0.0,x IN rrb|t+(x-rrmu)*(x-rrmu))/size(rrb)) AS rrsd\nWITH s,\n     CASE WHEN hsd>0 THEN (s.hrv_mean-hmu)/hsd ELSE 0 END AS hz,\n     CASE WHEN rsd>0 THEN (s.resting_heart_rate-rmu)/rsd ELSE 0 END AS rz,\n     CASE WHEN rrsd>0 THEN (s.avg_respiratory_rate-rrmu)/rrsd ELSE 0 END AS rrz\nWHERE hz < -1.5 AND rz > 1.0 AND rrz > 0.5\nRETURN s.date AS date,\n       round(hz*10)/10.0 AS `HRV z`,\n       round(rz*10)/10.0 AS `RHR z`,\n       round(rrz*10)/10.0 AS `Resp z`,\n       round(s.hrv_mean*10)/10.0 AS `HRV`,\n       round(s.resting_heart_rate) AS `RHR`,\n       round(s.avg_respiratory_rate*10)/10.0 AS `RespRate`\nORDER BY date DESC",
+          "width": 12,
+          "height": 4,
+          "x": 0,
+          "y": 2,
+          "type": "table",
+          "selection": {},
+          "settings": {
+            "compact": true
+          }
+        },
+        {
+          "title": "Pre-illness early warning (resp rate spiking)",
+          "query": "MATCH (s:DailySummary)\nWHERE s.avg_respiratory_rate IS NOT NULL\nWITH s\nMATCH (b:DailySummary)\nWHERE b.date >= s.date - duration({days:30}) AND b.date < s.date\n  AND b.avg_respiratory_rate IS NOT NULL\nWITH s, collect(b.avg_respiratory_rate) AS rrb\nWHERE size(rrb) >= 14\nWITH s, rrb, reduce(t=0.0,x IN rrb|t+x)/size(rrb) AS rrmu\nWITH s, rrb, rrmu, sqrt(reduce(t=0.0,x IN rrb|t+(x-rrmu)*(x-rrmu))/size(rrb)) AS rrsd\nWITH s, CASE WHEN rrsd>0 THEN (s.avg_respiratory_rate-rrmu)/rrsd ELSE 0 END AS rrz\nWHERE rrz > 1.5\nRETURN s.date AS date,\n       round(rrz*10)/10.0 AS `Resp z`,\n       round(s.avg_respiratory_rate*10)/10.0 AS `RespRate`,\n       round(s.hrv_mean*10)/10.0 AS `HRV`,\n       round(s.resting_heart_rate) AS `RHR`\nORDER BY rrz DESC LIMIT 20",
+          "width": 6,
+          "height": 4,
+          "x": 0,
+          "y": 6,
+          "type": "table",
+          "selection": {},
+          "settings": {
+            "compact": true
+          }
+        },
+        {
+          "title": "HRV regression streaks (\u22653 consecutive declining days)",
+          "query": "MATCH (s:DailySummary) WHERE s.hrv_mean IS NOT NULL\nWITH s ORDER BY s.date\nWITH collect(s) AS days\nUNWIND range(0, size(days)-1) AS i\nWITH days, i,\n     [j IN range(0, 6) WHERE i+j < size(days) AND\n       (j=0 OR (duration.inDays(days[i+j-1].date, days[i+j].date).days = 1\n                AND days[i+j].hrv_mean < days[i+j-1].hrv_mean))\n       | days[i+j]] AS run\nWHERE size(run) >= 3\nWITH days, i, run\nWHERE i = 0 OR NOT (duration.inDays(days[i-1].date, run[0].date).days = 1\n                    AND run[0].hrv_mean < days[i-1].hrv_mean)\nRETURN head(run).date AS `Start`,\n       last(run).date AS `End`,\n       round(head(run).hrv_mean*10)/10.0 AS `HRV start`,\n       round(last(run).hrv_mean*10)/10.0 AS `HRV end`,\n       size(run) AS `Days`\nORDER BY `Days` DESC, `Start` DESC LIMIT 15",
+          "width": 6,
+          "height": 4,
+          "x": 6,
+          "y": 6,
+          "type": "table",
+          "selection": {},
+          "settings": {
+            "compact": true
+          }
+        },
+        {
+          "title": "Overtraining flags (load\u2191 AND HRV\u2193 week-over-week)",
+          "query": "MATCH (s:DailySummary)\nWHERE s.hrv_mean IS NOT NULL AND s.workout_minutes IS NOT NULL\nWITH date.truncate('week', s.date) AS week,\n     avg(s.hrv_mean) AS hrv,\n     sum(coalesce(s.workout_minutes, 0)) AS load\nWITH collect({w: week, h: hrv, l: load}) AS weeks ORDER BY weeks[0].w\nUNWIND range(1, size(weeks)-1) AS i\nWITH weeks, i,\n     weeks[i].w AS week,\n     weeks[i].h - weeks[i-1].h AS hrv_delta,\n     weeks[i].l - weeks[i-1].l AS load_delta,\n     round(weeks[i].h * 10)/10.0 AS hrv,\n     weeks[i].l AS load\nWHERE hrv_delta < 0 AND load_delta > 60\nRETURN week AS `Week`,\n       hrv AS `Avg HRV`,\n       round(hrv_delta*10)/10.0 AS `HRV \u0394`,\n       load AS `Workout min`,\n       load_delta AS `Load \u0394`\nORDER BY week DESC LIMIT 20",
+          "width": 6,
+          "height": 4,
+          "x": 0,
+          "y": 10,
+          "type": "table",
+          "selection": {},
+          "settings": {
+            "compact": true
+          }
+        },
+        {
+          "title": "Energy anomalies (>2\u03c3 from 30d baseline)",
+          "query": "MATCH (s:DailySummary) WHERE s.active_energy_kcal IS NOT NULL AND s.active_energy_kcal > 0\nWITH s\nMATCH (b:DailySummary)\nWHERE b.date >= s.date - duration({days:30}) AND b.date < s.date\n  AND b.active_energy_kcal IS NOT NULL\nWITH s, collect(b.active_energy_kcal) AS eb WHERE size(eb)>=14\nWITH s, reduce(t=0.0,x IN eb|t+x)/size(eb) AS mu, eb\nWITH s, mu, sqrt(reduce(t=0.0,x IN eb|t+(x-mu)*(x-mu))/size(eb)) AS sd\nWHERE sd > 0 AND abs((s.active_energy_kcal - mu)/sd) > 2.0\nRETURN s.date AS date,\n       round(s.active_energy_kcal) AS `Active kcal`,\n       round(mu) AS `30d baseline`,\n       round((s.active_energy_kcal-mu)/sd*10)/10.0 AS `Z`,\n       CASE WHEN s.active_energy_kcal > mu THEN 'overexert' ELSE 'underfueled' END AS `Pattern`\nORDER BY date DESC LIMIT 30",
+          "width": 6,
+          "height": 4,
+          "x": 6,
+          "y": 10,
+          "type": "table",
+          "selection": {},
+          "settings": {
+            "compact": true
+          }
+        },
+        {
+          "title": "Best HRV days (and what preceded them)",
+          "query": "MATCH (d:Day)-[:HAS_SUMMARY]->(s:DailySummary)\nWHERE s.hrv_mean IS NOT NULL\nWITH d, s ORDER BY s.hrv_mean DESC LIMIT 10\nOPTIONAL MATCH (yest:Day {date: d.date - duration({days:1})})-[:HAS_SUMMARY]->(ys:DailySummary)\nOPTIONAL MATCH (w:Workout)-[:ON_DAY]->(yest)\nWITH d, s, ys, collect(DISTINCT w.activity_type) AS prev_acts\nRETURN d.date AS `Best day`,\n       round(s.hrv_mean*10)/10.0 AS `HRV`,\n       round(s.resting_heart_rate) AS `RHR`,\n       round(ys.sleep_hours*10)/10.0 AS `Prev sleep`,\n       prev_acts AS `Prev workouts`\nORDER BY s.hrv_mean DESC",
+          "width": 12,
+          "height": 4,
+          "x": 0,
+          "y": 14,
+          "type": "table",
+          "selection": {},
+          "settings": {
+            "compact": true
+          }
+        },
+        {
+          "title": "Personal record streaks",
+          "query": "MATCH (s:DailySummary)\nWHERE s.hrv_mean IS NOT NULL OR s.resting_heart_rate IS NOT NULL\n   OR s.sleep_hours IS NOT NULL OR s.total_steps IS NOT NULL\nWITH s ORDER BY s.date\nWITH collect(s) AS days\nUNWIND ['HRV>median', 'RHR<60', 'Sleep>=7.5h', 'Steps>=10k'] AS metric\nWITH days, metric,\n     [d IN days WHERE\n        (metric='HRV>median' AND d.hrv_mean IS NOT NULL AND d.hrv_mean >= 38) OR\n        (metric='RHR<60' AND d.resting_heart_rate IS NOT NULL AND d.resting_heart_rate < 60) OR\n        (metric='Sleep>=7.5h' AND d.sleep_hours IS NOT NULL AND d.sleep_hours >= 7.5) OR\n        (metric='Steps>=10k' AND d.total_steps IS NOT NULL AND d.total_steps >= 10000)\n      | d.date] AS hits\nUNWIND range(0, size(hits)-1) AS i\nWITH metric, hits, i,\n     reduce(s=0, j IN range(0,i) |\n       CASE WHEN j=0 OR duration.inDays(hits[j-1], hits[j]).days > 1\n            THEN s+1 ELSE s END) AS group_id\nWITH metric, group_id, collect(hits[i]) AS run\nRETURN metric AS `Metric`,\n       head(run) AS `Start`, last(run) AS `End`,\n       size(run) AS `Days`\nORDER BY size(run) DESC LIMIT 12",
+          "width": 6,
+          "height": 3,
+          "x": 0,
+          "y": 18,
+          "type": "table",
+          "selection": {},
+          "settings": {
+            "compact": true
+          }
+        },
+        {
+          "title": "Activity diversity entropy (last 180 days)",
+          "query": "MATCH (m:DailySummary) WITH max(m.date) AS anchor\nMATCH (w:Workout)-[:ON_DAY]->(d:Day)\nWHERE d.date >= anchor - duration({days:180})\nWITH date.truncate('week', d.date) AS week, w.activity_type AS act, count(*) AS n\nWITH week, collect({act: act, n: n}) AS counts, sum(n) AS total\nWITH week, total, counts,\n     reduce(e=0.0, c IN counts |\n       e - ((c.n*1.0/total) * log(c.n*1.0/total))\n     ) AS entropy\nRETURN week AS date,\n       round(entropy*100)/100.0 AS `Diversity entropy`,\n       total AS `Workouts`\nORDER BY date",
+          "width": 6,
+          "height": 3,
+          "x": 6,
+          "y": 18,
+          "type": "line",
+          "selection": {
+            "x": "date",
+            "value": [
+              "Diversity entropy"
+            ]
+          },
+          "settings": {
+            "colors": [
+              "#06b6d4"
+            ],
+            "legend": true,
+            "showGrid": true
+          }
+        }
+      ]
+    }
+  ]
+}

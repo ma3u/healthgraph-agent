@@ -1,0 +1,56 @@
+name: Daily Recovery snapshot
+
+# Runs once a day. Auto-resumes the paused Aura instance, queries it,
+# regenerates docs/snapshot/index.html, commits if changed.
+# The committed HTML contains only Recovery % + zone + date + streak counts.
+# Raw biometric values never leave the runner.
+
+on:
+  schedule:
+    # 06:30 UTC = 08:30 CEST in summer / 07:30 CET in winter
+    # After the laptop auto-resume cron (08:00 local) in case that ran first,
+    # and well before the local pause cron (23:00 local) fires.
+    - cron: "30 6 * * *"
+  workflow_dispatch: {}  # allow manual runs from the Actions tab
+
+permissions:
+  contents: write   # commit the snapshot back
+
+concurrency:
+  group: snapshot
+  cancel-in-progress: false
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Neo4j driver
+        run: pip install --quiet "neo4j>=5"
+
+      - name: Render snapshot
+        env:
+          NEO4J_URI: ${{ secrets.NEO4J_URI }}
+          NEO4J_USER: ${{ secrets.NEO4J_USER }}
+          NEO4J_PASSWORD: ${{ secrets.NEO4J_PASSWORD }}
+          AURA_INSTANCEID: ${{ secrets.AURA_INSTANCEID }}
+          AURA_CLIENT_ID: ${{ secrets.AURA_CLIENT_ID }}
+          AURA_CLIENT_SECRET: ${{ secrets.AURA_CLIENT_SECRET }}
+        run: python scripts/render_snapshot.py
+
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet docs/snapshot/index.html; then
+            echo "No change in snapshot."
+          else
+            git add docs/snapshot/index.html
+            git commit -m "snapshot: $(date -u +%Y-%m-%d)"
+            git push
+          fi
