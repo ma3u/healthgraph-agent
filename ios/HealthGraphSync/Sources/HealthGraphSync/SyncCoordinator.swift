@@ -158,9 +158,15 @@ final class SyncCoordinator: ObservableObject {
 }
 
 extension ISO8601DateFormatter {
+    /// "YYYY-MM-DD" — formatted in the user's local timezone so a date string
+    /// parsed from Aura matches the day the user thinks of locally. Without
+    /// this, `dateOnly.date(from: "2026-04-15")` returns midnight UTC, and
+    /// Calendar.current.startOfDay shifts it back to the previous local day
+    /// in any TZ east of UTC.
     nonisolated(unsafe) static let dateOnly: ISO8601DateFormatter = {
         let f = ISO8601DateFormatter()
         f.formatOptions = [.withFullDate, .withDashSeparatorInDate]
+        f.timeZone = .current
         return f
     }()
 }

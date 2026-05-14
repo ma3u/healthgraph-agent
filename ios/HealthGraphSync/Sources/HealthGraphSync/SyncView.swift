@@ -26,66 +26,52 @@ struct SyncView: View {
                 }
 
                 if let delta = sync.delta {
-                    Section("Missing from Aura (will upload)") {
-                        LabeledContent("From",
-                                       value: ISO8601DateFormatter.dateOnly.string(from: delta.since))
-                        LabeledContent("To",
-                                       value: ISO8601DateFormatter.dateOnly.string(from: delta.until))
+                    Section {
+                        LabeledContent("Date range",
+                            value: "\(ISO8601DateFormatter.dateOnly.string(from: delta.since)) → \(ISO8601DateFormatter.dateOnly.string(from: delta.until))")
                         LabeledContent("Days", value: "\(delta.daysCovered)")
-                        LabeledContent("Samples", value: "\(delta.totalSamples)")
+                        LabeledContent("Total samples", value: "\(delta.totalSamples)")
                         LabeledContent("Workouts", value: "\(delta.workoutCount)")
+                    } header: {
+                        Text("Will upload to Aura")
+                    } footer: {
+                        Text("Counts are totals across the full date range above, not per-day.")
+                            .foregroundStyle(.secondary)
                     }
 
                     if delta.hasZeroSamples {
                         Section {
-                            Text("These types returned **0 samples**. Either there's no data, " +
-                                 "or HealthKit didn't grant read access (Apple hides which, for privacy). " +
-                                 "Permissions live in the Health app — Sharing tab → Apps & Services → HealthGraph Sync.")
+                            Text("If a type below shows 0, either it has no data in this date range, " +
+                                 "or HealthKit didn't grant access (Apple hides this for privacy).")
                                 .font(.footnote)
                                 .foregroundStyle(.orange)
-
-                            Button {
-                                if let url = URL(string: "x-apple-health://") {
-                                    UIApplication.shared.open(url)
-                                }
-                            } label: {
-                                Label("Open the Health app", systemImage: "heart.text.square")
-                            }
-
-                            Button {
-                                if let url = URL(string: UIApplication.openSettingsURLString) {
-                                    UIApplication.shared.open(url)
-                                }
-                            } label: {
-                                Label("Or open iOS Settings", systemImage: "gear")
-                            }
-                            .font(.footnote)
-
-                            ForEach(delta.zeroSampleTypes, id: \.self) { name in
-                                Label(name, systemImage: "questionmark.circle")
-                                    .foregroundStyle(.secondary)
-                            }
-                            if delta.workoutCount == 0 {
-                                Label("Workouts", systemImage: "questionmark.circle")
-                                    .foregroundStyle(.secondary)
-                            }
+                            Text("To toggle permissions:\n" +
+                                 "**Health app → Sharing tab (bottom) → tap *Apps & Services* under Sources → HealthGraph Sync**")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
                         } header: {
-                            Text("0 samples — check permissions")
+                            Text("Some types are empty")
                         }
                     }
 
                     if !delta.quantityCounts.isEmpty {
-                        Section("Quantity samples") {
+                        Section {
                             ForEach(delta.quantityCounts) { tc in
                                 LabeledContent(tc.type, value: "\(tc.count)")
+                                    .foregroundStyle(tc.count == 0 ? .secondary : .primary)
                             }
+                        } header: {
+                            Text("Samples by type — total across \(delta.daysCovered) days")
                         }
                     }
                     if !delta.categoryCounts.isEmpty {
-                        Section("Category samples") {
+                        Section {
                             ForEach(delta.categoryCounts) { tc in
                                 LabeledContent(tc.type, value: "\(tc.count)")
+                                    .foregroundStyle(tc.count == 0 ? .secondary : .primary)
                             }
+                        } header: {
+                            Text("Category samples — total across \(delta.daysCovered) days")
                         }
                     }
 
