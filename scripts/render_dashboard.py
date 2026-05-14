@@ -386,26 +386,35 @@ def main() -> int:
         recovery = recovery_score(anchor, baseline)
     print(f"  latest={latest['date']}, recovery_anchor={anchor['date']}, recovery={recovery}")
 
-    # Last 7 days averages
-    seven = [r for r in rows[:7] if r["date"]]
-    def avg(field: str) -> float | None:
-        vs = [r[field] for r in seven if r.get(field) is not None]
+    # Last 7 days averages — but per-metric smart anchor: find the most
+    # recent 7 rows that HAVE a value for each metric. This avoids the
+    # "all dashes" problem when recent days are partial iOS syncs.
+    def avg_recent(field: str, n: int = 7) -> float | None:
+        vs = [r[field] for r in rows if r.get(field) is not None][:n]
         return statistics.fmean(vs) if vs else None
 
     seven_day = {
-        "avg_rhr": avg("restingHeartRate"),
-        "avg_hrv": avg("hrvMean"),
-        "avg_sleep": avg("sleepHours"),
-        "avg_steps": avg("totalSteps"),
+        "avg_rhr": avg_recent("restingHeartRate"),
+        "avg_hrv": avg_recent("hrvMean"),
+        "avg_sleep": avg_recent("sleepHours"),
+        "avg_steps": avg_recent("totalSteps"),
     }
 
-    # Workouts this week (last 7 days)
+    # Workouts in the most recent week that has any. With partial recent
+    # iOS syncs we may have zero workouts since 2026-04-16; fall back to the
+    # week ending at the most recent workout we DO have.
     print("[gql] fetching recent workouts…")
     workouts = gql(RECENT_WORKOUTS_QUERY)["workouts"]
-    week_cutoff = dt.date.fromisoformat(latest["date"]) - dt.timedelta(days=7)
+    if workouts:
+        try:
+            most_recent_workout_date = dt.date.fromisoformat(workouts[0]["startDate"][:10])
+        except (TypeError, ValueError):
+            most_recent_workout_date = dt.date.fromisoformat(latest["date"])
+    else:
+        most_recent_workout_date = dt.date.fromisoformat(latest["date"])
+    week_cutoff = most_recent_workout_date - dt.timedelta(days=7)
     weekly = []
     for w in workouts:
-        # startDate comes back as DateTime ISO string; date-only prefix
         try:
             wdate = dt.date.fromisoformat(w["startDate"][:10])
         except (TypeError, ValueError):
