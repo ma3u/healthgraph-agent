@@ -17,6 +17,17 @@ struct DashboardView: View {
                 }
             }
             .navigationTitle("Dashboard")
+            .toolbar {
+                if let auraURL = AppConfig.auraDashboardURL {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button {
+                            UIApplication.shared.open(auraURL)
+                        } label: {
+                            Label("Open Whoop dashboard in Safari", systemImage: "safari")
+                        }
+                    }
+                }
+            }
         }
     }
 }

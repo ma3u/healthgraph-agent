@@ -48,4 +48,15 @@ enum AppConfig {
         else { return nil }
         return URL(string: raw)
     }
+
+    /// The full Aura Console dashboard URL — opens in Safari (not WebView)
+    /// so passkey 2FA flows work. GitHub's passkey login needs full WebAuthn
+    /// which WKWebView only partially supports.
+    static var auraDashboardURL: URL? {
+        guard
+            let raw = Bundle.main.object(forInfoDictionaryKey: "AURA_DASHBOARD_URL") as? String,
+            !raw.isEmpty
+        else { return nil }
+        return URL(string: raw)
+    }
 }

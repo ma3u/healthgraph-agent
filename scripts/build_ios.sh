@@ -50,6 +50,10 @@ if [ -n "${NEODASH_URL:-}" ]; then
     /usr/libexec/PlistBuddy -c "Set :NEODASH_URL $NEODASH_URL" "$INFO_PLIST"
     echo "  patched NEODASH_URL → $NEODASH_URL"
 fi
+if [ -n "${AURA_DASHBOARD_URL:-}" ]; then
+    /usr/libexec/PlistBuddy -c "Set :AURA_DASHBOARD_URL $AURA_DASHBOARD_URL" "$INFO_PLIST"
+    echo "  patched AURA_DASHBOARD_URL → $AURA_DASHBOARD_URL"
+fi
 # Auth0 production path — if AUTH0_DOMAIN is set in .env, switch from dev-mode
 # to real Auth0 sign-in. Clears DEV_AURA_* so AppConfig.isDevMode returns false.
 if [ -n "${AUTH0_DOMAIN:-}" ] && [ -n "${AUTH0_CLIENT_ID:-}" ]; then
