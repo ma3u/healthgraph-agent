@@ -3,13 +3,23 @@
 This doc tracks what's built, what's next, and what we explicitly chose to
 skip. The companion architectural overview is in `docs/IOS_APP.md`.
 
-**Status as of 2026-05-14:** scaffold complete, backend HTTP-tested end-to-end
-against real Aura (write + cleanup), iOS project builds against the iOS 26.5
-SDK / Swift 6, app launches in the iPhone 17 Pro simulator and renders the
-login screen with `API_BASE_URL` correctly read from Info.plist. Aura schema
-audit confirms 3,087 days of historical data already loaded (2017-10-29 →
-2026-04-15) — see [`AURA_VERIFICATION.md`](AURA_VERIFICATION.md). Not yet run
-on a real iPhone.
+**Status as of 2026-05-14 (post-pivot):**
+
+- Architecture pivoted from FastAPI-in-the-middle to **direct iOS ↔ Aura
+  GraphQL Data API with Auth0 sign-in**. See
+  [`AUTH_RESEARCH.md`](AUTH_RESEARCH.md) for why. The FastAPI backend lives
+  on as `archive/backend-legacy/` for reference.
+- iOS project builds (Swift 6, iOS 26.5 SDK). Sources rewritten for the new
+  flow: `Auth0Client`, `AuraConnection`, `ConnectView`, `GraphQLClient`,
+  `AuraIngest`, mutation-based `SyncCoordinator`.
+- App icon designed and bundled.
+- GraphQL SDL with `@cypher` mutations (`ingestDay` / `ingestWorkout` /
+  `ingestSleep`) committed in `cypher/graphql_schema.graphql`.
+- **Mutations smoke-tested against real Aura via `scripts/test_aura_mutations.py`:
+  all three pass, idempotency verified, cleanup green.** This is the Phase 1
+  local-test win.
+- Historical data: 3,087 days from 2017-10-29 → 2026-04-15 already in Aura
+  via offline `etl/`. The iOS app picks up from 2026-04-16 forward.
 
 ---
 
@@ -39,52 +49,117 @@ on a real iPhone.
 
 ---
 
-## Phase 1 — first real run (NEXT)
+## Phase 1 — first real run (in progress)
 
-Goal: log in, sync one day of real HealthKit data into a sandbox Aura DB,
-view the result in NeoDash from inside the app.
+Goal: prove every layer of the new stack works against the **real** Aura
+instance, ending with the user signing in on a real iPhone and syncing a
+delta day end-to-end.
 
-1. **Switch the active developer dir** so terminal Xcode tooling works:
-   ```
-   sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
-   ```
-   (You'll be prompted for the sudo password.)
+### 1.1 Local mutation smoke test ✅ DONE
 
-2. **Wait for the iOS 26.5 Simulator runtime** to finish downloading in the
-   Xcode app. Until then, the project compiles but you can't boot a simulator.
+Validate the `@cypher` mutations from the SDL run cleanly against your live
+Aura, *before* spending time on Auth0 setup. Uses `.env` credentials and a
+test date (`2099-01-01`) cleaned up at the end.
 
-3. **Pick a deployment target for the backend.** Easiest options:
-   - Local + Tailscale Funnel (no DNS, free): expose `:8000` to your phone
-   - Render / Fly.io / Railway free tier
-   - Run on a Mac that's always on; expose via Tailscale alone (no Funnel)
-     since your phone is on the same tailnet.
+```sh
+archive/backend-legacy/.venv/bin/python scripts/test_aura_mutations.py
+```
 
-4. **Provision a sandbox Aura DB** (separate from your prod data). Set its
-   credentials in `.env` so accidents stay isolated.
+Expected (and what we observed on 2026-05-14):
 
-5. **Set the real config** in `ios/project.yml`:
-   - `API_BASE_URL` → the URL from step 3
-   - `NEODASH_URL` → your NeoDash dashboard URL
-   - `DEVELOPMENT_TEAM` → your Apple developer team ID (from Xcode → Settings → Accounts)
+```
+✅ All three @cypher mutations succeeded against real Aura.
+✅ Idempotency (re-run with new values) verified.
+✅ Cleanup left baseline counts unchanged.
+```
 
-6. **Regenerate the project** and open it:
-   ```
-   cd ios && xcodegen generate && open HealthGraphSync.xcodeproj
-   ```
+### 1.2 Aura GraphQL Data API up (USER ACTION)
 
-7. **Run on a real iPhone.** Simulators don't have HealthKit data by default,
-   so first-run testing should be a tethered device. Trust the dev cert in
-   Settings → General → VPN & Device Management.
+In the Aura Console → **GraphQL Data APIs** tab (the page in the screenshot
+that started this thread):
 
-8. **Verify the loop**: Login → Sync tab → **Incremental sync** (the
-   historical data is already in Aura through 2026-04-15 — see
-   `AURA_VERIFICATION.md` — so the right first run picks up 2026-04-16
-   onwards) → grant HealthKit permissions → check Aura for new `Day` nodes
-   beyond 2026-04-15.
+1. Click **Create** → **Define my own** → paste the contents of
+   `cypher/graphql_schema.graphql`.
+2. Name the API something like *HealthGraph*.
+3. After it's created, copy the **endpoint URL** (looks like
+   `https://<api-id>.<region>.data.neo4j.io/graphql`) — you'll need it for
+   the iOS app's Connect screen.
+4. Add a **JWKS auth provider** pointing at your Auth0 tenant. See §1.3.
 
-**Done when:** the sync log on the phone matches Aura's node counts within a
-few %, and the embedded NeoDash dashboard renders at least one chart with
-your data.
+### 1.3 Auth0 tenant (USER ACTION)
+
+Walk through **`docs/AUTH_SETUP.md`** — roughly 15 minutes:
+
+- Create Auth0 tenant
+- Native iOS application with callback `io.healthgraph.sync://callback`
+- Enable Apple + Google + GitHub + Microsoft social connections
+- Create an API audience (any URL string)
+- `aura-cli data-api graphql auth-provider create … --type jwks --url
+  https://YOUR_TENANT.us.auth0.com/.well-known/jwks.json`
+
+### 1.4 iOS project config (USER ACTION + REGEN)
+
+Edit `ios/project.yml`:
+
+```yaml
+info:
+  properties:
+    AUTH0_DOMAIN: YOUR_TENANT.us.auth0.com
+    AUTH0_CLIENT_ID: ...
+    AUTH0_AUDIENCE: https://healthgraph.io/aura
+settings:
+  base:
+    DEVELOPMENT_TEAM: YOUR_TEAM_ID    # from Xcode → Settings → Accounts
+```
+
+Then:
+
+```sh
+cd ios && xcodegen generate
+```
+
+### 1.5 Manual curl test (verify the wires)
+
+Per `docs/AUTH_SETUP.md` §7: grab a JWT from the Auth0 dashboard, then:
+
+```sh
+curl -X POST "$AURA_GRAPHQL_ENDPOINT" \
+  -H "Authorization: Bearer $JWT" \
+  -H "Content-Type: application/json" \
+  -d '{"query":"{ days(options:{sort:[{date: DESC}], limit: 1}) { date } }"}'
+```
+
+Expect a JSON response with `data.days[0].date == "2026-04-15"`.
+
+### 1.6 Device install ✅ docs ready
+
+Follow `docs/IOS_DEVICE_INSTALL.md`:
+
+- Xcode → Settings → Accounts → Apple ID → 2FA
+- "+" → Apple Development (puts cert + private key in Keychain)
+- `xcodebuild … -allowProvisioningUpdates build` and
+  `xcrun devicectl device install app …`
+- On the iPhone: Settings → General → VPN & Device Management → Trust
+
+### 1.7 End-to-end on device
+
+In order on the iPhone:
+
+1. **HealthGraphSync icon → Continue** → Auth0 sheet → pick a social
+   provider → land back in the app.
+2. **Connect screen** → paste the Aura GraphQL endpoint URL → app does a
+   `{ __typename }` probe → green.
+3. **Sync tab → "Check what's missing"** — calls Aura for `max(Day.date)`
+   (2026-04-15), scans HealthKit since then, shows per-type counts.
+4. **Confirm & Upload** — three mutations per day (`ingestDay`,
+   `ingestWorkout`, `ingestSleep`).
+5. On success, the app auto-switches to **Dashboard** (NeoDash WebView).
+
+### Done when
+
+- `MATCH (d:Day) RETURN max(d.date)` in Aura returns a date ≥ today.
+- The Dashboard tab renders at least one chart with data through today.
+- A second sync run an hour later reports "0 days to upload" (idempotency).
 
 ---
 
