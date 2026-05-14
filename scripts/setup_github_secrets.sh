@@ -30,7 +30,7 @@ for var in "${required[@]}"; do
         echo "  ✗ $var is empty in .env — skipping" >&2
         continue
     fi
-    printf '%s' "${!var}" | gh secret set "$var" --repo "$repo" --body -
+    gh secret set "$var" --repo "$repo" --body "${!var}"
     echo "  ✓ $var"
 done
 
@@ -41,7 +41,7 @@ for var in "${optional[@]}"; do
         echo "  - $var not set in .env — skipping (optional)"
         continue
     fi
-    printf '%s' "${!var}" | gh secret set "$var" --repo "$repo" --body -
+    gh secret set "$var" --repo "$repo" --body "${!var}"
     echo "  ✓ $var"
 done
 
