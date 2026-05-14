@@ -4,8 +4,12 @@ This doc tracks what's built, what's next, and what we explicitly chose to
 skip. The companion architectural overview is in `docs/IOS_APP.md`.
 
 **Status as of 2026-05-14:** scaffold complete, backend HTTP-tested end-to-end
-in dry-run mode, iOS project builds against the iOS 26.5 SDK / Swift 6 for the
-simulator. Not yet run on a real iPhone.
+against real Aura (write + cleanup), iOS project builds against the iOS 26.5
+SDK / Swift 6, app launches in the iPhone 17 Pro simulator and renders the
+login screen with `API_BASE_URL` correctly read from Info.plist. Aura schema
+audit confirms 3,087 days of historical data already loaded (2017-10-29 →
+2026-04-15) — see [`AURA_VERIFICATION.md`](AURA_VERIFICATION.md). Not yet run
+on a real iPhone.
 
 ---
 
@@ -72,9 +76,11 @@ view the result in NeoDash from inside the app.
    so first-run testing should be a tethered device. Trust the dev cert in
    Settings → General → VPN & Device Management.
 
-8. **Verify the loop**: Login → Sync tab → Initial sync → grant HealthKit
-   permissions → wait for progress to reach 100% → check the sandbox Aura
-   browser for `Day` / `Workout` / `DailySummary` nodes.
+8. **Verify the loop**: Login → Sync tab → **Incremental sync** (the
+   historical data is already in Aura through 2026-04-15 — see
+   `AURA_VERIFICATION.md` — so the right first run picks up 2026-04-16
+   onwards) → grant HealthKit permissions → check Aura for new `Day` nodes
+   beyond 2026-04-15.
 
 **Done when:** the sync log on the phone matches Aura's node counts within a
 few %, and the embedded NeoDash dashboard renders at least one chart with

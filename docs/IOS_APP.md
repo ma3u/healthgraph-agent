@@ -122,6 +122,13 @@ BACKEND_DRY_RUN=0
 | `NSHealthShareUsageDescription`| String | (already populated)                      |
 | `NSHealthUpdateUsageDescription`| String| (already populated)                      |
 
+## Verifying the Aura side
+
+For a step-by-step check that Aura is reachable and the schema is installed,
+see [`AURA_VERIFICATION.md`](AURA_VERIFICATION.md). It includes copy-paste
+probe scripts and a safe end-to-end ingest test (test date `2099-01-01`,
+cleaned up after).
+
 ## Running end-to-end
 
 1. **Backend**: see `backend/README.md`. For local testing, run with `BACKEND_DRY_RUN=1`.

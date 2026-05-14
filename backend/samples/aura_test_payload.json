@@ -1,0 +1,27 @@
+{
+  "person": { "biological_sex": "Male" },
+  "quantity_samples": [
+    {
+      "type": "HeartRate",
+      "raw_type": "HKQuantityTypeIdentifierHeartRate",
+      "value": 99,
+      "unit": "count/min",
+      "start_date": "2099-01-01T12:00:00+00:00",
+      "end_date": "2099-01-01T12:00:00+00:00",
+      "source_name": "HealthGraphSync-Test",
+      "device": "HealthGraphSync-Test-Device"
+    },
+    {
+      "type": "StepCount",
+      "value": 12345,
+      "unit": "count",
+      "start_date": "2099-01-01T00:00:00+00:00",
+      "end_date": "2099-01-01T23:59:59+00:00",
+      "source_name": "HealthGraphSync-Test"
+    }
+  ],
+  "category_samples": [],
+  "workouts": [],
+  "date_range_start": "2099-01-01T00:00:00+00:00",
+  "date_range_end": "2099-01-01T23:59:59+00:00"
+}
