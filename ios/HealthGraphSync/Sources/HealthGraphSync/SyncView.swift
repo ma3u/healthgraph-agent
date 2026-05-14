@@ -35,6 +35,22 @@ struct SyncView: View {
                         LabeledContent("Workouts", value: "\(delta.workoutCount)")
                     }
 
+                    if !delta.deniedTypes.isEmpty || delta.workoutAuthStatus == .sharingDenied {
+                        Section {
+                            Text("HealthKit denied permission for some types. Open **Settings → Privacy & Security → Health → HealthGraphSync** to grant them, then come back here and re-scan.")
+                                .font(.footnote)
+                                .foregroundStyle(.orange)
+                            ForEach(delta.deniedTypes, id: \.self) { name in
+                                Label(name, systemImage: "lock.fill").foregroundStyle(.secondary)
+                            }
+                            if delta.workoutAuthStatus == .sharingDenied {
+                                Label("Workouts", systemImage: "lock.fill").foregroundStyle(.secondary)
+                            }
+                        } header: {
+                            Text("Permission needed")
+                        }
+                    }
+
                     if !delta.quantityCounts.isEmpty {
                         Section("Quantity samples") {
                             ForEach(delta.quantityCounts) { tc in

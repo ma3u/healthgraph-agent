@@ -79,17 +79,26 @@ final class HealthKitService: ObservableObject {
             let id = UUID()
             let type: String
             let count: Int
+            /// nil = type isn't expected to surface auth status (e.g. workout total);
+            /// .sharingDenied / .notDetermined / .sharingAuthorized for real HK types.
+            let authStatus: HKAuthorizationStatus?
         }
         var since: Date
         var until: Date
         var quantityCounts: [TypeCount]
         var categoryCounts: [TypeCount]
         var workoutCount: Int
+        var workoutAuthStatus: HKAuthorizationStatus
         var daysCovered: Int
 
         var totalSamples: Int {
             quantityCounts.reduce(0) { $0 + $1.count } +
             categoryCounts.reduce(0) { $0 + $1.count }
+        }
+        var deniedTypes: [String] {
+            (quantityCounts + categoryCounts)
+                .filter { $0.authStatus == .sharingDenied }
+                .map { $0.type }
         }
     }
 
@@ -100,24 +109,28 @@ final class HealthKitService: ObservableObject {
         var qCounts: [DeltaScan.TypeCount] = []
         for q in HealthKitTypes.quantities {
             guard let type = HKQuantityType.quantityType(forIdentifier: q.id) else { continue }
-            let samples = try await fetchSamples(type: type, start: since, end: until)
-            if !samples.isEmpty {
-                qCounts.append(.init(type: q.display, count: samples.count))
+            let auth = store.authorizationStatus(for: type)
+            let samples = auth == .sharingDenied ? [] : try await fetchSamples(type: type, start: since, end: until)
+            // Include the type if it has samples OR is explicitly denied (so the
+            // user can see which types iOS is refusing to share).
+            if !samples.isEmpty || auth == .sharingDenied {
+                qCounts.append(.init(type: q.display, count: samples.count, authStatus: auth))
             }
         }
         var cCounts: [DeltaScan.TypeCount] = []
         for c in HealthKitTypes.categories {
             guard let type = HKCategoryType.categoryType(forIdentifier: c.id) else { continue }
-            let samples = try await fetchSamples(type: type, start: since, end: until)
-            if !samples.isEmpty {
-                cCounts.append(.init(type: c.display, count: samples.count))
+            let auth = store.authorizationStatus(for: type)
+            let samples = auth == .sharingDenied ? [] : try await fetchSamples(type: type, start: since, end: until)
+            if !samples.isEmpty || auth == .sharingDenied {
+                cCounts.append(.init(type: c.display, count: samples.count, authStatus: auth))
             }
         }
-        let workouts = try await fetchSamples(type: HKObjectType.workoutType(), start: since, end: until)
-
-        let allDates = Set(
-            (qCounts + cCounts).flatMap { _ in [] as [String] }
+        let workoutAuth = store.authorizationStatus(for: HKObjectType.workoutType())
+        let workouts = workoutAuth == .sharingDenied ? [] : try await fetchSamples(
+            type: HKObjectType.workoutType(), start: since, end: until
         )
+
         let cal = Calendar.current
         let days = max(1, cal.dateComponents([.day], from: since, to: until).day ?? 1)
 
@@ -127,7 +140,8 @@ final class HealthKitService: ObservableObject {
             quantityCounts: qCounts.sorted { $0.count > $1.count },
             categoryCounts: cCounts.sorted { $0.count > $1.count },
             workoutCount: workouts.count,
-            daysCovered: max(days, allDates.count)
+            workoutAuthStatus: workoutAuth,
+            daysCovered: days
         )
     }
 
