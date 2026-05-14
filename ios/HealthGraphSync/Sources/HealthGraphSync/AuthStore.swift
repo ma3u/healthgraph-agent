@@ -15,6 +15,15 @@ final class AuthStore: ObservableObject {
     private let expiryAccount = "auth.token_expiry"
 
     init() {
+        // Dev mode: synthesise a fake session from Info.plist DEV_AURA_* keys
+        // so we can run the sync flow without an Auth0 tenant.
+        if AppConfig.isDevMode, let url = AppConfig.devAuraGraphQLURL,
+           let key = AppConfig.devAuraAPIKey {
+            self.idToken = "dev:" + key  // sentinel prefix so GraphQLClient knows to send x-api-key
+            self.idTokenExpiresAt = .distantFuture
+            self.connection = AuraConnection(graphqlURL: url)
+            return
+        }
         self.idToken = Keychain.get(tokenAccount)
         if let raw = Keychain.get(expiryAccount), let secs = TimeInterval(raw) {
             self.idTokenExpiresAt = Date(timeIntervalSince1970: secs)

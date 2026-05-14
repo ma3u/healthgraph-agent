@@ -19,9 +19,7 @@ targets:
     platform: iOS
     sources:
       - path: HealthGraphSync/Sources/HealthGraphSync
-    resources:
-      - path: HealthGraphSync/Resources
-        optional: true
+      - path: HealthGraphSync/Resources/Assets.xcassets
     info:
       path: HealthGraphSync/Resources/Info.plist
       properties:
@@ -34,11 +32,14 @@ targets:
         # HealthKit usage strings — required by Apple, displayed in the permission prompt.
         NSHealthShareUsageDescription: "HealthGraph Sync reads your HealthKit data so it can upload it to your private Aura graph for personal analysis."
         NSHealthUpdateUsageDescription: "HealthGraph Sync does not write data back to HealthKit, but iOS requires this string."
-        # Custom config the app reads via AppConfig.swift.
-        # Fill these in after running through docs/AUTH_SETUP.md.
+        # Production path — fill these in after running through docs/AUTH_SETUP.md.
         AUTH0_DOMAIN: ""              # e.g. "healthgraph.us.auth0.com"
         AUTH0_CLIENT_ID: ""           # from Auth0 Application → Settings
         AUTH0_AUDIENCE: ""            # e.g. "https://healthgraph.io/aura"
+        # Dev-mode path — patched in by scripts/build_ios.sh from .env.
+        # Leave empty in version control; scripts injects real values.
+        DEV_AURA_GRAPHQL_URL: ""
+        DEV_AURA_API_KEY: ""
         NEODASH_URL: ""
         # URL scheme so Auth0 can redirect back to the app after sign-in.
         CFBundleURLTypes:

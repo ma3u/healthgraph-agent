@@ -36,7 +36,16 @@ final class GraphQLClient: @unchecked Sendable {
         var req = URLRequest(url: endpoint)
         req.httpMethod = "POST"
         req.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        // Dev-mode tokens are prefixed "dev:" — send as x-api-key instead of
+        // Bearer JWT. The Aura Data API accepts either depending on the
+        // configured auth providers (we have both api-key and, eventually,
+        // JWKS via Auth0).
+        if let apiKey = token.split(separator: ":", maxSplits: 1).dropFirst().first,
+           token.hasPrefix("dev:") {
+            req.setValue(String(apiKey), forHTTPHeaderField: "x-api-key")
+        } else {
+            req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
 
         let payload = GraphQLRequest(query: query, variables: variables)
         req.httpBody = try encoder.encode(payload)
