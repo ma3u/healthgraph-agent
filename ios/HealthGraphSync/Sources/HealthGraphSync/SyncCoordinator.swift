@@ -27,10 +27,10 @@ final class SyncCoordinator: ObservableObject {
             struct LatestDayResult: Decodable {
                 let max: String?
             }
-            // GraphQL query: a single aggregation that returns max(date) from Day nodes
+            // Aura GraphQL Library v6+ syntax: sort and limit are top-level args
             let query = """
             query LatestDay {
-              days(options: { sort: [{ date: DESC }], limit: 1 }) {
+              days(sort: [{ date: DESC }], limit: 1) {
                 date
               }
             }
