@@ -50,7 +50,19 @@ if [ -n "${NEODASH_URL:-}" ]; then
     /usr/libexec/PlistBuddy -c "Set :NEODASH_URL $NEODASH_URL" "$INFO_PLIST"
     echo "  patched NEODASH_URL → $NEODASH_URL"
 fi
-echo "  patched DEV_AURA_GRAPHQL_URL + DEV_AURA_API_KEY into $INFO_PLIST"
+# Auth0 production path — if AUTH0_DOMAIN is set in .env, switch from dev-mode
+# to real Auth0 sign-in. Clears DEV_AURA_* so AppConfig.isDevMode returns false.
+if [ -n "${AUTH0_DOMAIN:-}" ] && [ -n "${AUTH0_CLIENT_ID:-}" ]; then
+    /usr/libexec/PlistBuddy -c "Set :AUTH0_DOMAIN $AUTH0_DOMAIN" "$INFO_PLIST"
+    /usr/libexec/PlistBuddy -c "Set :AUTH0_CLIENT_ID $AUTH0_CLIENT_ID" "$INFO_PLIST"
+    /usr/libexec/PlistBuddy -c "Set :AUTH0_AUDIENCE ${AUTH0_AUDIENCE:-https://healthgraph.io/aura}" "$INFO_PLIST"
+    /usr/libexec/PlistBuddy -c "Set :DEV_AURA_GRAPHQL_URL " "$INFO_PLIST"
+    /usr/libexec/PlistBuddy -c "Set :DEV_AURA_API_KEY " "$INFO_PLIST"
+    echo "  patched AUTH0_DOMAIN/_CLIENT_ID/_AUDIENCE (Auth0 production path)"
+    echo "  cleared DEV_AURA_* (dev-mode disabled)"
+else
+    echo "  patched DEV_AURA_GRAPHQL_URL + DEV_AURA_API_KEY (dev-mode path)"
+fi
 
 # 3. Build
 echo "Building for $DEVICE_ID..."
