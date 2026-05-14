@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct SyncView: View {
     @EnvironmentObject private var auth: AuthStore
@@ -35,19 +36,36 @@ struct SyncView: View {
                         LabeledContent("Workouts", value: "\(delta.workoutCount)")
                     }
 
-                    if !delta.deniedTypes.isEmpty || delta.workoutAuthStatus == .sharingDenied {
+                    if delta.hasZeroSamples {
                         Section {
-                            Text("HealthKit denied permission for some types. Open **Settings → Privacy & Security → Health → HealthGraphSync** to grant them, then come back here and re-scan.")
+                            Text("These types returned **0 samples** in the date range. " +
+                                 "Either there's genuinely no data, or HealthKit didn't grant " +
+                                 "read access (Apple deliberately hides which, for privacy).")
                                 .font(.footnote)
                                 .foregroundStyle(.orange)
-                            ForEach(delta.deniedTypes, id: \.self) { name in
-                                Label(name, systemImage: "lock.fill").foregroundStyle(.secondary)
+
+                            Button {
+                                if let url = URL(string: UIApplication.openSettingsURLString) {
+                                    UIApplication.shared.open(url)
+                                }
+                            } label: {
+                                Label("Open HealthGraphSync settings", systemImage: "gear")
                             }
-                            if delta.workoutAuthStatus == .sharingDenied {
-                                Label("Workouts", systemImage: "lock.fill").foregroundStyle(.secondary)
+
+                            Text("In Settings, tap **Health → Data Access & Devices** to toggle on the types below.")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+
+                            ForEach(delta.zeroSampleTypes, id: \.self) { name in
+                                Label(name, systemImage: "questionmark.circle")
+                                    .foregroundStyle(.secondary)
+                            }
+                            if delta.workoutCount == 0 {
+                                Label("Workouts", systemImage: "questionmark.circle")
+                                    .foregroundStyle(.secondary)
                             }
                         } header: {
-                            Text("Permission needed")
+                            Text("0 samples — check permissions")
                         }
                     }
 
