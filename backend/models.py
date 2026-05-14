@@ -96,6 +96,16 @@ class SyncState(BaseModel):
     total_samples_seen: int = 0
 
 
+class SyncPreview(BaseModel):
+    """Tells the iOS app where Aura currently stops, so the app can locally
+    compute the HealthKit delta and present a confirmation dialog before the
+    user kicks off the upload.
+    """
+    latest_day_in_aura: Optional[str] = None  # YYYY-MM-DD, max Day.date
+    total_days_in_aura: int = 0
+    total_workouts_in_aura: int = 0
+
+
 class LoginResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"

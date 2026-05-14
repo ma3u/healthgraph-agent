@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>HealthGraph Agent</title>
+<style>
+  :root {
+    --bg: #0b0d10;
+    --fg: #e8eef4;
+    --muted: #8392a3;
+    --accent: #dc2f8a;
+    --link: #ff9eaf;
+  }
+  html, body { margin: 0; min-height: 100%; }
+  body {
+    background:
+      radial-gradient(1200px 800px at 20% 0%, rgba(98,33,152,0.45), transparent 60%),
+      radial-gradient(900px 700px at 90% 100%, rgba(255,110,110,0.35), transparent 60%),
+      linear-gradient(160deg, #0b0d10 0%, #1c2230 100%);
+    color: var(--fg);
+    font-family: -apple-system, "SF Pro Display", "Segoe UI", system-ui, sans-serif;
+    line-height: 1.55;
+    padding: 4rem 1.5rem;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  header { display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem; }
+  header img { width: 96px; height: 96px; border-radius: 22px; box-shadow: 0 12px 40px rgba(0,0,0,0.5); }
+  h1 { margin: 0; font-size: 2rem; }
+  h1 small { font-size: 0.85rem; font-weight: 400; color: var(--muted); display: block; margin-top: 0.25rem; }
+  h2 { margin-top: 2.5rem; font-weight: 600; letter-spacing: 0.02em; }
+  a { color: var(--link); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  ul { padding-left: 1.25rem; }
+  .card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 1rem;
+    padding: 1.25rem 1.5rem;
+  }
+  .grid { display: grid; gap: 1rem; grid-template-columns: 1fr 1fr; margin-top: 1rem; }
+  @media (max-width: 540px) { .grid { grid-template-columns: 1fr; } }
+  footer { color: var(--muted); font-size: 0.85rem; margin-top: 3rem; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <img src="app-icon-1024.png" alt="HealthGraph icon">
+      <div>
+        <h1>HealthGraph Agent
+          <small>Apple Health → Neo4j Aura → insight</small>
+        </h1>
+      </div>
+    </header>
+
+    <p>
+      An open-source pipeline + iPhone app that streams Apple HealthKit data into your own
+      Neo4j Aura graph. Built for the
+      <a href="https://www.linkedin.com/feed/update/urn:li:activity:7314498497126670336/"
+         target="_blank" rel="noopener">Neo4j Aura Agent Hackathon</a>
+      (Apr 15 – Jun 15 2026).
+    </p>
+
+    <p>
+      <strong>Bring your own Aura instance.</strong> Every installer deploys the backend
+      against their own Aura DB — there is no shared cloud.
+    </p>
+
+    <div class="grid">
+      <div class="card">
+        <h2 style="margin-top:0">📱 iOS app</h2>
+        <p>Reads HealthKit incrementally on-device and uploads only the delta to your Aura.
+           Embeds your NeoDash dashboard for in-app viewing.</p>
+        <p><a href="IOS_APP.html">Architecture</a> · <a href="IOS_PLAN.html">Build plan</a></p>
+      </div>
+      <div class="card">
+        <h2 style="margin-top:0">🛠 Backend</h2>
+        <p>Tiny FastAPI service that reuses the existing ETL to <code>MERGE</code> samples
+           into Aura via the official Neo4j Python driver.</p>
+        <p><a href="../backend/README.md">README</a></p>
+      </div>
+      <div class="card">
+        <h2 style="margin-top:0">🔍 GraphQL Data API</h2>
+        <p>Curated SDL for Aura's GraphQL Data API — paste into <em>Define my own</em> in
+           the Aura Console.</p>
+        <p><a href="../cypher/graphql_schema.graphql">graphql_schema.graphql</a></p>
+      </div>
+      <div class="card">
+        <h2 style="margin-top:0">📊 Daily snapshot</h2>
+        <p>A GitHub Action wakes the Aura instance daily, queries it, and renders a tiny
+           Recovery card with no raw biometrics.</p>
+        <p><a href="snapshot/">View the latest snapshot →</a></p>
+      </div>
+    </div>
+
+    <h2>Docs</h2>
+    <ul>
+      <li><a href="IOS_APP.md">iOS app architecture</a></li>
+      <li><a href="IOS_PLAN.md">Build plan</a></li>
+      <li><a href="AURA_VERIFICATION.md">Aura connection verification</a></li>
+      <li><a href="HEALTH_ANALYTICS.md">Health analytics queries</a></li>
+      <li><a href="SCORING.md">Scoring methodology</a></li>
+      <li><a href="STATUS.md">Project status</a></li>
+      <li><a href="AURA_API_FEEDBACK.md">Aura API feedback for the DevRel team</a></li>
+    </ul>
+
+    <footer>
+      <a href="https://github.com/ma3u/healthgraph-agent">github.com/ma3u/healthgraph-agent</a>
+      · Generated 2026-05-14
+    </footer>
+  </div>
+</body>
+</html>

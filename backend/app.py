@@ -40,8 +40,15 @@ from .models import (
     IngestPayload,
     IngestResponse,
     LoginResponse,
+    SyncPreview,
     SyncState,
 )
+import sys
+_BACKEND_DIR = Path(__file__).resolve().parent
+_ETL_DIR = _BACKEND_DIR.parent / "etl"
+if str(_ETL_DIR) not in sys.path:
+    sys.path.insert(0, str(_ETL_DIR))
+import load_to_neo4j  # type: ignore  noqa: E402
 
 load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
@@ -89,6 +96,29 @@ def login(form_data: OAuth2PasswordRequestForm = Depends()):
 @app.get("/sync/state", response_model=SyncState)
 def sync_state(user: str = Depends(require_user)):
     return _state
+
+
+@app.get("/sync/preview", response_model=SyncPreview)
+def sync_preview(user: str = Depends(require_user)):
+    """Return the last Day.date written to Aura so the iOS app can compute
+    what's missing locally before uploading."""
+    driver = load_to_neo4j.get_driver()
+    try:
+        with driver.session() as session:
+            days = session.run(
+                "MATCH (d:Day) RETURN max(d.date) AS latest, count(d) AS n"
+            ).single()
+            workouts = session.run(
+                "MATCH (w:Workout) RETURN count(w) AS n"
+            ).single()
+            latest = days["latest"]
+            return SyncPreview(
+                latest_day_in_aura=str(latest) if latest else None,
+                total_days_in_aura=days["n"] or 0,
+                total_workouts_in_aura=workouts["n"] or 0,
+            )
+    finally:
+        driver.close()
 
 
 @app.post("/ingest/healthkit", response_model=IngestResponse)

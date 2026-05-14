@@ -77,6 +77,19 @@ final class APIClient: @unchecked Sendable {
         }
     }
 
+    func syncPreview(token: String) async throws -> SyncPreviewResponse {
+        var req = URLRequest(url: url("sync/preview"))
+        req.httpMethod = "GET"
+        req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        let (data, resp) = try await session.data(for: req)
+        try Self.requireOK(resp, data)
+        do {
+            return try decoder.decode(SyncPreviewResponse.self, from: data)
+        } catch {
+            throw APIError.decoding(String(describing: error))
+        }
+    }
+
     func ingest(_ payload: IngestPayload, token: String) async throws -> IngestResponse {
         var req = URLRequest(url: url("ingest/healthkit"))
         req.httpMethod = "POST"

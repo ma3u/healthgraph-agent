@@ -36,3 +36,4 @@ Thumbs.db
 !package.json
 !neodash/*.json
 !backend/samples/*.json
+!ios/**/*.xcassets/**/Contents.json

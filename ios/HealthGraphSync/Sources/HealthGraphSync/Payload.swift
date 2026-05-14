@@ -64,3 +64,10 @@ struct IngestResponse: Codable {
     var daysAffected: [String]
     var serverAnchor: String
 }
+
+/// Matches backend/models.py SyncPreview.
+struct SyncPreviewResponse: Codable {
+    var latestDayInAura: String?
+    var totalDaysInAura: Int
+    var totalWorkoutsInAura: Int
+}

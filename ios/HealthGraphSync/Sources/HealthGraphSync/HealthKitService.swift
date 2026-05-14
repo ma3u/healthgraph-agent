@@ -70,6 +70,73 @@ final class HealthKitService: ObservableObject {
         }
     }
 
+    // MARK: - Delta scan (preview)
+
+    /// Per-type breakdown of HealthKit samples newer than `since`. Used by the
+    /// confirmation dialog before kicking off an upload. No network calls.
+    struct DeltaScan: Sendable {
+        struct TypeCount: Identifiable, Sendable {
+            let id = UUID()
+            let type: String
+            let count: Int
+        }
+        var since: Date
+        var until: Date
+        var quantityCounts: [TypeCount]
+        var categoryCounts: [TypeCount]
+        var workoutCount: Int
+        var daysCovered: Int
+
+        var totalSamples: Int {
+            quantityCounts.reduce(0) { $0 + $1.count } +
+            categoryCounts.reduce(0) { $0 + $1.count }
+        }
+    }
+
+    func deltaScan(since: Date) async throws -> DeltaScan {
+        try await requestAuthorization()
+        let until = Date()
+
+        var qCounts: [DeltaScan.TypeCount] = []
+        for q in HealthKitTypes.quantities {
+            guard let type = HKQuantityType.quantityType(forIdentifier: q.id) else { continue }
+            let samples = try await fetchSamples(type: type, start: since, end: until)
+            if !samples.isEmpty {
+                qCounts.append(.init(type: q.display, count: samples.count))
+            }
+        }
+        var cCounts: [DeltaScan.TypeCount] = []
+        for c in HealthKitTypes.categories {
+            guard let type = HKCategoryType.categoryType(forIdentifier: c.id) else { continue }
+            let samples = try await fetchSamples(type: type, start: since, end: until)
+            if !samples.isEmpty {
+                cCounts.append(.init(type: c.display, count: samples.count))
+            }
+        }
+        let workouts = try await fetchSamples(type: HKObjectType.workoutType(), start: since, end: until)
+
+        let allDates = Set(
+            (qCounts + cCounts).flatMap { _ in [] as [String] }
+        )
+        let cal = Calendar.current
+        let days = max(1, cal.dateComponents([.day], from: since, to: until).day ?? 1)
+
+        return DeltaScan(
+            since: since,
+            until: until,
+            quantityCounts: qCounts.sorted { $0.count > $1.count },
+            categoryCounts: cCounts.sorted { $0.count > $1.count },
+            workoutCount: workouts.count,
+            daysCovered: max(days, allDates.count)
+        )
+    }
+
+    /// Build a full IngestPayload for the date range covered by the delta scan.
+    /// This is what gets POSTed to /ingest/healthkit when the user confirms.
+    func buildPayload(since: Date, until: Date) async throws -> IngestPayload {
+        try await buildPayload(start: since, end: until, person: await readPersonInfo())
+    }
+
     // MARK: - Incremental sync
 
     /// Returns the set of YYYY-MM-DD dates that have changed since the saved

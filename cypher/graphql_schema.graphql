@@ -1,0 +1,118 @@
+# GraphQL SDL for the Apple Health graph in Neo4j Aura
+#
+# Paste this into Aura Console → GraphQL Data APIs → "Create" → "Define my own"
+# for the MyAppleHealthData instance. Or use "Fetch from instance" if you'd
+# rather have Aura introspect — but this file is the canonical curated version
+# that names relationships, scopes types, and excludes NeoDash internals.
+#
+# Generated 2026-05-14 from the live schema; see docs/AURA_VERIFICATION.md for
+# how the property names were enumerated.
+
+type Person @node {
+  name: String!
+  biologicalSex: String @alias(property: "biological_sex")
+
+  uses: [Device!]! @relationship(type: "USES", direction: OUT)
+  recorded: [Workout!]! @relationship(type: "RECORDED", direction: OUT)
+}
+
+type Device @node {
+  name: String!
+
+  usedBy: [Person!]! @relationship(type: "USES", direction: IN)
+}
+
+type Week @node {
+  iso: String!
+  year: Int
+  weekNumber: Int @alias(property: "week_number")
+  startDate: Date @alias(property: "start_date")
+
+  days: [Day!]! @relationship(type: "PART_OF", direction: IN)
+}
+
+type Day @node {
+  date: Date!
+  dayOfWeek: String @alias(property: "day_of_week")
+
+  # Apple Activity rings
+  ringMove: Float @alias(property: "ring_move")
+  ringMoveGoal: Float @alias(property: "ring_move_goal")
+  ringExercise: Float @alias(property: "ring_exercise")
+  ringExerciseGoal: Float @alias(property: "ring_exercise_goal")
+  ringStand: Float @alias(property: "ring_stand")
+  ringStandGoal: Float @alias(property: "ring_stand_goal")
+
+  week: Week @relationship(type: "PART_OF", direction: OUT)
+  summary: DailySummary @relationship(type: "HAS_SUMMARY", direction: OUT)
+  workouts: [Workout!]! @relationship(type: "ON_DAY", direction: IN)
+  sleep: SleepSession @relationship(type: "ON_DAY", direction: IN)
+  nextDay: Day @relationship(type: "NEXT_DAY", direction: OUT)
+  previousDay: Day @relationship(type: "NEXT_DAY", direction: IN)
+}
+
+type DailySummary @node {
+  date: Date!
+
+  # Heart
+  avgHeartRate: Float @alias(property: "avg_heart_rate")
+  minHeartRate: Float @alias(property: "min_heart_rate")
+  maxHeartRate: Float @alias(property: "max_heart_rate")
+  restingHeartRate: Float @alias(property: "resting_heart_rate")
+  hrvMean: Float @alias(property: "hrv_mean")
+
+  # Activity
+  totalSteps: Float @alias(property: "total_steps")
+  totalDistanceKm: Float @alias(property: "total_distance_km")
+  activeEnergyKcal: Float @alias(property: "active_energy_kcal")
+  basalEnergyKcal: Float @alias(property: "basal_energy_kcal")
+  flightsClimbed: Float @alias(property: "flights_climbed")
+
+  # Vitals
+  avgBloodOxygen: Float @alias(property: "avg_blood_oxygen")
+  avgRespiratoryRate: Float @alias(property: "avg_respiratory_rate")
+  bodyMassKg: Float @alias(property: "body_mass_kg")
+  vo2max: Float
+
+  # Sleep + workouts
+  sleepHours: Float @alias(property: "sleep_hours")
+  workoutCount: Int @alias(property: "workout_count")
+  workoutMinutes: Float @alias(property: "workout_minutes")
+
+  # Free-text description used by similarity search / embedding pipelines.
+  description: String
+
+  day: Day @relationship(type: "HAS_SUMMARY", direction: IN)
+}
+
+type Workout @node {
+  uid: ID!
+  activityType: String @alias(property: "activity_type")
+  rawType: String @alias(property: "raw_type")
+  durationMin: Float @alias(property: "duration_min")
+  startDate: DateTime @alias(property: "start_date")
+  endDate: DateTime @alias(property: "end_date")
+  device: String
+  sourceName: String @alias(property: "source_name")
+
+  day: Day @relationship(type: "ON_DAY", direction: OUT)
+  recordedBy: Person @relationship(type: "RECORDED", direction: IN)
+  followedBy: [SleepSession!]! @relationship(type: "FOLLOWED_BY", direction: OUT)
+}
+
+type SleepSession @node {
+  date: Date!
+  asleepMinutes: Float @alias(property: "asleep_minutes")
+  inBedMinutes: Float @alias(property: "in_bed_minutes")
+  sourceName: String @alias(property: "source_name")
+
+  day: Day @relationship(type: "ON_DAY", direction: OUT)
+  precededBy: [Workout!]! @relationship(type: "FOLLOWED_BY", direction: IN)
+}
+
+type MetricType @node {
+  identifier: ID!
+  displayName: String @alias(property: "display_name")
+  unit: String
+  category: String
+}
