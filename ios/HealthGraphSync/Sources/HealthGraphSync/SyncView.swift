@@ -38,23 +38,28 @@ struct SyncView: View {
 
                     if delta.hasZeroSamples {
                         Section {
-                            Text("These types returned **0 samples** in the date range. " +
-                                 "Either there's genuinely no data, or HealthKit didn't grant " +
-                                 "read access (Apple deliberately hides which, for privacy).")
+                            Text("These types returned **0 samples**. Either there's no data, " +
+                                 "or HealthKit didn't grant read access (Apple hides which, for privacy). " +
+                                 "Permissions live in the Health app — Sharing tab → Apps & Services → HealthGraph Sync.")
                                 .font(.footnote)
                                 .foregroundStyle(.orange)
+
+                            Button {
+                                if let url = URL(string: "x-apple-health://") {
+                                    UIApplication.shared.open(url)
+                                }
+                            } label: {
+                                Label("Open the Health app", systemImage: "heart.text.square")
+                            }
 
                             Button {
                                 if let url = URL(string: UIApplication.openSettingsURLString) {
                                     UIApplication.shared.open(url)
                                 }
                             } label: {
-                                Label("Open HealthGraphSync settings", systemImage: "gear")
+                                Label("Or open iOS Settings", systemImage: "gear")
                             }
-
-                            Text("In Settings, tap **Health → Data Access & Devices** to toggle on the types below.")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
+                            .font(.footnote)
 
                             ForEach(delta.zeroSampleTypes, id: \.self) { name in
                                 Label(name, systemImage: "questionmark.circle")
