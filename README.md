@@ -21,6 +21,50 @@ no shared backend; the dev's Aura is for development only.
 
 ---
 
+## Table of contents
+
+- [The idea](#the-idea)
+- [Why a graph?](#why-a-graph)
+- [Two ways to import your data](#two-ways-to-import-your-data)
+- [Synthetic test data](#synthetic-test-data)
+- [20 Longevity Cypher queries](#20-longevity-cypher-queries)
+- [Architecture](#architecture)
+- [Longevity Dashboard](#longevity-dashboard)
+- [Repo structure](#repo-structure)
+- [Getting started](#getting-started)
+- [Key health metrics](#key-health-metrics)
+- [Privacy & data handling](#privacy--data-handling)
+- [Tech stack](#tech-stack)
+- [Next steps](#next-steps)
+- [Hackathon checklist](#hackathon-checklist)
+
+### Linked documentation
+
+| Doc | What it covers |
+| --- | --- |
+| [`docs/IOS_APP.md`](docs/IOS_APP.md) | iOS app architecture, sync flow, configuration |
+| [`docs/IOS_PLAN.md`](docs/IOS_PLAN.md) | Phase-by-phase build plan and status |
+| [`docs/IOS_DEVICE_INSTALL.md`](docs/IOS_DEVICE_INSTALL.md) | Apple Development cert + device deploy steps |
+| [`docs/AUTH_RESEARCH.md`](docs/AUTH_RESEARCH.md) | Why we don't reuse `login.neo4j.com`; what Neo4j actually supports |
+| [`docs/AUTH_SETUP.md`](docs/AUTH_SETUP.md) | Auth0 + Aura JWKS one-time setup (~15 min) |
+| [`docs/AURA_VERIFICATION.md`](docs/AURA_VERIFICATION.md) | How to probe your Aura instance, schema audit |
+| [`docs/DASHBOARD.md`](docs/DASHBOARD.md) | Dashboard panels & longevity science behind each metric |
+| [`docs/HEALTH_ANALYTICS.md`](docs/HEALTH_ANALYTICS.md) | Analytics query catalog |
+| [`docs/SCORING.md`](docs/SCORING.md) | Recovery / Strain / Sleep score formulas |
+| [`docs/STATUS.md`](docs/STATUS.md) | Project status & rollout plan |
+| [`docs/AURA_API_FEEDBACK.md`](docs/AURA_API_FEEDBACK.md) | Open feedback for the Neo4j Aura team |
+| [`cypher/README.md`](cypher/README.md) | Cypher & GraphQL files: what's where, how to deploy |
+| [`backend/README.md`](archive/backend-legacy/README.md) (archived) | Original FastAPI sync service — superseded by direct Aura GraphQL |
+
+### Issues & links
+
+- 📌 Issue [#2 — Apple Health Sync to Aura + In-app Dashboard](https://github.com/ma3u/healthgraph-agent/issues/2)
+- 📌 Issue [#3 — GraphQL Data API for iOS + GitHub Pages personal dashboard](https://github.com/ma3u/healthgraph-agent/issues/3)
+- 🏆 [Neo4j Aura Agent Hackathon 2026 — Apr 15 – Jun 15](https://community.neo4j.com/t/start-here-register-get-aura-credits-aura-agent-hackathon-2026/77191)
+- 🌐 Live site: [https://ma3u.github.io/healthgraph-agent/](https://ma3u.github.io/healthgraph-agent/)
+
+---
+
 ## The idea
 
 Apple Health collects thousands of data points daily — heart rate, HRV, steps, sleep, workouts, respiratory rate, blood oxygen — but stores them as flat, disconnected time series. You can see _what_ happened, but never _why_ or _how things relate_.
