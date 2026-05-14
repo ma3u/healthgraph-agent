@@ -97,6 +97,21 @@ $99/year Apple Developer Program membership extends this to 1 year.
   on device".
 - *Device not appearing in `devicectl list devices`*: re-plug the USB-C cable,
   unlock the iPhone, accept the "Trust" prompt again, and re-run.
+
+## HealthKit permission gotcha
+
+On first sync the iOS permission sheet lists every HK type the app requests
+(HeartRate, RestingHeartRate, HRV, StepCount, ActiveEnergyBurned, sleep, etc.)
+and **each one is individually toggleable**. If you tap *Allow* without
+flipping every switch on, the un-toggled types are silently denied — the
+sync will run but those types return zero samples.
+
+To check or re-enable later: **Settings → Privacy & Security → Health →
+HealthGraph Sync**. Toggle on every category you want synced. Re-run the
+sync — it'll now pick up the previously-missing types.
+
+(Bug-symptom that points here: the *Sync* tab's *Quantity samples* list
+omits common types like StepCount or HeartRate but shows others.)
 - *Backend unreachable*: `localhost` works only from the iOS Simulator. From a
   real iPhone you need either a Tailscale-funneled URL or a deployed backend.
   Update `API_BASE_URL` in `ios/project.yml` and re-run `xcodegen generate`.

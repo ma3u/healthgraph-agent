@@ -46,6 +46,10 @@ xcodegen generate >/dev/null
 INFO_PLIST="HealthGraphSync/Resources/Info.plist"
 /usr/libexec/PlistBuddy -c "Set :DEV_AURA_GRAPHQL_URL $AURA_GRAPHQL_URL" "$INFO_PLIST"
 /usr/libexec/PlistBuddy -c "Set :DEV_AURA_API_KEY $AURA_GRAPHQL_API_KEY" "$INFO_PLIST"
+if [ -n "${NEODASH_URL:-}" ]; then
+    /usr/libexec/PlistBuddy -c "Set :NEODASH_URL $NEODASH_URL" "$INFO_PLIST"
+    echo "  patched NEODASH_URL → $NEODASH_URL"
+fi
 echo "  patched DEV_AURA_GRAPHQL_URL + DEV_AURA_API_KEY into $INFO_PLIST"
 
 # 3. Build
