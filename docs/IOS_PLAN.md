@@ -131,6 +131,21 @@ curl -X POST "$AURA_GRAPHQL_ENDPOINT" \
 
 Expect a JSON response with `data.days[0].date == "2026-04-15"`.
 
+### 1.5b Dev-mode shortcut ✅ DONE
+
+While Auth0 setup is pending, the iOS app supports a **dev-mode** that
+bypasses Auth0 entirely and talks directly to the Aura GraphQL Data API
+using `x-api-key`. Triggered when `AUTH0_DOMAIN` is empty AND
+`DEV_AURA_GRAPHQL_URL` + `DEV_AURA_API_KEY` are set in `Info.plist`.
+
+`scripts/build_ios.sh` wraps the whole loop — reads `.env`, patches the
+Info.plist (secrets never committed), regenerates the xcodeproj, builds
+for the connected iPhone, and installs:
+
+```sh
+bash scripts/build_ios.sh
+```
+
 ### 1.6 Device install ✅ docs ready
 
 Follow `docs/IOS_DEVICE_INSTALL.md`:
