@@ -38,6 +38,16 @@ final class AuthStore: ObservableObject {
 
     func signIn() async {
         lastError = nil
+        // Dev mode short-circuit: rebuild the synthesised session from Info.plist
+        // so the user can "sign in" after a "sign out" without an Auth0 tenant.
+        if AppConfig.isDevMode,
+           let url = AppConfig.devAuraGraphQLURL,
+           let key = AppConfig.devAuraAPIKey {
+            self.idToken = "dev:" + key
+            self.idTokenExpiresAt = .distantFuture
+            self.connection = AuraConnection(graphqlURL: url)
+            return
+        }
         do {
             let (idToken, _, expiresAt) = try await Auth0Client.shared.login()
             Keychain.set(idToken, for: tokenAccount)

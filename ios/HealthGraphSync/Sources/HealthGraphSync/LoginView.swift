@@ -54,7 +54,13 @@ struct LoginView: View {
                     .multilineTextAlignment(.center)
             }
 
-            if let err = auth.lastError {
+            if AppConfig.isDevMode {
+                Text("Dev-mode: signing in uses the API key from Info.plist.")
+                    .font(.footnote)
+                    .foregroundStyle(.blue)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal)
+            } else if let err = auth.lastError {
                 Text(err)
                     .foregroundStyle(.red)
                     .font(.footnote)
