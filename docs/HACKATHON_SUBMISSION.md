@@ -19,6 +19,8 @@ A longevity-focused assistant with **6 tools** — Text2Cypher + 5 parameterized
 
 The big addition since my last post: the agent is **defined as code** via the new [Aura v2beta1 `/agents` API](https://neo4j.com/docs/aura/platform/api/specification/?urls.primaryName=Aura%20v2beta1) (thanks to [Ed Sandoval](https://www.linkedin.com/in/edsandoval) for pointing it out). The JSON is committed at [`agents/healthgraph-coach.json`](https://github.com/ma3u/healthgraph-agent/blob/main/agents/healthgraph-coach.json) and reconciled with one script ([`scripts/create_aura_agent.py`](https://github.com/ma3u/healthgraph-agent/blob/main/scripts/create_aura_agent.py)) supporting three modes: `status` (default — diff live vs file), `--pull` (live → file), `--push` (file → live, POST or PUT).
 
+While I was wiring the iPhone chat to this agent I caught — and fixed — a copy-paste bug in the `health_overview` Cypher template (it referenced `$workout_type` while the tool parameters were `$start_date`/`$end_date`, so the agent was reporting "tool is currently unavailable"). The rewritten template now returns daily metrics (RHR / HRV / steps / sleep_hours / workout_min / kcal / VO2max) for the requested window **plus** a rolling 30-day baseline ending the day before — exactly what the system prompt asks for. Round-tripped to live via `--push`; verified on-device.
+
 Three real Q&As captured at [`docs/AGENT_DEMO.md`](https://github.com/ma3u/healthgraph-agent/blob/main/docs/AGENT_DEMO.md):
 
 - *"What is my average resting heart rate over the last 30 days, and how does it compare to my all-time baseline?"* — grounded analysis with all-time avg `56.11 bpm` vs last-30 `57.82 bpm`, longevity context, four actionable recommendations.
@@ -51,11 +53,11 @@ Pushed into Aura's built-in *Tools → Dashboards* via [`scripts/upload_dashboar
 
 `HealthGraphSync` iOS app ([`ios/`](https://github.com/ma3u/healthgraph-agent/tree/main/ios)) — Swift 6 / iOS 26.5 SDK. Reads HealthKit **on-device**, queries Aura for `max(Day.date)`, scans HealthKit since then, presents the per-type delta, then uploads via the three GraphQL `@cypher` mutations. Includes `Rescan last 30 days` and `Rescan last 365 days` flows for backfilling partial days. Verified end-to-end on real **iPhone 17 Pro** — graph grew from 3,087 → 3,117 `:Day` nodes after first sync.
 
-The Dashboard tab embeds the **"Ask your graph"** chat panel: 4 suggestion chips (`Last week summary` / `Overtraining check` / `Best workout day` / `Sleep vs HRV`), text input, scrollable Q&A history persisted to UserDefaults. Hits the same `HealthGraph Agent` invoke endpoint as the REST demo above — OAuth2 client-credentials → Bearer JWT.
+The Dashboard tab embeds an **"Ask your graph"** panel that calls the same `HealthGraph Agent` `/invoke` endpoint as the REST demo above — OAuth2 client-credentials → Bearer JWT. Four suggestion chips (`Last week summary` / `Overtraining check` / `Best workout day` / `Sleep vs HRV`) compute concrete date ranges at tap time (ISO Mon–Sun for "last week", last 12 weeks for overtraining, last 30 / 60 days for workout-HRV correlations) so the agent always gets specific dates — no more "please specify start and end dates" replies. The fresh answer auto-opens in a draggable sheet overlay on top of the dashboard (`.medium` / `.large` detents — swipe between them), with full Markdown rendering via `AttributedString(markdown:)`: paragraphs, `*`/`-` bullets, `N.` numbered lists, inline `**bold**` / `*italic*` / `` `code` ``, and the trend arrows (↑ improving, ↓ declining, → stable) the agent emits in its longevity analysis.
 
-| iPhone Sync tab — delta upload to Aura | iPhone Dashboard — "Ask your graph" |
-| --- | --- |
-| ![iPhone HealthKit sync](https://github.com/ma3u/healthgraph-agent/raw/main/docs/images/hackathon/06-iphone-healthkit-sync-delta-upload.jpeg) | ![iPhone Dashboard Ask your graph](https://github.com/ma3u/healthgraph-agent/raw/main/docs/images/hackathon/07-iphone-dashboard-ask-your-graph.jpeg) |
+| iPhone Sync — delta upload to Aura | Dashboard — "Ask your graph" | Answer overlay with Markdown |
+| --- | --- | --- |
+| ![iPhone HealthKit sync — delta upload to Aura](https://github.com/ma3u/healthgraph-agent/raw/main/docs/images/hackathon/06-iphone-healthkit-sync-delta-upload.jpeg) | ![iPhone Dashboard — Ask your graph powered by Aura Agent](https://github.com/ma3u/healthgraph-agent/raw/main/docs/images/hackathon/07-iphone-dashboard-ask-your-graph.jpeg) | ![iPhone Answer overlay — grounded longevity analysis with Markdown rendering and trend arrows](https://github.com/ma3u/healthgraph-agent/raw/main/docs/images/hackathon/08-iphone-agent-answer-overlay-markdown.jpeg) |
 
 ## BYO Aura
 
@@ -65,7 +67,6 @@ The whole thing is **bring-your-own-Aura**: every installer points the iOS app a
 
 - **#5** Auth0 production sign-in path (Apple / Google / GitHub / Microsoft → Bearer JWT to the Data API). Currently using dev-mode `x-api-key`; Auth0 work is gated on a manual tenant setup.
 - Vector embeddings for similarity search on `DailySummary.description`.
-- One bug preserved for round-trip fidelity: `health_overview` tool's template references `$workout_type` but its parameters are `start_date`/`end_date` — will fix in a follow-up `--push`.
 
 ## Issues closed during this stretch
 
