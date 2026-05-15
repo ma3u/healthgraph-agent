@@ -42,6 +42,13 @@ targets:
         DEV_AURA_API_KEY: ""
         NEODASH_URL: ""
         AURA_DASHBOARD_URL: ""
+        # Aura Agent REST endpoint + OAuth client credentials.
+        # Empty = "Ask your graph" panel is hidden in the Dashboard tab.
+        # Filled in by scripts/build_ios.sh from .env (AURA_AGENT_*).
+        AURA_AGENT_URL: ""
+        AURA_AGENT_TOKEN_URL: ""
+        AURA_AGENT_CLIENT_ID: ""
+        AURA_AGENT_CLIENT_SECRET: ""
         # URL scheme so Auth0 can redirect back to the app after sign-in.
         CFBundleURLTypes:
           - CFBundleURLName: io.healthgraph.sync.callback

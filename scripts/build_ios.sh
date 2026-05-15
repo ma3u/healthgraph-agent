@@ -54,6 +54,16 @@ if [ -n "${AURA_DASHBOARD_URL:-}" ]; then
     /usr/libexec/PlistBuddy -c "Set :AURA_DASHBOARD_URL $AURA_DASHBOARD_URL" "$INFO_PLIST"
     echo "  patched AURA_DASHBOARD_URL → $AURA_DASHBOARD_URL"
 fi
+# Aura Agent (Dashboard "Ask your graph" panel). All four must be set or the
+# panel stays hidden.
+if [ -n "${AURA_AGENT_URL:-}" ] && [ -n "${AURA_AGENT_TOKEN_URL:-}" ] \
+   && [ -n "${AURA_AGENT_CLIENT_ID:-}" ] && [ -n "${AURA_AGENT_CLIENT_SECRET:-}" ]; then
+    /usr/libexec/PlistBuddy -c "Set :AURA_AGENT_URL $AURA_AGENT_URL" "$INFO_PLIST"
+    /usr/libexec/PlistBuddy -c "Set :AURA_AGENT_TOKEN_URL $AURA_AGENT_TOKEN_URL" "$INFO_PLIST"
+    /usr/libexec/PlistBuddy -c "Set :AURA_AGENT_CLIENT_ID $AURA_AGENT_CLIENT_ID" "$INFO_PLIST"
+    /usr/libexec/PlistBuddy -c "Set :AURA_AGENT_CLIENT_SECRET $AURA_AGENT_CLIENT_SECRET" "$INFO_PLIST"
+    echo "  patched AURA_AGENT_* (Dashboard 'Ask your graph' enabled)"
+fi
 # Auth0 production path — if AUTH0_DOMAIN is set in .env, switch from dev-mode
 # to real Auth0 sign-in. Clears DEV_AURA_* so AppConfig.isDevMode returns false.
 if [ -n "${AUTH0_DOMAIN:-}" ] && [ -n "${AUTH0_CLIENT_ID:-}" ]; then

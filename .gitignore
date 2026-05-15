@@ -24,6 +24,10 @@ __pycache__/
 .vscode/
 *.swp
 
+# Skills CLI (npx skills add ...) — installed locally, managed via the CLI
+.agents/
+.claude/
+
 # OS
 .DS_Store
 Thumbs.db
@@ -38,3 +42,4 @@ Thumbs.db
 !backend/samples/*.json
 !archive/backend-legacy/samples/*.json
 !ios/**/*.xcassets/**/Contents.json
+!agents/*.json

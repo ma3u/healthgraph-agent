@@ -2,27 +2,85 @@
 
 **[Neo4j Aura Agent Hackathon 2026](https://community.neo4j.com/t/start-here-register-get-aura-credits-aura-agent-hackathon-2026/77191) — Submission**
 
-> _Your Apple Health data, finally connected. An AI agent that reasons over your health as a knowledge graph._
+> _My Apple Health data, finally connected to Neo4j Aura. An AI agent that reasons over your health as a knowledge graph._
 
 <p align="center">
   <img src="docs/app-icon-1024.png" alt="HealthGraphSync app icon" width="160" />
 </p>
 
-| Piece | What it is | Where |
+| Pillar | What it does | Where |
 | --- | --- | --- |
-| 🐍 ETL pipeline | One-shot Python parse + load of an Apple Health export.xml | [`etl/`](etl/), [`scripts/run_pipeline.sh`](scripts/run_pipeline.sh) |
-| 📱 iPhone app | Reads HealthKit on-device, uploads only the delta to **your own** Aura via GraphQL mutations | [`ios/`](ios/), [`docs/IOS_APP.md`](docs/IOS_APP.md), [`docs/IOS_PLAN.md`](docs/IOS_PLAN.md) |
-| 🔐 Auth | Auth0 universal login (Apple / Google / GitHub / Microsoft) → JWT → Aura GraphQL Data API | [`docs/AUTH_RESEARCH.md`](docs/AUTH_RESEARCH.md), [`docs/AUTH_SETUP.md`](docs/AUTH_SETUP.md) |
-| 🔍 GraphQL schema | Curated SDL with `@cypher` MERGE mutations | [`cypher/graphql_schema.graphql`](cypher/graphql_schema.graphql), [`cypher/README.md`](cypher/README.md) |
-| 🌐 Public dashboard | Daily recovery snapshot + project docs on GitHub Pages | [https://ma3u.github.io/healthgraph-agent/](https://ma3u.github.io/healthgraph-agent/) |
+| 🤖 **Aura Agent** | Longevity coach that reasons over your health graph via Text2Cypher + 5 Cypher-template tools, exposed over REST + MCP | [`agents/healthgraph-coach.json`](agents/healthgraph-coach.json), [`scripts/create_aura_agent.py`](scripts/create_aura_agent.py) |
+| 📊 **Aura Dashboard** | Whoop-style NeoDash dashboard (5 pages, 35 panels) loaded into Aura's built-in Dashboards | [`neodash/whoop_dashboard.json`](neodash/whoop_dashboard.json), [`scripts/upload_dashboard.py`](scripts/upload_dashboard.py) |
+| 🔍 **Aura GraphQL Data API + GitHub Page** | Curated SDL with `@cypher` MERGE mutations + daily Recovery snapshot at `ma3u.github.io/...` | [`cypher/graphql_schema.graphql`](cypher/graphql_schema.graphql), [`scripts/create_aura_data_api.py`](scripts/create_aura_data_api.py), [live](https://ma3u.github.io/healthgraph-agent/snapshot/) |
+| 📱 **iPhone Sync** | HealthKit → on-device delta scan → GraphQL mutations into your own Aura | [`ios/`](ios/), [`scripts/build_ios.sh`](scripts/build_ios.sh) |
 
-**BYO Aura** — every installer brings their own Neo4j Aura instance. There is
+**BYO Aura**: every installer brings their own Neo4j Aura instance. There is
 no shared backend; the dev's Aura is for development only.
+
+---
+
+## 🏆 Hackathon achievements
+
+Submission for the [**Neo4j Aura Agent Hackathon 2026**](https://community.neo4j.com/t/start-here-register-get-aura-credits-aura-agent-hackathon-2026/77191) (Apr 15 – Jun 15, 2026).
+
+End-to-end longevity stack across four pillars.
+
+### 1. 🤖 Aura Agent
+
+`HealthGraph Agent`: a longevity-focused assistant with **6 tools** (Text2Cypher + 5 parameterized Cypher templates: `health_overview`, `workout_recovery`, `longevity_trends`, `overtraining_check`, `exercise_balance`), MCP enabled, REST-invokable. Defined **as code** via the [Aura v2beta1 `/agents` API](https://neo4j.com/docs/aura/platform/api/specification/?urls.primaryName=Aura%20v2beta1) — the agent's JSON lives in [`agents/healthgraph-coach.json`](agents/healthgraph-coach.json) and is reconciled with one script ([`scripts/create_aura_agent.py`](scripts/create_aura_agent.py), three modes: status / `--pull` / `--push`). Tracked in [#4](https://github.com/ma3u/healthgraph-agent/issues/4) and [#6](https://github.com/ma3u/healthgraph-agent/issues/6).
+
+![Aura Agent playground — longevity question](image.png)
+
+---
+### 2. 📊 Aura Dashboard
+
+Whoop-style NeoDash dashboard in [`neodash/whoop_dashboard.json`](neodash/whoop_dashboard.json) — **5 pages, 35 panels**: daily hero card (Recovery %, Strain 0–21, Sleep %), Recovery deep-dive, Strain deep-dive, Sleep deep-dive, and 8.5-year Health Monitor. Score formulas in [`docs/SCORING.md`](docs/SCORING.md). Pushed into Aura's built-in *Tools → Dashboards* via [`scripts/upload_dashboard.py`](scripts/upload_dashboard.py) (idempotent: deterministic UUID per title).
+
+![Aura Dashboard — Whoop-style Recovery view](image-1.png)
+
+---
+### 3. 🔍 Aura GraphQL Data API + GitHub Page
+
+**GraphQL Data API**: curated SDL with `@cypher` MERGE mutations (`ingestDay` / `ingestWorkout` / `ingestSleep`) — [`cypher/graphql_schema.graphql`](cypher/graphql_schema.graphql). Deployed against the live tenant via [`scripts/create_aura_data_api.py`](scripts/create_aura_data_api.py) (hits `v1beta5` Aura platform REST directly; aura-cli has no `data-api` command). All three mutations smoke-tested + idempotent ([`scripts/test_aura_mutations.py`](scripts/test_aura_mutations.py)).
+
+![GraphQL Data API — schema overview](image-2.png)
+
+Daily Github Pipeline creates runs GraphQL Data API and renders the Dashboard via [`scripts/render_snapshot.py`](scripts/render_snapshot.py), committed by [`.github/workflows/snapshot.yml`](.github/workflows/snapshot.yml) on a 06:30 UTC cron (auto-resumes paused Aura instances), served at **[`ma3u.github.io/healthgraph-agent/snapshot/`](https://ma3u.github.io/healthgraph-agent/snapshot/)**. Tracked in [#3](
+![Daily Github Pipeline creates runs GraphQL Data API and renders the Dashboard](image-4.png)
+**GitHub Page**: daily Recovery snapshot rendered by [`scripts/render_snapshot.py`](scripts/render_snapshot.py), committed by [`.github/workflows/snapshot.yml`](.github/workflows/snapshot.yml) on a 06:30 UTC cron (auto-resumes paused Aura instances), served at **[`ma3u.github.io/healthgraph-agent/snapshot/`](https://ma3u.github.io/healthgraph-agent/snapshot/)**. Tracked in [#3](https://github.com/ma3u/healthgraph-agent/issues/3).
+
+
+
+![GitHub Pages — daily Recovery snapshot](image-3.png)
+!
+
+### 4. 📱 iPhone App — Apple Health → Aura sync
+
+`HealthGraphSync` iOS app ([`ios/`](ios/)) — Swift 6 / iOS 26.5 SDK. Reads HealthKit on-device, queries Aura for `max(Day.date)`, scans HealthKit since then, presents the per-type delta, then uploads via the three GraphQL `@cypher` mutations. Includes a `Rescan last 30 days` + `Rescan last 365 days` flow for backfilling partial days. Verified end-to-end on **real iPhone 17 Pro** — 3,087 → 3,117 `:Day` nodes, `max(Day.date)` advancing daily. Tracked in [#2](https://github.com/ma3u/healthgraph-agent/issues/2). One command to build + sign + install:
+
+```sh
+bash scripts/build_ios.sh
+```
+
+The Dashboard tab also includes an **"Ask your graph"** chat panel ([`AgentChatView.swift`](ios/HealthGraphSync/Sources/HealthGraphSync/AgentChatView.swift)) that hits the Aura Agent's `/invoke` endpoint via OAuth client-credentials — same agent as Pillar 1, in your pocket.
+
+![iPhone Dashboard — Ask your graph](docs/images/hackathon/07-iphone-dashboard-ask.png)
+
+![iPhone Sync tab — delta upload start](0036F366-B40A-426D-9EF9-F3C325A457E5_1_101_o.jpeg)
+
+![iPhone Dashboard — Ask your graph](916FED50-CF78-49CC-82B9-03712EE3BA03_1_101_o.jpeg)
+
 
 ---
 
 ## Table of contents
 
+- [Hackathon achievements](#-hackathon-achievements)
+  - [🤖 Aura Agent](#1--aura-agent)
+  - [📊 Aura Dashboard](#2--aura-dashboard)
+  - [🔍 Aura GraphQL Data API + GitHub Page](#3--aura-graphql-data-api--github-page)
+  - [📱 iPhone App — Apple Health → Aura sync](#4--iphone-app--apple-health--aura-sync)
 - [The idea](#the-idea)
 - [Why a graph?](#why-a-graph)
 - [Two ways to import your data](#two-ways-to-import-your-data)
@@ -58,8 +116,11 @@ no shared backend; the dev's Aura is for development only.
 
 ### Issues & links
 
-- 📌 Issue [#2 — Apple Health Sync to Aura + In-app Dashboard](https://github.com/ma3u/healthgraph-agent/issues/2)
-- 📌 Issue [#3 — GraphQL Data API for iOS + GitHub Pages personal dashboard](https://github.com/ma3u/healthgraph-agent/issues/3)
+- ✅ Issue [#2 — Apple Health Sync to Aura + In-app Dashboard](https://github.com/ma3u/healthgraph-agent/issues/2) (closed)
+- ✅ Issue [#3 — GraphQL Data API for iOS + GitHub Pages personal dashboard](https://github.com/ma3u/healthgraph-agent/issues/3) (closed)
+- 📌 Issue [#4 — Aura Agent integration + Neo4j Skills](https://github.com/ma3u/healthgraph-agent/issues/4)
+- 📌 Issue [#5 — Auth0 sign-in + Bearer JWT path for iOS](https://github.com/ma3u/healthgraph-agent/issues/5)
+- 📌 Issue [#6 — HealthGraphCoach as code via Aura v2beta1 `/agents`](https://github.com/ma3u/healthgraph-agent/issues/6)
 - 🏆 [Neo4j Aura Agent Hackathon 2026 — Apr 15 – Jun 15](https://community.neo4j.com/t/start-here-register-get-aura-credits-aura-agent-hackathon-2026/77191)
 - 🌐 Live site: [https://ma3u.github.io/healthgraph-agent/](https://ma3u.github.io/healthgraph-agent/)
 
@@ -67,7 +128,7 @@ no shared backend; the dev's Aura is for development only.
 
 ## The idea
 
-Apple Health collects thousands of data points daily — heart rate, HRV, steps, sleep, workouts, respiratory rate, blood oxygen — but stores them as flat, disconnected time series. You can see _what_ happened, but never _why_ or _how things relate_.
+Apple Health collects thousands of data points daily like heart rate, HRV, steps, sleep, workouts, respiratory rate, blood oxygen, but stores them as flat, disconnected time series. You can see _what_ happened, but never _why_ or _how things relate_.
 
 **HealthGraph Agent** transforms your Apple Health XML export into a Neo4j knowledge graph that captures the relationships _between_ your health metrics, then deploys a Neo4j Aura Agent that can reason over those relationships to answer longevity questions like:
 
@@ -457,12 +518,19 @@ See [Issue #1: Deploy to Neo4j Aura and configure Aura Agent](https://github.com
 - [x] Build ETL pipeline (Method 1: Python, Method 2: CSV)
 - [x] Synthetic test data generator (4 personas)
 - [x] 20 longevity-focused Cypher queries
-- [x] Load health data into Neo4j Desktop (3,087 days, 3,180 workouts)
+- [x] Load health data into Aura (3,087 days, 3,180 workouts)
 - [x] Longevity dashboard (Python charts + NeoDash)
-- [ ] Create AuraDB instance and load data ([#1](https://github.com/ma3u/healthgraph-agent/issues/1))
-- [ ] Configure Aura Agent with tools ([#1](https://github.com/ma3u/healthgraph-agent/issues/1))
-- [ ] Generate vector embeddings for similarity search ([#1](https://github.com/ma3u/healthgraph-agent/issues/1))
-- [ ] Test agent with longevity questions ([#1](https://github.com/ma3u/healthgraph-agent/issues/1))
-- [ ] Take screenshots (console + agent demo)
+- [x] Deploy Aura GraphQL Data API via `scripts/create_aura_data_api.py` ([#3](https://github.com/ma3u/healthgraph-agent/issues/3))
+- [x] iPhone app — HealthKit → delta scan → GraphQL upload, verified on real device ([#2](https://github.com/ma3u/healthgraph-agent/issues/2))
+- [x] GitHub Pages daily snapshot live ([#3](https://github.com/ma3u/healthgraph-agent/issues/3))
+- [x] Configure Aura Agent with tools — `HealthGraph Agent`, 6 tools, MCP enabled ([#4](https://github.com/ma3u/healthgraph-agent/issues/4))
+- [x] Agent-as-code via v2beta1 `/agents` — `agents/healthgraph-coach.json` + `scripts/create_aura_agent.py` ([#6](https://github.com/ma3u/healthgraph-agent/issues/6))
+- [x] iOS "Ask your graph" panel — OAuth + invoke endpoint wired ([#4](https://github.com/ma3u/healthgraph-agent/issues/4))
+- [x] Install Neo4j Skills for Claude Code ([#4](https://github.com/ma3u/healthgraph-agent/issues/4))
+- [x] Test agent with longevity questions — REST smoke-test passed ([#6](https://github.com/ma3u/healthgraph-agent/issues/6))
+- [ ] Generate vector embeddings for similarity search
+- [ ] Auth0 production sign-in path ([#5](https://github.com/ma3u/healthgraph-agent/issues/5))
+- [ ] Capture demo Q&A in `docs/AGENT_DEMO.md`
+- [ ] Drop screenshots into `docs/images/hackathon/` (see [Hackathon achievements](#-hackathon-achievements) table)
 - [x] Submit to [community thread](https://community.neo4j.com/t/start-here-register-get-aura-credits-aura-agent-hackathon-2026/77191)
 

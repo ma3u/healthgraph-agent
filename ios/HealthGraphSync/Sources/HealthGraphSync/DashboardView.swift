@@ -4,7 +4,11 @@ import WebKit
 struct DashboardView: View {
     var body: some View {
         NavigationStack {
-            Group {
+            VStack(spacing: 0) {
+                if AppConfig.isAgentConfigured {
+                    AgentChatView()
+                    Divider()
+                }
                 if let url = AppConfig.neodashURL {
                     WebView(url: url)
                         .ignoresSafeArea(edges: .bottom)

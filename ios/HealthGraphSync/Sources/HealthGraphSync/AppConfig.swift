@@ -59,4 +59,37 @@ enum AppConfig {
         else { return nil }
         return URL(string: raw)
     }
+
+    static var auraAgentURL: URL? {
+        guard
+            let raw = Bundle.main.object(forInfoDictionaryKey: "AURA_AGENT_URL") as? String,
+            !raw.isEmpty
+        else { return nil }
+        return URL(string: raw)
+    }
+
+    static var auraAgentTokenURL: URL? {
+        guard
+            let raw = Bundle.main.object(forInfoDictionaryKey: "AURA_AGENT_TOKEN_URL") as? String,
+            !raw.isEmpty
+        else { return nil }
+        return URL(string: raw)
+    }
+
+    static var auraAgentClientID: String? {
+        let raw = (Bundle.main.object(forInfoDictionaryKey: "AURA_AGENT_CLIENT_ID") as? String) ?? ""
+        return raw.isEmpty ? nil : raw
+    }
+
+    static var auraAgentClientSecret: String? {
+        let raw = (Bundle.main.object(forInfoDictionaryKey: "AURA_AGENT_CLIENT_SECRET") as? String) ?? ""
+        return raw.isEmpty ? nil : raw
+    }
+
+    static var isAgentConfigured: Bool {
+        auraAgentURL != nil
+            && auraAgentTokenURL != nil
+            && auraAgentClientID != nil
+            && auraAgentClientSecret != nil
+    }
 }
