@@ -5,6 +5,8 @@ struct AgentChatView: View {
     @State private var history: [QAEntry] = QAEntry.loadHistory()
     @State private var isLoading = false
     @State private var errorMessage: String?
+    @State private var expandedEntry: QAEntry?
+
     private static let suggestions: [Suggestion] = [
         Suggestion(label: "Last week summary") {
             let (start, end) = lastWeekRange()
@@ -112,59 +114,12 @@ struct AgentChatView: View {
                     .font(.caption)
                     .foregroundStyle(.red)
             }
-
-            if let latest = history.first {
-                entryCard(latest, isLatest: true)
-            }
-
-            if history.count > 1 {
-                HStack {
-                    Text("History")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    Spacer()
-                    Button("Clear") {
-                        history = []
-                        QAEntry.saveHistory(history)
-                    }
-                    .font(.caption)
-                    .buttonStyle(.borderless)
-                }
-                .padding(.top, 4)
-
-                ScrollView {
-                    LazyVStack(alignment: .leading, spacing: 8) {
-                        ForEach(history.dropFirst()) { entry in
-                            entryCard(entry, isLatest: false)
-                        }
-                    }
-                }
-                .frame(maxHeight: 240)
-            }
         }
         .padding(.horizontal)
         .padding(.top, 8)
-    }
-
-    @ViewBuilder
-    private func entryCard(_ entry: QAEntry, isLatest: Bool) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(entry.question)
-                .font(isLatest ? .subheadline.weight(.semibold) : .subheadline.weight(.medium))
-                .multilineTextAlignment(.leading)
-                .lineLimit(isLatest ? 3 : 2)
-                .frame(maxWidth: .infinity, alignment: .leading)
-            MarkdownText(entry.answer)
-                .font(.callout)
-                .foregroundStyle(isLatest ? .primary : .secondary)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .textSelection(.enabled)
+        .sheet(item: $expandedEntry) { entry in
+            AnswerSheet(entry: entry)
         }
-        .padding(10)
-        .background(
-            (isLatest ? Color.accentColor.opacity(0.08) : Color.gray.opacity(0.08)),
-            in: RoundedRectangle(cornerRadius: 8)
-        )
     }
 
     private func submit() async {
@@ -181,9 +136,44 @@ struct AgentChatView: View {
             if history.count > 10 { history = Array(history.prefix(10)) }
             QAEntry.saveHistory(history)
             question = ""
+            expandedEntry = entry  // open the answer overlay
         } catch {
             errorMessage = error.localizedDescription
         }
+    }
+}
+
+/// Answer overlay shown on top of the Dashboard tab. Two detents
+/// (.medium / .large) so the Dashboard stays visible behind a half-height
+/// sheet, and Done dismisses back to the chips + input.
+private struct AnswerSheet: View {
+    let entry: QAEntry
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    Text(entry.question)
+                        .font(.title3.weight(.semibold))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    MarkdownText(entry.answer)
+                        .font(.body)
+                        .textSelection(.enabled)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .padding()
+            }
+            .navigationTitle("Answer")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Done") { dismiss() }
+                }
+            }
+        }
+        .presentationDetents([.medium, .large])
+        .presentationDragIndicator(.visible)
     }
 }
 
