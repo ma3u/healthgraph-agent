@@ -7,12 +7,66 @@ struct AgentChatView: View {
     @State private var errorMessage: String?
     @State private var expandedEntry: QAEntry?
 
-    private static let suggestions = [
-        "Last week summary",
-        "Overtraining check",
-        "Best workout day",
-        "Sleep vs HRV",
+    private static let suggestions: [Suggestion] = [
+        Suggestion(label: "Last week summary") {
+            let (start, end) = lastWeekRange()
+            return """
+            Summarize my health from \(start) to \(end) (last ISO week). \
+            Report average resting heart rate, HRV, daily steps, sleep hours, \
+            and total workout minutes. Compare each to my 30-day baseline and \
+            flag changes with arrows (↑ improving, ↓ declining, → stable).
+            """
+        },
+        Suggestion(label: "Overtraining check") {
+            "Am I overtraining? Use the overtraining_check tool to look at training load vs HRV over the last 12 weeks. Flag weeks with CAUTION or HIGH RISK and recommend deload weeks if needed."
+        },
+        Suggestion(label: "Best workout day") {
+            let (start, end) = lastNDaysRange(30)
+            return "Between \(start) and \(end), which workout type gave me the best next-day HRV recovery? Use the workout_recovery tool. Rank by hrv_change descending."
+        },
+        Suggestion(label: "Sleep vs HRV") {
+            let (start, end) = lastNDaysRange(60)
+            return "Between \(start) and \(end), is there a relationship between sleep duration and next-day HRV? Look at days with sleep ≥ 7.5h vs sleep < 6h and compare their HRV the following day."
+        },
     ]
+
+    /// Monday–Sunday range of the most recently completed ISO week.
+    private static func lastWeekRange() -> (start: String, end: String) {
+        var cal = Calendar(identifier: .iso8601)
+        cal.firstWeekday = 2  // Monday
+        cal.minimumDaysInFirstWeek = 4
+        let now = Date()
+        let thisWeekStart = cal.date(
+            from: cal.dateComponents([.yearForWeekOfYear, .weekOfYear], from: now)
+        ) ?? now
+        let lastWeekStart = cal.date(byAdding: .day, value: -7, to: thisWeekStart) ?? now
+        let lastWeekEnd = cal.date(byAdding: .day, value: 6, to: lastWeekStart) ?? now
+        return (isoDate(lastWeekStart), isoDate(lastWeekEnd))
+    }
+
+    /// Past N-day window ending yesterday.
+    private static func lastNDaysRange(_ n: Int) -> (start: String, end: String) {
+        let cal = Calendar(identifier: .iso8601)
+        let now = Date()
+        let yesterday = cal.date(byAdding: .day, value: -1, to: now) ?? now
+        let start = cal.date(byAdding: .day, value: -(n - 1), to: yesterday) ?? yesterday
+        return (isoDate(start), isoDate(yesterday))
+    }
+
+    private static func isoDate(_ d: Date) -> String {
+        let f = DateFormatter()
+        f.calendar = Calendar(identifier: .iso8601)
+        f.locale = Locale(identifier: "en_US_POSIX")
+        f.timeZone = TimeZone(identifier: "UTC")
+        f.dateFormat = "yyyy-MM-dd"
+        return f.string(from: d)
+    }
+
+    struct Suggestion: Identifiable {
+        let id = UUID()
+        let label: String
+        let makeQuestion: () -> String
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -24,9 +78,10 @@ struct AgentChatView: View {
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 6) {
-                    ForEach(Self.suggestions, id: \.self) { chip in
-                        Button(chip) {
-                            question = chip
+                    ForEach(Self.suggestions) { chip in
+                        Button(chip.label) {
+                            let q = chip.makeQuestion()
+                            question = q
                             Task { await submit() }
                         }
                         .buttonStyle(.bordered)
@@ -60,20 +115,33 @@ struct AgentChatView: View {
                     .foregroundStyle(.red)
             }
 
-            if !history.isEmpty {
+            if let latest = history.first {
+                Button {
+                    expandedEntry = latest
+                } label: {
+                    entryCard(latest, isLatest: true)
+                }
+                .buttonStyle(.plain)
+            }
+
+            if history.count > 1 {
+                Text("History")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .padding(.top, 4)
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: 8) {
-                        ForEach(history) { entry in
+                        ForEach(history.dropFirst()) { entry in
                             Button {
                                 expandedEntry = entry
                             } label: {
-                                entryPreview(entry)
+                                entryCard(entry, isLatest: false)
                             }
                             .buttonStyle(.plain)
                         }
                     }
                 }
-                .frame(maxHeight: 220)
+                .frame(maxHeight: 200)
             }
         }
         .padding(.horizontal)
@@ -84,12 +152,13 @@ struct AgentChatView: View {
     }
 
     @ViewBuilder
-    private func entryPreview(_ entry: QAEntry) -> some View {
+    private func entryCard(_ entry: QAEntry, isLatest: Bool) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack(alignment: .top) {
                 Text(entry.question)
-                    .font(.subheadline.weight(.medium))
+                    .font(isLatest ? .subheadline.weight(.semibold) : .subheadline.weight(.medium))
                     .multilineTextAlignment(.leading)
+                    .lineLimit(isLatest ? 3 : 2)
                 Spacer(minLength: 8)
                 Image(systemName: "arrow.up.left.and.arrow.down.right")
                     .font(.caption2)
@@ -97,12 +166,15 @@ struct AgentChatView: View {
             }
             MarkdownText(entry.answer)
                 .font(.callout)
-                .foregroundStyle(.secondary)
-                .lineLimit(6)
+                .foregroundStyle(isLatest ? .primary : .secondary)
+                .lineLimit(isLatest ? nil : 4)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding(10)
-        .background(Color.gray.opacity(0.08), in: RoundedRectangle(cornerRadius: 8))
+        .background(
+            (isLatest ? Color.accentColor.opacity(0.08) : Color.gray.opacity(0.08)),
+            in: RoundedRectangle(cornerRadius: 8)
+        )
         .contentShape(Rectangle())
     }
 
@@ -120,7 +192,6 @@ struct AgentChatView: View {
             if history.count > 10 { history = Array(history.prefix(10)) }
             QAEntry.saveHistory(history)
             question = ""
-            expandedEntry = entry  // auto-open the fresh answer full-screen
         } catch {
             errorMessage = error.localizedDescription
         }
