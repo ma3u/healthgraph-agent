@@ -56,6 +56,8 @@ End-to-end longevity stack across four pillars.
 
 `HealthGraph Agent`: a longevity-focused assistant with **6 tools** (Text2Cypher + 5 parameterized Cypher templates: `health_overview`, `workout_recovery`, `longevity_trends`, `overtraining_check`, `exercise_balance`), MCP enabled, REST-invokable. Defined **as code** via the [Aura v2beta1 `/agents` API](https://neo4j.com/docs/aura/platform/api/specification/?urls.primaryName=Aura%20v2beta1) — the agent's JSON lives in [`agents/healthgraph-coach.json`](agents/healthgraph-coach.json) and is reconciled with one script ([`scripts/create_aura_agent.py`](scripts/create_aura_agent.py), three modes: status / `--pull` / `--push`). Tracked in [#4](https://github.com/ma3u/healthgraph-agent/issues/4) and [#6](https://github.com/ma3u/healthgraph-agent/issues/6).
 
+The `health_overview` Cypher template was rewritten so the tool actually returns daily metrics (RHR / HRV / steps / sleep_hours / workout_min / kcal / VO2max) for a `$start_date`..`$end_date` window **plus** a rolling 30-day baseline ending the day before the window — exactly what the system prompt asks for. Three captured Q&As in [`docs/AGENT_DEMO.md`](docs/AGENT_DEMO.md) show the agent grounding longevity advice in real numbers ("57.7 bpm RHR this week vs 58.2 bpm baseline → stable, but slightly higher") and honestly reporting "no data" when the graph lacks coverage.
+
 ![Aura Agent playground — longevity question](docs/images/hackathon/01-aura-agent-playground-longevity-question.png)
 
 ---
@@ -79,19 +81,19 @@ Whoop-style NeoDash dashboard in [`neodash/whoop_dashboard.json`](neodash/whoop_
 ![GitHub Pages — daily Recovery snapshot](docs/images/hackathon/05-github-pages-recovery-snapshot.png)
 
 ---
-### 4. 📱 iPhone App — Apple Health → Aura sync
+### 4. 📱 iPhone App — Apple Health → Aura sync + "Ask your graph"
 
-`HealthGraphSync` iOS app ([`ios/`](ios/)) — Swift 6 / iOS 26.5 SDK. Reads HealthKit on-device, queries Aura for `max(Day.date)`, scans HealthKit since then, presents the per-type delta, then uploads via the three GraphQL `@cypher` mutations. Includes a `Rescan last 30 days` + `Rescan last 365 days` flow for backfilling partial days. Verified end-to-end on **real iPhone 17 Pro** — 3,087 → 3,117 `:Day` nodes, `max(Day.date)` advancing daily. Tracked in [#2](https://github.com/ma3u/healthgraph-agent/issues/2). One command to build + sign + install:
+`HealthGraphSync` iOS app ([`ios/`](ios/)) — Swift 6 / iOS 26.5 SDK. Reads HealthKit on-device, queries Aura for `max(Day.date)`, scans HealthKit since then, presents the per-type delta, then uploads via the three GraphQL `@cypher` mutations. Includes `Rescan last 30 days` + `Rescan last 365 days` flows for backfilling partial days. Verified end-to-end on **real iPhone 17 Pro** — 3,087 → 3,117 `:Day` nodes, `max(Day.date)` advancing daily. Tracked in [#2](https://github.com/ma3u/healthgraph-agent/issues/2). One command to build + sign + install:
 
 ```sh
 bash scripts/build_ios.sh
 ```
 
-The Dashboard tab also includes an **"Ask your graph"** chat panel ([`AgentChatView.swift`](ios/HealthGraphSync/Sources/HealthGraphSync/AgentChatView.swift)) that hits the Aura Agent's `/invoke` endpoint via OAuth client-credentials — same agent as Pillar 1, in your pocket.
+The Dashboard tab embeds an **"Ask your graph"** panel ([`AgentChatView.swift`](ios/HealthGraphSync/Sources/HealthGraphSync/AgentChatView.swift)) that talks to the Pillar 1 Aura Agent's `/invoke` endpoint via OAuth client-credentials. Four suggestion chips compute concrete date ranges at tap time (ISO Mon–Sun for "Last week summary", last 12 weeks for overtraining, last 30 / 60 days for workout-HRV correlations) so the agent always gets specific dates — not vague phrases. The fresh answer auto-opens in a draggable sheet overlay (`.medium` / `.large` detents) on top of the dashboard, with full Markdown rendering — paragraphs, `*`/`-` bullets, `N.` numbered lists, inline `**bold**` / `*italic*` / `` `code` `` via `AttributedString(markdown:)`, plus trend arrows (↑ improving, ↓ declining, → stable) the agent emits in its longevity analysis.
 
-| iPhone Sync — delta upload | iPhone Dashboard — Ask your graph |
-| --- | --- |
-| ![iPhone HealthKit sync — delta upload to Aura](docs/images/hackathon/06-iphone-healthkit-sync-delta-upload.jpeg) | ![iPhone Dashboard — Ask your graph powered by Aura Agent](docs/images/hackathon/07-iphone-dashboard-ask-your-graph.jpeg) |
+| iPhone Sync — delta upload | Dashboard — "Ask your graph" | Answer overlay with Markdown |
+| --- | --- | --- |
+| ![iPhone HealthKit sync — delta upload to Aura](docs/images/hackathon/06-iphone-healthkit-sync-delta-upload.jpeg) | ![iPhone Dashboard — Ask your graph powered by Aura Agent](docs/images/hackathon/07-iphone-dashboard-ask-your-graph.jpeg) | ![iPhone Answer overlay — grounded longevity analysis with Markdown rendering and trend arrows](docs/images/hackathon/08-iphone-agent-answer-overlay-markdown.jpeg) |
 
 ---
 
