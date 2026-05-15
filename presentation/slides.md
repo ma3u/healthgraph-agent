@@ -707,28 +707,29 @@ class: text-center
 
 <div class="flex items-center justify-center gap-10 mt-10">
 
-<div class="flex flex-col items-center gap-2">
-  <img src="/linkedin-qr.png" class="w-40 h-40" />
-  <div class="flex items-center gap-2 text-sm">
-    <div class="i-material-symbols-link text-lg opacity-60" />
+<img src="/linkedin-photo.png" class="w-32 h-32 rounded-full shadow-lg" />
+
+<div class="text-left flex flex-col gap-2">
+  <div class="text-lg font-semibold">Matthias Buchhorn-Roth</div>
+  <div class="flex items-center gap-2 text-sm opacity-75">
+    <div class="i-material-symbols-link text-lg opacity-70" />
     <span class="font-mono">linkedin.com/in/mbuchhorn</span>
   </div>
-  <div class="text-xs opacity-50">Let's connect</div>
-</div>
-
-<div class="text-left text-sm flex flex-col gap-2">
-  <div class="flex items-center gap-2">
-    <div class="i-material-symbols-person-outline text-lg opacity-60" />
-    <span class="font-semibold">Matthias Buchhorn-Roth</span>
-  </div>
-  <div class="flex items-center gap-2 opacity-70">
-    <div class="i-material-symbols-code text-lg opacity-60" />
+  <div class="flex items-center gap-2 text-sm opacity-75">
+    <div class="i-material-symbols-code text-lg opacity-70" />
     <span class="font-mono">github.com/ma3u</span>
   </div>
-  <div class="flex items-center gap-2 opacity-70">
-    <div class="i-material-symbols-folder-data-outline text-lg opacity-60" />
+  <div class="flex items-center gap-2 text-sm opacity-75">
+    <div class="i-material-symbols-folder-data-outline text-lg opacity-70" />
     <span class="font-mono">github.com/ma3u/healthgraph-agent</span>
   </div>
+</div>
+
+<div class="flex flex-col items-center gap-2">
+  <div class="bg-white p-3 rounded-xl shadow-lg">
+    <img src="/linkedin-qr.png" class="w-40 h-40" />
+  </div>
+  <div class="text-xs font-semibold opacity-70">Connect on LinkedIn</div>
 </div>
 
 </div>
