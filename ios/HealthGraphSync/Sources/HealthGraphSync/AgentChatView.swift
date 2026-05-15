@@ -5,6 +5,7 @@ struct AgentChatView: View {
     @State private var history: [QAEntry] = QAEntry.loadHistory()
     @State private var isLoading = false
     @State private var errorMessage: String?
+    @State private var expandedEntry: QAEntry?
 
     private static let suggestions = [
         "Last week summary",
@@ -61,27 +62,48 @@ struct AgentChatView: View {
 
             if !history.isEmpty {
                 ScrollView {
-                    LazyVStack(alignment: .leading, spacing: 12) {
+                    LazyVStack(alignment: .leading, spacing: 8) {
                         ForEach(history) { entry in
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(entry.question)
-                                    .font(.subheadline.weight(.medium))
-                                Text(entry.answer)
-                                    .font(.callout)
-                                    .foregroundStyle(.secondary)
-                                    .textSelection(.enabled)
+                            Button {
+                                expandedEntry = entry
+                            } label: {
+                                entryPreview(entry)
                             }
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(8)
-                            .background(Color.gray.opacity(0.08), in: RoundedRectangle(cornerRadius: 8))
+                            .buttonStyle(.plain)
                         }
                     }
                 }
-                .frame(maxHeight: 240)
+                .frame(maxHeight: 220)
             }
         }
         .padding(.horizontal)
         .padding(.top, 8)
+        .sheet(item: $expandedEntry) { entry in
+            AnswerSheet(entry: entry)
+        }
+    }
+
+    @ViewBuilder
+    private func entryPreview(_ entry: QAEntry) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(alignment: .top) {
+                Text(entry.question)
+                    .font(.subheadline.weight(.medium))
+                    .multilineTextAlignment(.leading)
+                Spacer(minLength: 8)
+                Image(systemName: "arrow.up.left.and.arrow.down.right")
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+            }
+            MarkdownText(entry.answer)
+                .font(.callout)
+                .foregroundStyle(.secondary)
+                .lineLimit(6)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .padding(10)
+        .background(Color.gray.opacity(0.08), in: RoundedRectangle(cornerRadius: 8))
+        .contentShape(Rectangle())
     }
 
     private func submit() async {
@@ -98,9 +120,135 @@ struct AgentChatView: View {
             if history.count > 10 { history = Array(history.prefix(10)) }
             QAEntry.saveHistory(history)
             question = ""
+            expandedEntry = entry  // auto-open the fresh answer full-screen
         } catch {
             errorMessage = error.localizedDescription
         }
+    }
+}
+
+/// Full-screen-ish answer view. Two detents (.medium and .large) so the user
+/// can swipe between minimized and maximized, and a drag indicator at the top.
+private struct AnswerSheet: View {
+    let entry: QAEntry
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    Text(entry.question)
+                        .font(.title3.weight(.semibold))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    MarkdownText(entry.answer)
+                        .font(.body)
+                        .textSelection(.enabled)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .padding()
+            }
+            .navigationTitle("Answer")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Done") { dismiss() }
+                }
+            }
+        }
+        .presentationDetents([.medium, .large])
+        .presentationDragIndicator(.visible)
+    }
+}
+
+/// Minimal Markdown renderer for the agent's typical output: paragraphs,
+/// `*`/`-` bullets, `N.` numbered lists, and inline `**bold**` / `*italic*` /
+/// `` `code` `` via `AttributedString(markdown:)`.
+private struct MarkdownText: View {
+    private let blocks: [MarkdownBlock]
+
+    init(_ text: String) {
+        self.blocks = MarkdownBlock.parse(text)
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            ForEach(blocks) { block in
+                switch block.kind {
+                case .paragraph:
+                    Text(inline(block.content))
+                        .fixedSize(horizontal: false, vertical: true)
+                case .bullet:
+                    HStack(alignment: .firstTextBaseline, spacing: 6) {
+                        Text("•").foregroundStyle(.tertiary)
+                        Text(inline(block.content))
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                case .numbered(let n):
+                    HStack(alignment: .firstTextBaseline, spacing: 6) {
+                        Text("\(n).")
+                            .foregroundStyle(.tertiary)
+                            .monospacedDigit()
+                        Text(inline(block.content))
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+            }
+        }
+    }
+
+    private func inline(_ s: String) -> AttributedString {
+        let opts = AttributedString.MarkdownParsingOptions(
+            interpretedSyntax: .inlineOnlyPreservingWhitespace
+        )
+        return (try? AttributedString(markdown: s, options: opts)) ?? AttributedString(s)
+    }
+}
+
+private struct MarkdownBlock: Identifiable {
+    enum Kind { case paragraph, bullet, numbered(Int) }
+    let id: Int
+    let kind: Kind
+    let content: String
+
+    static func parse(_ text: String) -> [MarkdownBlock] {
+        var out: [MarkdownBlock] = []
+        var paragraph: [String] = []
+
+        func flush() {
+            guard !paragraph.isEmpty else { return }
+            let joined = paragraph.joined(separator: " ").trimmingCharacters(in: .whitespaces)
+            if !joined.isEmpty {
+                out.append(MarkdownBlock(id: out.count, kind: .paragraph, content: joined))
+            }
+            paragraph = []
+        }
+
+        for raw in text.split(separator: "\n", omittingEmptySubsequences: false) {
+            let line = String(raw).trimmingCharacters(in: .whitespaces)
+            if line.isEmpty { flush(); continue }
+            if line.hasPrefix("* ") || line.hasPrefix("- ") {
+                flush()
+                let content = String(line.dropFirst(2)).trimmingCharacters(in: .whitespaces)
+                out.append(MarkdownBlock(id: out.count, kind: .bullet, content: content))
+                continue
+            }
+            // "N. content" — small positive integer + "." + " "
+            if let dot = line.firstIndex(of: "."),
+               dot > line.startIndex,
+               let n = Int(line[line.startIndex..<dot]),
+               n > 0,
+               line.index(after: dot) < line.endIndex,
+               line[line.index(after: dot)] == " " {
+                flush()
+                let content = String(line[line.index(dot, offsetBy: 2)...])
+                    .trimmingCharacters(in: .whitespaces)
+                out.append(MarkdownBlock(id: out.count, kind: .numbered(n), content: content))
+                continue
+            }
+            paragraph.append(line)
+        }
+        flush()
+        return out
     }
 }
 
