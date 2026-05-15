@@ -5,8 +5,6 @@ struct AgentChatView: View {
     @State private var history: [QAEntry] = QAEntry.loadHistory()
     @State private var isLoading = false
     @State private var errorMessage: String?
-    @State private var expandedEntry: QAEntry?
-
     private static let suggestions: [Suggestion] = [
         Suggestion(label: "Last week summary") {
             let (start, end) = lastWeekRange()
@@ -115,87 +113,58 @@ struct AgentChatView: View {
                     .foregroundStyle(.red)
             }
 
-            // Hide all inline content while the sheet is showing an answer.
-            // Two motivations:
-            //   1. Stop the visible duplication where the same answer shows
-            //      both behind the dimmed sheet and inside it.
-            //   2. Stale entries from earlier app versions (e.g. a "Last week
-            //      summary" entry where the chip used to send just the chip
-            //      label) don't compete for the user's attention while
-            //      they're reading the current answer.
-            if expandedEntry == nil {
-                if let latest = history.first {
-                    Button {
-                        expandedEntry = latest
-                    } label: {
-                        entryCard(latest, isLatest: true)
-                    }
-                    .buttonStyle(.plain)
-                }
+            if let latest = history.first {
+                entryCard(latest, isLatest: true)
+            }
 
-                if history.count > 1 {
-                    HStack {
-                        Text("History")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                        Spacer()
-                        Button("Clear") {
-                            history = []
-                            QAEntry.saveHistory(history)
-                        }
+            if history.count > 1 {
+                HStack {
+                    Text("History")
                         .font(.caption)
-                        .buttonStyle(.borderless)
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                    Button("Clear") {
+                        history = []
+                        QAEntry.saveHistory(history)
                     }
-                    .padding(.top, 4)
+                    .font(.caption)
+                    .buttonStyle(.borderless)
+                }
+                .padding(.top, 4)
 
-                    ScrollView {
-                        LazyVStack(alignment: .leading, spacing: 8) {
-                            ForEach(history.dropFirst()) { entry in
-                                Button {
-                                    expandedEntry = entry
-                                } label: {
-                                    entryCard(entry, isLatest: false)
-                                }
-                                .buttonStyle(.plain)
-                            }
+                ScrollView {
+                    LazyVStack(alignment: .leading, spacing: 8) {
+                        ForEach(history.dropFirst()) { entry in
+                            entryCard(entry, isLatest: false)
                         }
                     }
-                    .frame(maxHeight: 200)
                 }
+                .frame(maxHeight: 240)
             }
         }
         .padding(.horizontal)
         .padding(.top, 8)
-        .sheet(item: $expandedEntry) { entry in
-            AnswerSheet(entry: entry)
-        }
     }
 
     @ViewBuilder
     private func entryCard(_ entry: QAEntry, isLatest: Bool) -> some View {
         VStack(alignment: .leading, spacing: 4) {
-            HStack(alignment: .top) {
-                Text(entry.question)
-                    .font(isLatest ? .subheadline.weight(.semibold) : .subheadline.weight(.medium))
-                    .multilineTextAlignment(.leading)
-                    .lineLimit(isLatest ? 3 : 2)
-                Spacer(minLength: 8)
-                Image(systemName: "arrow.up.left.and.arrow.down.right")
-                    .font(.caption2)
-                    .foregroundStyle(.tertiary)
-            }
+            Text(entry.question)
+                .font(isLatest ? .subheadline.weight(.semibold) : .subheadline.weight(.medium))
+                .multilineTextAlignment(.leading)
+                .lineLimit(isLatest ? 3 : 2)
+                .frame(maxWidth: .infinity, alignment: .leading)
             MarkdownText(entry.answer)
                 .font(.callout)
                 .foregroundStyle(isLatest ? .primary : .secondary)
-                .lineLimit(isLatest ? nil : 4)
                 .frame(maxWidth: .infinity, alignment: .leading)
+                .textSelection(.enabled)
         }
         .padding(10)
         .background(
             (isLatest ? Color.accentColor.opacity(0.08) : Color.gray.opacity(0.08)),
             in: RoundedRectangle(cornerRadius: 8)
         )
-        .contentShape(Rectangle())
     }
 
     private func submit() async {
@@ -215,46 +184,6 @@ struct AgentChatView: View {
         } catch {
             errorMessage = error.localizedDescription
         }
-    }
-}
-
-/// Full-screen-ish answer view. Two detents (.medium and .large) so the user
-/// can swipe between minimized and maximized, and a drag indicator at the top.
-private struct AnswerSheet: View {
-    let entry: QAEntry
-    @Environment(\.dismiss) private var dismiss
-
-    var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
-                    Text(entry.question)
-                        .font(.title3.weight(.semibold))
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    MarkdownText(entry.answer)
-                        .font(.body)
-                        .textSelection(.enabled)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }
-                .padding()
-            }
-            .navigationTitle("Answer")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        dismiss()
-                    } label: {
-                        Label("Dashboard", systemImage: "chevron.left")
-                    }
-                }
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Done") { dismiss() }
-                }
-            }
-        }
-        .presentationDetents([.medium, .large])
-        .presentationDragIndicator(.visible)
     }
 }
 
