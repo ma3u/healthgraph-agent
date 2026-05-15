@@ -1,63 +1,51 @@
 # Hackathon submission update — HealthGraph Agent: Apple Health → Aura, end-to-end
 
-Draft for a follow-up post to my original submission on the
-[Aura Agent Hackathon thread](https://community.neo4j.com/t/start-here-register-get-aura-credits-aura-agent-hackathon/77191/63).
+Draft for a follow-up post on the Neo4j community Aura Agent Hackathon thread.
+Trimmed to the forum's new-user limits: **4 embedded images, 2 links**.
 Paste the section below into the forum.
 
 ---
 
-Hi everyone — quick update on my submission ([healthgraph-agent](https://github.com/ma3u/healthgraph-agent)). Since my last post I've added a full set of Neo4j Aura elements on top of the original ETL + longevity-query foundation. The whole stack now runs **end-to-end**: iPhone → Aura graph → Aura Agent → iOS chat.
+Hi everyone — quick update on my submission. Since my last post I've added a full set of Neo4j Aura elements on top of the original ETL + longevity-query foundation. The whole stack now runs **end-to-end**: iPhone → Aura graph → Aura Agent → iOS chat. Everything is open source and reproducible.
 
-**README + docs:** https://github.com/ma3u/healthgraph-agent
-**Live Pages snapshot:** https://ma3u.github.io/healthgraph-agent/snapshot/
+→ Repo + README: https://github.com/ma3u/healthgraph-agent
+→ Live daily snapshot: https://ma3u.github.io/healthgraph-agent/snapshot/
 
 The submission is now built on **four pillars**, each backed by a Neo4j Aura primitive:
 
 ## 1. 🤖 Aura Agent (`HealthGraph Agent`)
 
-A longevity-focused assistant with **6 tools** — Text2Cypher + 5 parameterized Cypher templates: `health_overview`, `workout_recovery`, `longevity_trends`, `overtraining_check`, `exercise_balance`. MCP enabled, REST-invokable.
+A longevity-focused assistant with **6 tools** — Text2Cypher + 5 parameterized Cypher templates (`health_overview`, `workout_recovery`, `longevity_trends`, `overtraining_check`, `exercise_balance`). MCP enabled, REST-invokable.
 
-The big addition since my last post: the agent is **defined as code** via the new [Aura v2beta1 `/agents` API](https://neo4j.com/docs/aura/platform/api/specification/?urls.primaryName=Aura%20v2beta1) (thanks to [Ed Sandoval](https://www.linkedin.com/in/edsandoval) for pointing it out). The JSON is committed at [`agents/healthgraph-coach.json`](https://github.com/ma3u/healthgraph-agent/blob/main/agents/healthgraph-coach.json) and reconciled with one script ([`scripts/create_aura_agent.py`](https://github.com/ma3u/healthgraph-agent/blob/main/scripts/create_aura_agent.py)) supporting three modes: `status` (default — diff live vs file), `--pull` (live → file), `--push` (file → live, POST or PUT).
+The big addition: the agent is **defined as code** via the new Aura v2beta1 `/agents` API (thanks to Ed Sandoval for the pointer). The full agent JSON is committed at `agents/healthgraph-coach.json` and reconciled with one script (`scripts/create_aura_agent.py`) supporting three modes: `status` (default — diff live vs file), `--pull` (live → file), `--push` (file → live, POST or PUT). I keep a screenshot of the Console state in the repo for fidelity.
 
-While I was wiring the iPhone chat to this agent I caught — and fixed — a copy-paste bug in the `health_overview` Cypher template (it referenced `$workout_type` while the tool parameters were `$start_date`/`$end_date`, so the agent was reporting "tool is currently unavailable"). The rewritten template now returns daily metrics (RHR / HRV / steps / sleep_hours / workout_min / kcal / VO2max) for the requested window **plus** a rolling 30-day baseline ending the day before — exactly what the system prompt asks for. Round-tripped to live via `--push`; verified on-device.
+While wiring the iPhone chat I caught and fixed a copy-paste bug in the `health_overview` Cypher template — it referenced `$workout_type` while the tool parameters were `$start_date`/`$end_date`, so the agent was reporting "tool is currently unavailable". The rewritten template now returns daily metrics (RHR / HRV / steps / sleep_hours / workout_min / kcal / VO2max) for the requested window **plus** a rolling 30-day baseline ending the day before — exactly what the system prompt asks for.
 
-Three real Q&As captured at [`docs/AGENT_DEMO.md`](https://github.com/ma3u/healthgraph-agent/blob/main/docs/AGENT_DEMO.md):
-
-- *"What is my average resting heart rate over the last 30 days, and how does it compare to my all-time baseline?"* — grounded analysis with all-time avg `56.11 bpm` vs last-30 `57.82 bpm`, longevity context, four actionable recommendations.
-- *"Am I overtraining?"* — week-by-week breakdown across 12 weeks with `CAUTION` / `OK` flags, deload-week recommendation.
-- A "no data" failure case where the agent honestly reports a data gap instead of fabricating.
+Three real Q&As are captured at `docs/AGENT_DEMO.md` (in the repo): a grounded RHR analysis ("56.11 bpm all-time vs 57.82 bpm last-30"), a 12-week overtraining check with CAUTION flags + deload-week recommendations, and a "no data" failure case where the agent honestly reports a gap instead of fabricating.
 
 ![Aura Agent playground — longevity question](https://github.com/ma3u/healthgraph-agent/raw/main/docs/images/hackathon/01-aura-agent-playground-longevity-question.png)
 
 ## 2. 📊 Aura Dashboard
 
-Whoop-style NeoDash dashboard ([`neodash/whoop_dashboard.json`](https://github.com/ma3u/healthgraph-agent/blob/main/neodash/whoop_dashboard.json)) — **5 pages, 35 panels**: daily hero card (Recovery %, Strain 0–21, Sleep %), Recovery deep-dive, Strain deep-dive, Sleep deep-dive, and 8.5-year Health Monitor. Score formulas at [`docs/SCORING.md`](https://github.com/ma3u/healthgraph-agent/blob/main/docs/SCORING.md).
-
-Pushed into Aura's built-in *Tools → Dashboards* via [`scripts/upload_dashboard.py`](https://github.com/ma3u/healthgraph-agent/blob/main/scripts/upload_dashboard.py) — idempotent (deterministic UUID per title).
+Whoop-style NeoDash dashboard at `neodash/whoop_dashboard.json` — **5 pages, 35 panels**: daily hero card (Recovery %, Strain 0–21, Sleep %), Recovery deep-dive, Strain deep-dive, Sleep deep-dive, and 8.5-year Health Monitor. Score formulas in `docs/SCORING.md`. Pushed into Aura's built-in *Tools → Dashboards* via `scripts/upload_dashboard.py` — idempotent (deterministic UUID per title).
 
 ![Aura Dashboard — Whoop-style Recovery view](https://github.com/ma3u/healthgraph-agent/raw/main/docs/images/hackathon/02-aura-dashboard-whoop-recovery.png)
 
 ## 3. 🔍 Aura GraphQL Data API + GitHub Pages
 
-**GraphQL Data API**: curated SDL with `@cypher` MERGE mutations (`ingestDay` / `ingestWorkout` / `ingestSleep`) at [`cypher/graphql_schema.graphql`](https://github.com/ma3u/healthgraph-agent/blob/main/cypher/graphql_schema.graphql). Deployed against the live tenant via [`scripts/create_aura_data_api.py`](https://github.com/ma3u/healthgraph-agent/blob/main/scripts/create_aura_data_api.py) — `aura-cli` v1.8.0 has no `data-api` commands, so the script hits the `v1beta5` REST endpoints directly. All three mutations smoke-tested + idempotent.
+**GraphQL Data API**: curated SDL with `@cypher` MERGE mutations (`ingestDay` / `ingestWorkout` / `ingestSleep`) at `cypher/graphql_schema.graphql`. Deployed against the live tenant via `scripts/create_aura_data_api.py` — `aura-cli` v1.8.0 has no `data-api` commands, so the script hits the `v1beta5` REST endpoints directly. All three mutations smoke-tested + idempotent.
 
-**GitHub Pages**: daily Recovery snapshot rendered by [`scripts/render_snapshot.py`](https://github.com/ma3u/healthgraph-agent/blob/main/scripts/render_snapshot.py), committed by a GitHub Actions workflow on a 06:30 UTC cron (auto-resumes paused Aura instances). Served at **[ma3u.github.io/healthgraph-agent/snapshot/](https://ma3u.github.io/healthgraph-agent/snapshot/)**.
+**GitHub Pages**: daily Recovery snapshot rendered by `scripts/render_snapshot.py`, committed by a GitHub Actions workflow on a 06:30 UTC cron (auto-resumes paused Aura instances). The live link is in the header above.
 
-| GraphQL Data API — schema overview | Daily pipeline → renders the Pages dashboard |
-| --- | --- |
-| ![GraphQL Data API schema](https://github.com/ma3u/healthgraph-agent/raw/main/docs/images/hackathon/03-aura-graphql-data-api-schema.png) | ![Daily GitHub Actions pipeline](https://github.com/ma3u/healthgraph-agent/raw/main/docs/images/hackathon/04-daily-github-actions-pipeline.png) |
-
-![GitHub Pages — daily Recovery snapshot](https://github.com/ma3u/healthgraph-agent/raw/main/docs/images/hackathon/05-github-pages-recovery-snapshot.png)
+![GitHub Pages — daily Recovery snapshot rendered from the Aura graph](https://github.com/ma3u/healthgraph-agent/raw/main/docs/images/hackathon/05-github-pages-recovery-snapshot.png)
 
 ## 4. 📱 iPhone App — HealthKit sync + "Ask your graph"
 
-`HealthGraphSync` iOS app ([`ios/`](https://github.com/ma3u/healthgraph-agent/tree/main/ios)) — Swift 6 / iOS 26.5 SDK. Reads HealthKit **on-device**, queries Aura for `max(Day.date)`, scans HealthKit since then, presents the per-type delta, then uploads via the three GraphQL `@cypher` mutations. Includes `Rescan last 30 days` and `Rescan last 365 days` flows for backfilling partial days. Verified end-to-end on real **iPhone 17 Pro** — graph grew from 3,087 → 3,117 `:Day` nodes after first sync.
+`HealthGraphSync` iOS app — Swift 6 / iOS 26.5 SDK. Reads HealthKit **on-device**, queries Aura for `max(Day.date)`, scans HealthKit since then, presents the per-type delta, then uploads via the three GraphQL `@cypher` mutations. Includes `Rescan last 30 days` and `Rescan last 365 days` flows. Verified end-to-end on real **iPhone 17 Pro** — graph grew from 3,087 → 3,117 `:Day` nodes after first sync.
 
-The Dashboard tab embeds an **"Ask your graph"** panel that calls the same `HealthGraph Agent` `/invoke` endpoint as the REST demo above — OAuth2 client-credentials → Bearer JWT. Four suggestion chips (`Last week summary` / `Overtraining check` / `Best workout day` / `Sleep vs HRV`) compute concrete date ranges at tap time (ISO Mon–Sun for "last week", last 12 weeks for overtraining, last 30 / 60 days for workout-HRV correlations) so the agent always gets specific dates — no more "please specify start and end dates" replies. The fresh answer auto-opens in a draggable sheet overlay on top of the dashboard (`.medium` / `.large` detents — swipe between them), with full Markdown rendering via `AttributedString(markdown:)`: paragraphs, `*`/`-` bullets, `N.` numbered lists, inline `**bold**` / `*italic*` / `` `code` ``, and the trend arrows (↑ improving, ↓ declining, → stable) the agent emits in its longevity analysis.
+The Dashboard tab embeds an **"Ask your graph"** panel that calls the same `HealthGraph Agent` `/invoke` endpoint via OAuth2 client-credentials. Four suggestion chips compute concrete date ranges at tap time (ISO Mon–Sun for "last week", last 12 weeks for overtraining, last 30 / 60 days for workout-HRV correlations) so the agent always gets specific dates. The fresh answer auto-opens in a draggable overlay (`.medium` / `.large` detents) on top of the dashboard, with full Markdown rendering via `AttributedString(markdown:)` — paragraphs, bullets, numbered lists, inline `**bold**` / `*italic*` / `` `code` ``, and the trend arrows (↑ improving, ↓ declining, → stable) the agent emits.
 
-| iPhone Sync — delta upload to Aura | Dashboard — "Ask your graph" | Answer overlay with Markdown |
-| --- | --- | --- |
-| ![iPhone HealthKit sync — delta upload to Aura](https://github.com/ma3u/healthgraph-agent/raw/main/docs/images/hackathon/06-iphone-healthkit-sync-delta-upload.jpeg) | ![iPhone Dashboard — Ask your graph powered by Aura Agent](https://github.com/ma3u/healthgraph-agent/raw/main/docs/images/hackathon/07-iphone-dashboard-ask-your-graph.jpeg) | ![iPhone Answer overlay — grounded longevity analysis with Markdown rendering and trend arrows](https://github.com/ma3u/healthgraph-agent/raw/main/docs/images/hackathon/08-iphone-agent-answer-overlay-markdown.jpeg) |
+![iPhone Answer overlay — grounded longevity analysis with Markdown rendering, trend arrows, and real numbers from the fixed health_overview tool](https://github.com/ma3u/healthgraph-agent/raw/main/docs/images/hackathon/08-iphone-agent-answer-overlay-markdown.jpeg)
 
 ## BYO Aura
 
@@ -70,11 +58,8 @@ The whole thing is **bring-your-own-Aura**: every installer points the iOS app a
 
 ## Issues closed during this stretch
 
-- [#2 Apple Health Sync to Aura + In-app Dashboard](https://github.com/ma3u/healthgraph-agent/issues/2)
-- [#3 GraphQL Data API for iOS + GitHub Pages personal dashboard](https://github.com/ma3u/healthgraph-agent/issues/3)
-- [#4 Aura Agent integration + Neo4j Skills](https://github.com/ma3u/healthgraph-agent/issues/4)
-- [#6 HealthGraphCoach as code via Aura v2beta1 `/agents`](https://github.com/ma3u/healthgraph-agent/issues/6)
+`#2` Apple Health Sync to Aura + In-app Dashboard · `#3` GraphQL Data API + Pages dashboard · `#4` Aura Agent integration + Neo4j Skills · `#6` HealthGraphCoach as code via Aura v2beta1 `/agents`.
 
 Feedback welcome 🙏 — particularly on whether the agent's tool selection feels right, and on the `v2beta1` agents-as-code workflow (super useful, please keep going with it).
 
-— Matthias / [@ma3u](https://github.com/ma3u)
+— Matthias / @ma3u
