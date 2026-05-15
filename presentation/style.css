@@ -62,6 +62,19 @@
   opacity: 0.6;
 }
 
+/* Title slide — text over the background image. The dark scrim div in
+ * slides.md does most of the work; these shadows add the last bit of
+ * contrast so the white headline stays crisp over bright image regions. */
+.cover-slide h1 {
+  text-shadow: 0 2px 30px rgba(0, 0, 0, 0.7);
+}
+.cover-slide .kicker {
+  text-shadow: 0 1px 14px rgba(0, 0, 0, 0.85);
+}
+.cover-slide .text-xl {
+  text-shadow: 0 1px 16px rgba(0, 0, 0, 0.8);
+}
+
 /* Source chips — small pill tags for the fragmented-data-sources list */
 .chip {
   display: inline-block;

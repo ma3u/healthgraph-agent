@@ -8,7 +8,7 @@ info: |
 
   Neo4j Theatre @ WeAreDevelopers Berlin 2026
   Speaker: Matthias Buchhorn-Roth · github.com/ma3u
-class: text-center
+class: text-center cover-slide
 highlighter: shiki
 lineNumbers: true
 drawings:
@@ -20,17 +20,24 @@ fonts:
 transition: fade-out
 ---
 
+<img src="/cover-bg.jpg" class="absolute inset-0 w-full h-full object-cover z-0" />
+<div class="absolute inset-0 z-1" style="background: linear-gradient(180deg, rgba(6,10,17,0.74) 0%, rgba(6,10,17,0.88) 100%)"></div>
+
+<div class="relative z-10">
+
 <div class="kicker">Neo4j Theatre · WeAreDevelopers Berlin 2026</div>
 
 # From Apple Health to Aura Agent
 
-<div class="text-xl opacity-80 mt-4">
+<div class="text-xl opacity-90 mt-4">
   Build a Whoop-style coach for your own data.<br/>
   Escape the vendor lock-in.
 </div>
 
-<div class="absolute bottom-12 left-0 right-0 text-center font-mono text-sm opacity-50">
-  Matthias Buchhorn-Roth · <span class="opacity-80">@ma3u</span>
+</div>
+
+<div class="absolute bottom-12 left-0 right-0 text-center font-mono text-sm opacity-70 z-10">
+  Matthias Buchhorn-Roth · <span class="opacity-90">@ma3u</span>
 </div>
 
 <!--
