@@ -86,37 +86,15 @@
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.18);
 }
 
-/* Auto-fade Slidev's slide-list / page-jump popover after a few seconds.
- * The popover appears when you click the slide counter in the bottom toolbar
- * and would otherwise stay until you click outside — distracting during a
- * live talk. Hover or focus pauses the fade. */
-.slidev-page-list,
-.slidev-page-list-popover,
-[class*="slides-list"],
-[class*="page-jump"] {
-  animation: slidev-auto-fade 5s ease-out 1.5s forwards;
-}
-
-.slidev-page-list:hover,
-.slidev-page-list-popover:hover,
-[class*="slides-list"]:hover,
-[class*="page-jump"]:hover,
-.slidev-page-list:focus-within,
-.slidev-page-list-popover:focus-within,
-[class*="slides-list"]:focus-within,
-[class*="page-jump"]:focus-within {
-  animation: none;
-  opacity: 1 !important;
-}
-
-@keyframes slidev-auto-fade {
-  0%, 50% {
-    opacity: 1;
-    pointer-events: auto;
-  }
-  100% {
-    opacity: 0;
-    pointer-events: none;
-    visibility: hidden;
-  }
+/* Disable Slidev's "Goto" dialog (#slidev-goto-dialog).
+ *
+ * It opens on the `g` key and renders a fixed right-side list of every
+ * slide (gray number + title, "undefined" for heading-less slides). It is
+ * supposed to auto-close when focus leaves it — but that relies on
+ * document.activeElement changing, which touch taps on iPad/iOS do NOT
+ * trigger. Result: on a touch device it gets stuck open and covers the
+ * slide content. A live talk navigates with arrows / space / tap, never
+ * type-to-jump, so the whole dialog is safe to remove. */
+#slidev-goto-dialog {
+  display: none !important;
 }
