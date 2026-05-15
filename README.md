@@ -72,9 +72,7 @@ Whoop-style NeoDash dashboard in [`neodash/whoop_dashboard.json`](neodash/whoop_
 
 **GraphQL Data API**: curated SDL with `@cypher` MERGE mutations (`ingestDay` / `ingestWorkout` / `ingestSleep`) — [`cypher/graphql_schema.graphql`](cypher/graphql_schema.graphql). Deployed against the live tenant via [`scripts/create_aura_data_api.py`](scripts/create_aura_data_api.py) (hits `v1beta5` Aura platform REST directly; aura-cli has no `data-api` command). All three mutations smoke-tested + idempotent ([`scripts/test_aura_mutations.py`](scripts/test_aura_mutations.py)).
 
-| GraphQL Data API — schema overview | Daily pipeline → renders the Pages dashboard |
-| --- | --- |
-| ![GraphQL Data API — schema overview](docs/images/hackathon/03-aura-graphql-data-api-schema.png) | ![Daily GitHub Actions pipeline runs the GraphQL Data API and renders the Pages dashboard](docs/images/hackathon/04-daily-github-actions-pipeline.png) |
+![GraphQL Data API schema (top) and the daily GitHub Actions pipeline that runs against it (bottom)](docs/images/hackathon/10-graphql-data-api-pipeline.png)
 
 **GitHub Page**: daily Recovery snapshot rendered by [`scripts/render_snapshot.py`](scripts/render_snapshot.py), committed by [`.github/workflows/snapshot.yml`](.github/workflows/snapshot.yml) on a 06:30 UTC cron (auto-resumes paused Aura instances), served at **[`ma3u.github.io/healthgraph-agent/snapshot/`](https://ma3u.github.io/healthgraph-agent/snapshot/)**. Tracked in [#3](https://github.com/ma3u/healthgraph-agent/issues/3).
 
@@ -91,9 +89,7 @@ bash scripts/build_ios.sh
 
 The Dashboard tab embeds an **"Ask your graph"** panel ([`AgentChatView.swift`](ios/HealthGraphSync/Sources/HealthGraphSync/AgentChatView.swift)) that talks to the Pillar 1 Aura Agent's `/invoke` endpoint via OAuth client-credentials. Four suggestion chips compute concrete date ranges at tap time (ISO Mon–Sun for "Last week summary", last 12 weeks for overtraining, last 30 / 60 days for workout-HRV correlations) so the agent always gets specific dates — not vague phrases. The fresh answer auto-opens in a draggable sheet overlay (`.medium` / `.large` detents) on top of the dashboard, with full Markdown rendering — paragraphs, `*`/`-` bullets, `N.` numbered lists, inline `**bold**` / `*italic*` / `` `code` `` via `AttributedString(markdown:)`, plus trend arrows (↑ improving, ↓ declining, → stable) the agent emits in its longevity analysis.
 
-| iPhone Sync — delta upload | Dashboard — "Ask your graph" | Answer overlay with Markdown |
-| --- | --- | --- |
-| ![iPhone HealthKit sync — delta upload to Aura](docs/images/hackathon/06-iphone-healthkit-sync-delta-upload.jpeg) | ![iPhone Dashboard — Ask your graph powered by Aura Agent](docs/images/hackathon/07-iphone-dashboard-ask-your-graph.jpeg) | ![iPhone Answer overlay — grounded longevity analysis with Markdown rendering and trend arrows](docs/images/hackathon/08-iphone-agent-answer-overlay-markdown.jpeg) |
+![iPhone HealthGraphSync end-to-end — HealthKit delta upload to Aura, "Ask your graph" Dashboard panel, and the auto-opening answer overlay with Markdown rendering and trend arrows](docs/images/hackathon/09-iphone-trio-sync-ask-answer.jpeg)
 
 ---
 

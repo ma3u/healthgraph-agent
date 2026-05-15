@@ -45,7 +45,7 @@ Whoop-style NeoDash dashboard at `neodash/whoop_dashboard.json` — **5 pages, 3
 
 The Dashboard tab embeds an **"Ask your graph"** panel that calls the same `HealthGraph Agent` `/invoke` endpoint via OAuth2 client-credentials. Four suggestion chips compute concrete date ranges at tap time (ISO Mon–Sun for "last week", last 12 weeks for overtraining, last 30 / 60 days for workout-HRV correlations) so the agent always gets specific dates. The fresh answer auto-opens in a draggable overlay (`.medium` / `.large` detents) on top of the dashboard, with full Markdown rendering via `AttributedString(markdown:)` — paragraphs, bullets, numbered lists, inline `**bold**` / `*italic*` / `` `code` ``, and the trend arrows (↑ improving, ↓ declining, → stable) the agent emits.
 
-![iPhone Answer overlay — grounded longevity analysis with Markdown rendering, trend arrows, and real numbers from the fixed health_overview tool](https://github.com/ma3u/healthgraph-agent/raw/main/docs/images/hackathon/08-iphone-agent-answer-overlay-markdown.jpeg)
+![iPhone HealthGraphSync end-to-end — HealthKit delta upload, "Ask your graph" Dashboard panel, and the auto-opening answer overlay with Markdown rendering, trend arrows, and real numbers from the fixed health_overview tool](https://github.com/ma3u/healthgraph-agent/raw/main/docs/images/hackathon/09-iphone-trio-sync-ask-answer.jpeg)
 
 ## BYO Aura
 
