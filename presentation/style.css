@@ -1,0 +1,75 @@
+/* Modern minimalist overrides for the seriph theme.
+ * Tightens spacing, makes code blocks subtler, and replaces the default
+ * serif body with Inter for a less "academic paper", more "product" feel.
+ */
+
+:root {
+  --slidev-code-radius: 8px;
+}
+
+.slidev-layout {
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Text",
+    "Segoe UI", system-ui, sans-serif;
+}
+
+.slidev-layout h1,
+.slidev-layout h2,
+.slidev-layout h3 {
+  font-family: "Inter", system-ui, sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.slidev-layout h1 {
+  font-weight: 700;
+}
+
+/* Tighter inline code */
+.slidev-layout code:not(pre code) {
+  font-size: 0.9em;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: rgba(127, 127, 127, 0.12);
+}
+
+/* Subtle "kicker" text used on title-y slides */
+.kicker {
+  font-size: 0.9rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--slidev-theme-primary, #8b5cf6);
+  font-weight: 600;
+}
+
+/* Stat block — big number + tiny label */
+.stat {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+}
+.stat .n {
+  font-size: 2.8rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+.stat .l {
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.6;
+}
+
+/* Two-up image rows with rounded corners */
+.img-row {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 12px;
+}
+.img-row img {
+  border-radius: 12px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.18);
+}
