@@ -20,14 +20,25 @@ final class SyncCoordinator: ObservableObject {
 
     private let healthKit = HealthKitService.shared
 
+    /// Scans HealthKit since Aura's latest Day.date. Used when the user just
+    /// wants the incremental delta.
     func loadPreview(token: String, endpoint: URL) async {
+        await runPreview(token: token, endpoint: endpoint, sinceOverride: nil)
+    }
+
+    /// Scans HealthKit for a fixed window (default last 30 days), regardless
+    /// of what Aura already has. Useful for backfilling days that were
+    /// partially synced before some HealthKit permissions were granted —
+    /// MERGE-idempotent ingest cleanly overwrites partial DailySummary rows.
+    func loadRescan(daysBack: Int, token: String, endpoint: URL) async {
+        let since = Calendar.current.date(byAdding: .day, value: -daysBack, to: Date()) ?? Date()
+        await runPreview(token: token, endpoint: endpoint, sinceOverride: since)
+    }
+
+    private func runPreview(token: String, endpoint: URL, sinceOverride: Date?) async {
         phase = .loadingPreview
         do {
-            // Ask Aura for the most recent Day.date
-            struct LatestDayResult: Decodable {
-                let max: String?
-            }
-            // Aura GraphQL Library v6+ syntax: sort and limit are top-level args
+            // Still query Aura's latest day so the UI shows where we are now.
             let query = """
             query LatestDay {
               days(sort: [{ date: DESC }], limit: 1) {
@@ -44,13 +55,16 @@ final class SyncCoordinator: ObservableObject {
             )
             auraLatestDay = days.first?.date
 
-            let since: Date = {
-                if let isoString = auraLatestDay,
-                   let date = ISO8601DateFormatter.dateOnly.date(from: isoString) {
-                    return Calendar.current.startOfDay(for: date)
-                }
-                return Calendar.current.date(byAdding: .day, value: -30, to: Date()) ?? Date()
-            }()
+            let since: Date
+            if let override = sinceOverride {
+                since = override
+            } else if let isoString = auraLatestDay,
+                      let date = ISO8601DateFormatter.dateOnly.date(from: isoString) {
+                since = Calendar.current.startOfDay(for: date)
+            } else {
+                since = Calendar.current.date(byAdding: .day, value: -30, to: Date()) ?? Date()
+            }
+
             let scan = try await healthKit.deltaScan(since: since)
             delta = scan
             phase = .awaitingConfirmation

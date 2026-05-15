@@ -8,7 +8,7 @@ struct SyncView: View {
     var body: some View {
         NavigationStack {
             List {
-                Section("Sync to your Aura") {
+                Section {
                     Button {
                         guard let token = auth.idToken,
                               let endpoint = auth.connection?.graphqlURL else { return }
@@ -17,6 +17,22 @@ struct SyncView: View {
                         Label("Check what's missing", systemImage: "magnifyingglass")
                     }
                     .disabled(isBusy)
+
+                    Button {
+                        guard let token = auth.idToken,
+                              let endpoint = auth.connection?.graphqlURL else { return }
+                        Task { await sync.loadRescan(daysBack: 30, token: token, endpoint: endpoint) }
+                    } label: {
+                        Label("Rescan last 30 days (backfill)", systemImage: "arrow.counterclockwise")
+                    }
+                    .disabled(isBusy)
+                } header: {
+                    Text("Sync to your Aura")
+                } footer: {
+                    Text("*Check what's missing* uploads only data newer than Aura's latest day. " +
+                         "*Rescan last 30 days* overwrites the last 30 days regardless — use after " +
+                         "granting new HealthKit permissions so partial days get filled in.")
+                        .foregroundStyle(.secondary)
                 }
 
                 if let latest = sync.auraLatestDay {
