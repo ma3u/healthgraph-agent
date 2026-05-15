@@ -682,10 +682,34 @@ class: text-center
 
 # Thanks 🙏
 
-<div class="text-xl opacity-70 mt-6">
+<div class="text-xl opacity-70 mt-2">
   Questions?
 </div>
 
-<div class="absolute bottom-12 left-0 right-0 text-center font-mono text-sm opacity-50">
-  Matthias Buchhorn-Roth · <span class="opacity-80">@ma3u</span> · github.com/ma3u/healthgraph-agent
+<div class="flex items-center justify-center gap-10 mt-10">
+
+<div class="flex flex-col items-center gap-2">
+  <img src="/linkedin-qr.png" class="w-40 h-40" />
+  <div class="flex items-center gap-2 text-sm">
+    <div class="i-material-symbols-link text-lg opacity-60" />
+    <span class="font-mono">linkedin.com/in/mbuchhorn</span>
+  </div>
+  <div class="text-xs opacity-50">Let's connect</div>
+</div>
+
+<div class="text-left text-sm flex flex-col gap-2">
+  <div class="flex items-center gap-2">
+    <div class="i-material-symbols-person-outline text-lg opacity-60" />
+    <span class="font-semibold">Matthias Buchhorn-Roth</span>
+  </div>
+  <div class="flex items-center gap-2 opacity-70">
+    <div class="i-material-symbols-code text-lg opacity-60" />
+    <span class="font-mono">github.com/ma3u</span>
+  </div>
+  <div class="flex items-center gap-2 opacity-70">
+    <div class="i-material-symbols-folder-data-outline text-lg opacity-60" />
+    <span class="font-mono">github.com/ma3u/healthgraph-agent</span>
+  </div>
+</div>
+
 </div>
