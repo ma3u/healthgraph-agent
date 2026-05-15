@@ -115,7 +115,11 @@ struct AgentChatView: View {
                     .foregroundStyle(.red)
             }
 
-            if let latest = history.first {
+            // Hide whichever entry the sheet is currently showing, so the
+            // answer doesn't appear in two places at once (inline + sheet).
+            let visible = history.filter { $0.id != expandedEntry?.id }
+
+            if let latest = visible.first {
                 Button {
                     expandedEntry = latest
                 } label: {
@@ -124,14 +128,14 @@ struct AgentChatView: View {
                 .buttonStyle(.plain)
             }
 
-            if history.count > 1 {
+            if visible.count > 1 {
                 Text("History")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .padding(.top, 4)
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: 8) {
-                        ForEach(history.dropFirst()) { entry in
+                        ForEach(visible.dropFirst()) { entry in
                             Button {
                                 expandedEntry = entry
                             } label: {
@@ -221,6 +225,13 @@ private struct AnswerSheet: View {
             .navigationTitle("Answer")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        dismiss()
+                    } label: {
+                        Label("Dashboard", systemImage: "chevron.left")
+                    }
+                }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Done") { dismiss() }
                 }
