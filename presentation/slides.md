@@ -71,13 +71,22 @@ Both keep my data hostage. I want both, on my own data.
 
 # The problem you also have
 
-<div class="grid grid-cols-1 gap-4 mt-6">
+<div class="grid grid-cols-1 gap-3 mt-4">
 
 <div class="flex items-start gap-4">
   <div class="i-material-symbols-database-outline text-3xl text-rose-500 mt-1 shrink-0" />
   <div>
-    <div class="font-semibold">Your fitness tracker is a silo.</div>
-    <div class="opacity-70 text-sm">Apple Health shows charts. Whoop, Oura, Garmin monetize lock-in. None of them coach you across vendors.</div>
+    <div class="font-semibold">Your health data lives in a dozen silos.</div>
+    <div class="opacity-70 text-sm">Apple Health is just one. I also want blood panels, my gym, my classes, the German ePA. None of them talk to each other:</div>
+    <div class="flex flex-wrap gap-1.5 mt-2">
+      <span class="chip">Apple Health</span>
+      <span class="chip">Aware</span>
+      <span class="chip">Blood tests</span>
+      <span class="chip">ePA</span>
+      <span class="chip">Medical studies</span>
+      <span class="chip">eGym</span>
+      <span class="chip">Beat81</span>
+    </div>
   </div>
 </div>
 
@@ -101,12 +110,22 @@ Both keep my data hostage. I want both, on my own data.
 
 <v-click>
 
-<div class="mt-8 text-lg flex items-center gap-3">
+<div class="mt-6 text-lg flex items-center gap-3">
   <div class="i-material-symbols-rocket-launch-outline text-2xl text-amber-500" />
-  You're a developer. You can fix all three. In a weekend.
+  You're a developer. One graph unifies every silo.
 </div>
 
 </v-click>
+
+<!--
+Speaker: Apple Health was my starting point, but the real vision is broader.
+Blood panels, the German ePA (national electronic patient record), the eGym
+strength machines, my Beat81 HIIT classes, Aware, even findings from medical
+studies. Seven sources, seven silos. A graph is the one model that lets all
+of them share nodes — the same :Day, the same :Person — instead of seven
+disconnected exports.
+-->
+
 
 <!--
 Speaker: Three pains, one developer-shaped solution. Spend the next 20 minutes
