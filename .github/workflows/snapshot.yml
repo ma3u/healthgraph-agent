@@ -1,15 +1,17 @@
 name: Daily Recovery snapshot
 
 # Runs once a day. Auto-resumes the paused Aura instance, queries it,
-# regenerates docs/snapshot/index.html, commits if changed.
-# The committed HTML contains only Recovery % + zone + date + streak counts.
-# Raw biometric values never leave the runner.
+# regenerates docs/snapshot/index.html, commits if changed, then PAUSES
+# the instance again. Total instance uptime per run is ~2-3 minutes —
+# critical for keeping hackathon credits intact on professional-db tier
+# (which does NOT auto-pause; only Free/AuraDS do).
+#
+# The committed HTML contains only Recovery % + zone + date + streak
+# counts. Raw biometric values never leave the runner.
 
 on:
   schedule:
     # 06:30 UTC = 08:30 CEST in summer / 07:30 CET in winter
-    # After the laptop auto-resume cron (08:00 local) in case that ran first,
-    # and well before the local pause cron (23:00 local) fires.
     - cron: "30 6 * * *"
   workflow_dispatch: {}  # allow manual runs from the Actions tab
 
@@ -54,3 +56,15 @@ jobs:
             git commit -m "snapshot: $(date -u +%Y-%m-%d)"
             git push
           fi
+
+      # Pause the instance to stop credit drain.
+      # `if: always()` so we still pause even if render or commit failed —
+      # the worst case is the instance stays running, which is exactly
+      # what we're trying to avoid. Costs ~$7-10/day on professional-db.
+      - name: Pause Aura instance
+        if: always()
+        env:
+          AURA_INSTANCEID: ${{ secrets.AURA_INSTANCEID }}
+          AURA_CLIENT_ID: ${{ secrets.AURA_CLIENT_ID }}
+          AURA_CLIENT_SECRET: ${{ secrets.AURA_CLIENT_SECRET }}
+        run: bash scripts/aura_pause.sh pause
