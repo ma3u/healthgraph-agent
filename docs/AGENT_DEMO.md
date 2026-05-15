@@ -104,7 +104,7 @@ in the agent.)
 ## How this was captured
 
 ```sh
-/tmp/aura-venv/bin/python scripts/create_aura_agent.py    # confirms agent, writes .env
+python scripts/create_aura_agent.py    # confirms agent, writes .env
 
 curl -s -X POST "$AURA_AGENT_URL" \
   -H "Authorization: Bearer $TOKEN" \

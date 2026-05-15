@@ -10,8 +10,8 @@ Reads from .env:
   AURA_GRAPHQL_DATA_API_ID              (created by create_aura_data_api.py)
   AUTH0_DOMAIN                          (e.g. healthgraph.us.auth0.com)
 
-Run from repo root:
-  /tmp/aura-venv/bin/python scripts/add_auth0_jwks_provider.py
+Run from repo root (after `pip install -r requirements.txt`):
+  python scripts/add_auth0_jwks_provider.py
 """
 
 from __future__ import annotations

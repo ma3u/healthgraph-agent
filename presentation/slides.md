@@ -684,10 +684,12 @@ github.com/ma3u/healthgraph-agent
 ```bash
 git clone https://github.com/ma3u/healthgraph-agent
 cd healthgraph-agent
-cp .env.example .env   # fill in AURA_CLIENT_ID / SECRET / INSTANCEID
-/tmp/aura-venv/bin/python scripts/create_aura_data_api.py
-/tmp/aura-venv/bin/python scripts/create_aura_agent.py
-bash scripts/build_ios.sh
+cp .env.example .env          # add your Aura API credentials
+pip install -r requirements.txt
+
+python scripts/create_aura_data_api.py   # GraphQL Data API
+python scripts/create_aura_agent.py      # Aura Agent
+bash scripts/build_ios.sh                # iPhone app
 ```
 
 <div class="mt-6 opacity-70 text-sm">

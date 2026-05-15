@@ -15,8 +15,8 @@ Always appends AURA_AGENT_URL / AURA_AGENT_TOKEN_URL / AURA_AGENT_CLIENT_ID /
 AURA_AGENT_CLIENT_SECRET to .env if the agent exists, so scripts/build_ios.sh
 can patch the iOS app's "Ask your graph" panel.
 
-Run:
-  /tmp/aura-venv/bin/python scripts/create_aura_agent.py
+Run (after `pip install -r requirements.txt`):
+  python scripts/create_aura_agent.py
 """
 
 from __future__ import annotations

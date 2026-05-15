@@ -1,0 +1,8 @@
+# Dependencies for the Aura provisioning scripts in scripts/.
+# The scripts use only the Python standard library for HTTP (urllib),
+# so python-dotenv (reading .env) is the single third-party requirement.
+#
+#   pip install -r requirements.txt
+#
+# The ETL pipeline has its own pinned set in etl/requirements.txt.
+python-dotenv>=1.0

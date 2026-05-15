@@ -15,8 +15,8 @@ Output: appends AURA_GRAPHQL_DATA_API_ID, AURA_GRAPHQL_URL, and
 AURA_GRAPHQL_API_KEY to .env. The API key is shown ONCE — save it now or
 generate a new one via the console.
 
-Run:
-  /tmp/aura-venv/bin/python scripts/create_aura_data_api.py
+Run (after `pip install -r requirements.txt`):
+  python scripts/create_aura_data_api.py
 """
 
 from __future__ import annotations
