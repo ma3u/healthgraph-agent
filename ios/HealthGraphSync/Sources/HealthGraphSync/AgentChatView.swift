@@ -115,37 +115,53 @@ struct AgentChatView: View {
                     .foregroundStyle(.red)
             }
 
-            // Hide whichever entry the sheet is currently showing, so the
-            // answer doesn't appear in two places at once (inline + sheet).
-            let visible = history.filter { $0.id != expandedEntry?.id }
-
-            if let latest = visible.first {
-                Button {
-                    expandedEntry = latest
-                } label: {
-                    entryCard(latest, isLatest: true)
+            // Hide all inline content while the sheet is showing an answer.
+            // Two motivations:
+            //   1. Stop the visible duplication where the same answer shows
+            //      both behind the dimmed sheet and inside it.
+            //   2. Stale entries from earlier app versions (e.g. a "Last week
+            //      summary" entry where the chip used to send just the chip
+            //      label) don't compete for the user's attention while
+            //      they're reading the current answer.
+            if expandedEntry == nil {
+                if let latest = history.first {
+                    Button {
+                        expandedEntry = latest
+                    } label: {
+                        entryCard(latest, isLatest: true)
+                    }
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
-            }
 
-            if visible.count > 1 {
-                Text("History")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                if history.count > 1 {
+                    HStack {
+                        Text("History")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                        Button("Clear") {
+                            history = []
+                            QAEntry.saveHistory(history)
+                        }
+                        .font(.caption)
+                        .buttonStyle(.borderless)
+                    }
                     .padding(.top, 4)
-                ScrollView {
-                    LazyVStack(alignment: .leading, spacing: 8) {
-                        ForEach(visible.dropFirst()) { entry in
-                            Button {
-                                expandedEntry = entry
-                            } label: {
-                                entryCard(entry, isLatest: false)
+
+                    ScrollView {
+                        LazyVStack(alignment: .leading, spacing: 8) {
+                            ForEach(history.dropFirst()) { entry in
+                                Button {
+                                    expandedEntry = entry
+                                } label: {
+                                    entryCard(entry, isLatest: false)
+                                }
+                                .buttonStyle(.plain)
                             }
-                            .buttonStyle(.plain)
                         }
                     }
+                    .frame(maxHeight: 200)
                 }
-                .frame(maxHeight: 200)
             }
         }
         .padding(.horizontal)

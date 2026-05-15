@@ -28,9 +28,9 @@
             "name": "end_date"
           }
         ],
-        "template": "MATCH (w:Workout)-[:ON_DAY]->(d:Day)-[:HAS_SUMMARY]->(s:DailySummary)\nOPTIONAL MATCH (d)-[:NEXT_DAY]->(d2:Day)-[:HAS_SUMMARY]->(s2:DailySummary)\nOPTIONAL MATCH (w)-[:FOLLOWED_BY]->(sl:SleepSession)\nWHERE w.activity_type = $workout_type\nRETURN d.date AS workout_date,\n       w.duration_min AS duration,\n       w.total_energy_burned AS energy,\n       s.hrv_mean AS hrv_workout_day,\n       s2.hrv_mean AS hrv_next_day,\n       s2.hrv_mean - s.hrv_mean AS hrv_change,\n       sl.asleep_minutes / 60.0 AS sleep_hours_after,\n       s.resting_heart_rate AS rhr_workout_day,\n       s2.resting_heart_rate AS rhr_next_day\nORDER BY d.date DESC\nLIMIT 20"
+        "template": "MATCH (d:Day)-[:HAS_SUMMARY]->(s:DailySummary)\nWHERE d.date >= date($start_date) AND d.date <= date($end_date)\nWITH collect({\n  date: toString(d.date),\n  rhr: s.resting_heart_rate,\n  hrv: round(s.hrv_mean, 1),\n  steps: s.total_steps,\n  sleep_hours: round(s.sleep_hours, 1),\n  workout_min: s.workout_minutes,\n  active_kcal: round(s.active_energy_kcal, 0),\n  vo2max: s.vo2max\n}) AS week\nOPTIONAL MATCH (d2:Day)-[:HAS_SUMMARY]->(s2:DailySummary)\nWHERE d2.date >= date($start_date) - duration({days: 30})\n  AND d2.date < date($start_date)\nWITH week,\n     round(avg(s2.resting_heart_rate), 1) AS baseline_rhr,\n     round(avg(s2.hrv_mean), 1) AS baseline_hrv,\n     round(avg(s2.total_steps), 0) AS baseline_steps,\n     round(avg(s2.sleep_hours), 1) AS baseline_sleep,\n     round(avg(s2.workout_minutes), 0) AS baseline_workout_min\nRETURN week,\n       {rhr: baseline_rhr,\n        hrv: baseline_hrv,\n        steps: baseline_steps,\n        sleep_hours: baseline_sleep,\n        workout_min: baseline_workout_min} AS baseline_30d"
       },
-      "description": "Show daily health metrics for a date range with baseline comparison",
+      "description": "Daily health metrics (RHR, HRV, steps, sleep, workout minutes, kcal, VO2max) for the date range $start_date..$end_date plus a 30-day baseline ending the day before $start_date. Use this for any 'last week' / 'this month' / 'how did I do from X to Y' question.",
       "enabled": true,
       "name": "health_overview",
       "type": "cypherTemplate"

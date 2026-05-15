@@ -205,8 +205,12 @@ def cmd_push(token: str, org: str, proj: str, local: dict) -> int:
     )
     if code != 200 or not isinstance(resp, dict):
         sys.exit(f"PUT agent → {code} {json.dumps(resp, indent=2)}")
-    print(f"  endpoint: {resp.get('endpoint_link')}")
-    append_env(resp["endpoint_link"])
+    # PUT response may not include `endpoint_link` (varies by API version);
+    # fall back to the value from the prior GET, which we know is correct.
+    endpoint = resp.get("endpoint_link") or agent.get("endpoint_link", "")
+    print(f"  endpoint: {endpoint}")
+    if endpoint:
+        append_env(endpoint)
     return 0
 
 
