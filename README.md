@@ -32,7 +32,6 @@ no shared backend; the dev's Aura is for development only.
 
 ## Table of contents
 
-- [Pitch](#pitch)
 - [Hackathon achievements](#-hackathon-achievements)
   - [🤖 Aura Agent](#1--aura-agent)
   - [📊 Aura Dashboard](#2--aura-dashboard)
@@ -57,23 +56,8 @@ no shared backend; the dev's Aura is for development only.
 
 ---
 
-## Pitch
+The 🎤 [Talk deck](https://ma3u.github.io/healthgraph-agent/talk/) was built for a **Neo4j Theatre session proposal at the WeAreDevelopers conference, Berlin 2026** — proposed talk _"From Apple Health to Aura Agent"_: a live demo of the full pipeline (Apple Health export → ETL → Aura graph → 6-page dashboard → AI agent reasoning over the graph), preferred slot Thursday 9 July, morning. The proposal is submitted — fingers crossed for the spot. 🤞
 
-> **From Apple Health to Aura Agent.** 8.5 years of my Apple Health data — **3,117 daily records, 4,061 workouts, 10,854 nodes, 16,754 relationships** — turned into a Neo4j Aura knowledge graph, with a Whoop-style coach on top: Recovery / Strain / Sleep scoring, overtraining detection, and an Aura Agent that answers _"am I overtraining?"_ from templated Cypher.
-
-Apple Health shows you charts. It never tells you **why**, or **how things relate**. Whoop has the coach — behind a subscription and its own hardware. And your health data sits in a dozen silos that never talk to each other: Apple Health, blood panels, the German ePA, eGym, Beat81.
-
-The developer-shaped fix is one repeatable pattern: **own your data → model it as a graph → expose it via an API → ground an LLM with Cypher templates.** The whole stack — iPhone sync, GraphQL Data API, NeoDash dashboard, Aura Agent — runs on _your own_ Aura instance. No shared backend, no data leaving your tenant. ~5 minutes from `git clone` to a working coach, and the dataset is small enough to live on a 1 GB Aura instance.
-
-Submitted to the **Neo4j Aura Agent Hackathon 2026**.
-
-The [`presentation/`](presentation/) deck was built for a **Neo4j Theatre session proposal at the WeAreDevelopers conference, Berlin 2026** — proposed talk _"From Apple Health to Aura Agent"_: a live demo of the full pipeline (Apple Health export → ETL → Aura graph → 6-page dashboard → AI agent reasoning over the graph), preferred slot Thursday 9 July, morning. The proposal is submitted — fingers crossed for the spot. 🤞
-
-| | |
-| --- | --- |
-| 🎤 Talk deck | [ma3u.github.io/healthgraph-agent/talk](https://ma3u.github.io/healthgraph-agent/talk/) |
-| 📝 Full hackathon submission | [`docs/HACKATHON_SUBMISSION.md`](docs/HACKATHON_SUBMISSION.md) |
-| 🌐 Live daily snapshot | [ma3u.github.io/healthgraph-agent/snapshot](https://ma3u.github.io/healthgraph-agent/snapshot/) |
 
 ---
 
