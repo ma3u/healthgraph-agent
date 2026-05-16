@@ -11,6 +11,10 @@ info: |
 class: text-center cover-slide
 highlighter: shiki
 lineNumbers: true
+# Hash routing: deep links become /talk/#6 instead of /talk/6. The server
+# only ever sees /talk/, so direct links + refreshes work on GitHub Pages
+# (a static host with no SPA rewrite and only a site-root 404.html).
+routerMode: hash
 drawings:
   persist: false
 mdc: true
