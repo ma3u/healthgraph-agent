@@ -273,7 +273,7 @@ Four pillars. Each a Neo4j Aura primitive. Each solving a piece of the pattern.
 - `longevity_trends` · monthly biomarkers
 - `exercise_balance` · cardio vs strength
 
-**Plus Neo4j Skills for Claude Code:** 24 skills installed via `npx skills add neo4j-contrib/neo4j-skills`. Different layer: Aura Agent runs against *your data*, Skills run against *your IDE*. (More on the next slide.)
+Defined **as code** via the Aura v2beta1 `/agents` API, MCP enabled, REST-invokable.
 
 <div class="mt-3 font-mono text-xs opacity-70">
 console.neo4j.io · Agents tab
