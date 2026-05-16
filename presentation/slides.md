@@ -421,11 +421,12 @@ layout: section
 
 # Run it live — Xcode + iPhone 17 Pro Simulator
 
-<div class="opacity-70 mt-1 text-sm">
-HealthKit (Simulator) → Aura graph → Agent invoke → Markdown overlay. Then click straight into the live cloud:
-</div>
+<div class="demo-links mt-6">
 
-<div class="demo-links mt-4">
+<div class="demo-link">
+  <div class="i-tabler-brand-apple text-2xl text-gray-700 shrink-0" />
+  <div><div class="font-semibold">Open Xcode + iPhone 17 Pro Simulator</div><div class="u">HealthGraphSync · runs the same build</div></div>
+</div>
 
 <a href="https://console.neo4j.io/projects/326809f3-c351-4eb7-8770-fcf5d0b6adc1/agents" target="_blank" class="demo-link">
   <div class="i-tabler-robot text-2xl text-violet-500 shrink-0" />
@@ -452,10 +453,6 @@ HealthKit (Simulator) → Aura graph → Agent invoke → Markdown overlay. Then
   <div><div class="font-semibold">GitHub Pages snapshot</div><div class="u">ma3u.github.io · snapshot</div></div>
 </a>
 
-</div>
-
-<div class="text-xs opacity-55 text-center mt-3">
-No physical phone on stage — the iPhone 17 Pro Simulator in Xcode runs the same build. Every card above is a live link: click it during the talk.
 </div>
 
 <!--
@@ -634,42 +631,41 @@ Total uptime per day after: ~2-3 minutes.
 layout: center
 ---
 
-# 8.5 years, as a graph
+<HealthGraph3D class="hg3d-fill" />
 
-<div class="grid grid-cols-4 gap-6 mt-1">
-
-<div class="stat"><div class="n">10,854</div><div class="l">nodes (entities)</div></div>
-<div class="stat"><div class="n">16,754</div><div class="l">relationships</div></div>
-<div class="stat"><div class="n">4,061</div><div class="l">workouts</div></div>
-<div class="stat"><div class="n">3,117</div><div class="l">daily records</div></div>
-
+<div class="hg-top">
+  <div class="kicker">8.5 years, as a graph</div>
+  <div class="hg-stats">
+    <span><b>10,854</b> nodes</span>
+    <span><b>16,754</b> relationships</span>
+    <span><b>4,061</b> workouts</span>
+    <span><b>3,117</b> daily records</span>
+  </div>
 </div>
 
-<div class="hg3d-stage">
-  <HealthGraph3D />
-</div>
-
-<div class="flex flex-wrap justify-center gap-x-4 gap-y-1 mt-1 text-xs">
-  <span><span class="dot" style="background:#ec4899" /> Person · 1</span>
-  <span><span class="dot" style="background:#94a3b8" /> Device · 32</span>
-  <span><span class="dot" style="background:#f59e0b" /> Workout · 4,061</span>
-  <span><span class="dot" style="background:#10b981" /> Day · 3,117</span>
-  <span><span class="dot" style="background:#38bdf8" /> DailySummary · 3,117</span>
-  <span><span class="dot" style="background:#6366f1" /> SleepSession · 79</span>
-  <span><span class="dot" style="background:#a855f7" /> Week · 447</span>
-</div>
-
-<div class="text-xs opacity-60 text-center mt-1">
-7 node types · 7 relationship types · 2017-10-29 → 2026-05-15 (8.54 years) · live on a 1&nbsp;GB Aura instance
+<div class="hg-bottom">
+  <div class="flex flex-wrap justify-center gap-x-4 gap-y-1 text-xs">
+    <span><span class="dot" style="background:#ec4899" /> Person · 1</span>
+    <span><span class="dot" style="background:#94a3b8" /> Device · 32</span>
+    <span><span class="dot" style="background:#f59e0b" /> Workout · 4,061</span>
+    <span><span class="dot" style="background:#10b981" /> Day · 3,117</span>
+    <span><span class="dot" style="background:#38bdf8" /> DailySummary · 3,117</span>
+    <span><span class="dot" style="background:#6366f1" /> SleepSession · 79</span>
+    <span><span class="dot" style="background:#a855f7" /> Week · 447</span>
+  </div>
+  <div class="text-xs opacity-60 text-center mt-1">
+    7 node types · 7 relationship types · 2017-10-29 → 2026-05-15 (8.54 years) · live on a 1&nbsp;GB Aura instance
+  </div>
 </div>
 
 <!--
 Speaker: This is the whole point — 8.5 years of Apple Health, not a flat
-export but a connected graph you can rotate and walk. ~11k entities, ~17k
-relationships. The agent walks these edges: Workout FOLLOWED_BY
-SleepSession, Day NEXT_DAY Day. The cloud here is a representative slice;
-the four numbers up top are the real totals. And it all fits on a 1 GB
-Aura instance — the value is in the relationships, not the volume.
+export but a connected graph you can rotate and walk. Every node carries
+its real label: my name, my devices, the dates, the workout types; every
+edge its relationship. ~11k entities, ~17k relationships. The agent walks
+these edges — Workout FOLLOWED_BY SleepSession, Day NEXT_DAY Day. The
+cloud here is a readable slice; the four numbers up top are the real
+totals. And it all fits on a 1 GB Aura instance.
 -->
 
 

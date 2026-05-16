@@ -75,12 +75,48 @@
   text-shadow: 0 1px 16px rgba(0, 0, 0, 0.8);
 }
 
-/* 3D graph stage on the "8.5 years, as a graph" slide — fills the
- * vertical space between the stat tiles and the legend. */
-.hg3d-stage {
-  width: 100%;
-  height: 320px;
-  margin-top: 6px;
+/* Full-bleed 3D graph: the component fills the whole slide; the stats
+ * and legend sit on top in scrim'd overlay bands. */
+.hg3d-fill {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+.hg-top,
+.hg-bottom {
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  text-align: center;
+  padding: 14px 24px;
+}
+.hg-top {
+  top: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.96) 55%, rgba(255,255,255,0));
+}
+.hg-bottom {
+  bottom: 0;
+  background: linear-gradient(0deg, rgba(255,255,255,0.96) 55%, rgba(255,255,255,0));
+}
+.hg-stats {
+  display: flex;
+  justify-content: center;
+  gap: 1.6rem;
+  margin-top: 4px;
+  font-size: 0.95rem;
+  color: var(--fg, #1e293b);
+}
+.hg-stats b {
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+.hg-stats span {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.35rem;
 }
 
 /* Legend dot for the graph node-type key */
@@ -125,11 +161,6 @@
   font-family: "JetBrains Mono", monospace;
   font-size: 0.7rem;
   opacity: 0.6;
-}
-/* The 5th card spans both columns and centers, so the row isn't lopsided. */
-.demo-links .demo-link:last-child {
-  grid-column: 1 / -1;
-  justify-content: center;
 }
 
 /* Source chips — small pill tags for the fragmented-data-sources list */

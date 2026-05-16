@@ -1,105 +1,157 @@
 <!--
 Animated 3D force-directed graph for the "8.5 years, as a graph" slide.
-Renders a representative ~150-node slice of the real HealthGraph model
-(7 node types, 7 relationship types) with flowing link particles and a
-slow camera orbit. Client-only: 3d-force-graph (Three.js/WebGL) is
-dynamically imported inside onMounted so the Slidev static build does
-not try to evaluate it during SSR.
+Renders a readable, labelled slice of the real HealthGraph model — every
+node carries its entity label (person name, device name, date, activity)
+and every link carries its relationship type. Client-only: 3d-force-graph
+(Three.js/WebGL) + three-spritetext are dynamically imported in onMounted
+so the Slidev static build doesn't evaluate WebGL during SSR.
+
+Sizing: a ResizeObserver keeps the renderer locked to the container box,
+and the container is overflow:hidden — so the canvas can never spill out
+over the rest of the slide.
 -->
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 
-const TYPES: Record<string, { color: string; val: number }> = {
-  Person:       { color: '#ec4899', val: 14 },
-  Device:       { color: '#94a3b8', val: 5 },
-  Workout:      { color: '#f59e0b', val: 4 },
-  Day:          { color: '#10b981', val: 5 },
-  DailySummary: { color: '#38bdf8', val: 3.5 },
-  SleepSession: { color: '#6366f1', val: 4 },
-  Week:         { color: '#a855f7', val: 7 },
+const COLOR: Record<string, string> = {
+  Person: '#ec4899', Device: '#94a3b8', Workout: '#f59e0b', Day: '#10b981',
+  DailySummary: '#38bdf8', SleepSession: '#6366f1', Week: '#a855f7',
 }
+const SIZE: Record<string, number> = {
+  Person: 13, Device: 6, Workout: 5, Day: 6, DailySummary: 3.5, SleepSession: 5, Week: 8,
+}
+
+const PERSON = 'Matthias'
+const DEVICES = ['iPhone 17 Pro', 'Apple Watch', 'Strava']
+const ACTIVITIES = ['Running', 'Cycling', 'Strength', 'Swim', 'Hike', 'Rowing', 'Yoga']
 
 const el = ref<HTMLDivElement>()
 let graph: any = null
 let raf = 0
+let ro: ResizeObserver | null = null
 const failed = ref(false)
 
-/** Deterministic representative slice of the real graph structure. */
+/** Deterministic, readable slice of the real graph structure (~30 nodes). */
 function buildSample() {
   const nodes: any[] = []
   const links: any[] = []
-  let seed = 42
-  const rand = () => { seed = (seed * 1664525 + 1013904223) % 4294967296; return seed / 4294967296 }
-  const add = (id: string, type: string) => {
-    nodes.push({ id, type, color: TYPES[type].color, val: TYPES[type].val })
+  const add = (id: string, type: string, label: string) => {
+    nodes.push({ id, type, label, color: COLOR[type], val: SIZE[type] })
     return id
   }
-  const link = (source: string, target: string, rel: string) => links.push({ source, target, rel })
+  const link = (source: string, target: string, rel: string) =>
+    links.push({ source, target, rel })
 
-  add('Person', 'Person')
-  const devices = Array.from({ length: 6 }, (_, i) => add(`Device${i}`, 'Device'))
-  devices.forEach(d => link('Person', d, 'USES'))
+  add('person', 'Person', PERSON)
+  DEVICES.forEach((d, i) => { add(`dev${i}`, 'Device', d); link('person', `dev${i}`, 'USES') })
 
-  const DAYS = 46
+  const DAYS = 9
   let prevDay: string | null = null
   let week: string | null = null
+  let weekNo = 18
   for (let i = 0; i < DAYS; i++) {
-    const day = add(`Day${i}`, 'Day')
-    link(day, add(`Sum${i}`, 'DailySummary'), 'HAS_SUMMARY')
+    const day = add(`day${i}`, 'Day', `May ${7 + i}`)
+    add(`sum${i}`, 'DailySummary', 'Summary')
+    link(day, `sum${i}`, 'HAS_SUMMARY')
     if (prevDay) link(prevDay, day, 'NEXT_DAY')
     prevDay = day
-    if (i % 7 === 0) week = add(`Week${i / 7}`, 'Week')
+    if (i === 0 || (7 + i) % 7 === 1) { weekNo++; week = add(`wk${weekNo}`, 'Week', `2026-W${weekNo}`) }
     if (week) link(day, week, 'PART_OF')
-    const nWorkouts = rand() < 0.68 ? 1 : rand() < 0.5 ? 2 : 0
-    for (let w = 0; w < nWorkouts; w++) {
-      const workout = add(`W${i}_${w}`, 'Workout')
-      link(workout, day, 'ON_DAY')
-      link(devices[Math.floor(rand() * devices.length)], workout, 'RECORDED')
-      if (rand() < 0.16) {
-        const sleep = add(`Sleep${i}_${w}`, 'SleepSession')
-        link(sleep, day, 'ON_DAY')
-        link(workout, sleep, 'FOLLOWED_BY')
+    if (i % 3 !== 2) {
+      const act = ACTIVITIES[i % ACTIVITIES.length]
+      const w = add(`w${i}`, 'Workout', act)
+      link(w, day, 'ON_DAY')
+      link(`dev${i % DEVICES.length}`, w, 'RECORDED')
+      if (i === 3) {
+        add(`sleep${i}`, 'SleepSession', 'Sleep')
+        link(`sleep${i}`, day, 'ON_DAY')
+        link(w, `sleep${i}`, 'FOLLOWED_BY')
       }
     }
   }
   return { nodes, links }
 }
 
+function fit() {
+  if (!graph || !el.value) return
+  const w = el.value.clientWidth
+  const h = el.value.clientHeight
+  if (w > 0 && h > 0) graph.width(w).height(h)
+}
+
 onMounted(async () => {
   if (!el.value) return
   try {
-    const ForceGraph3D = (await import('3d-force-graph')).default
+    const [{ default: ForceGraph3D }, { default: SpriteText }] = await Promise.all([
+      import('3d-force-graph'),
+      import('three-spritetext'),
+    ])
+
     graph = ForceGraph3D()(el.value)
       .backgroundColor('rgba(0,0,0,0)')
       .graphData(buildSample())
-      .nodeColor((n: any) => n.color)
       .nodeVal((n: any) => n.val)
-      .nodeOpacity(0.95)
-      .nodeResolution(12)
-      .linkColor(() => 'rgba(120,130,150,0.45)')
-      .linkWidth(0.6)
+      .nodeColor((n: any) => n.color)
+      .nodeOpacity(0.9)
+      .nodeResolution(14)
+      .nodeThreeObjectExtend(true)
+      .nodeThreeObject((n: any) => {
+        const t = new SpriteText(n.label)
+        t.color = '#0f172a'
+        t.backgroundColor = 'rgba(255,255,255,0.86)'
+        t.padding = 2
+        t.borderRadius = 3
+        t.fontWeight = '600'
+        t.textHeight = n.type === 'Person' ? 7.5 : 4.6
+        t.position.y = (n.val ?? 5) + 7
+        return t
+      })
+      .linkColor(() => 'rgba(110,122,145,0.4)')
+      .linkWidth(0.5)
       .linkDirectionalParticles(2)
-      .linkDirectionalParticleWidth(1.3)
-      .linkDirectionalParticleSpeed(0.005)
+      .linkDirectionalParticleWidth(1.2)
+      .linkDirectionalParticleSpeed(0.006)
+      .linkThreeObjectExtend(true)
+      .linkThreeObject((l: any) => {
+        const t = new SpriteText(l.rel)
+        t.color = 'rgba(71,85,105,0.95)'
+        t.backgroundColor = 'rgba(255,255,255,0.7)'
+        t.padding = 1
+        t.textHeight = 2.7
+        return t
+      })
+      .linkPositionUpdate((sprite: any, { start, end }: any) => {
+        sprite.position.set(
+          start.x + (end.x - start.x) / 2,
+          start.y + (end.y - start.y) / 2,
+          start.z + (end.z - start.z) / 2,
+        )
+      })
       .enableNodeDrag(false)
       .showNavInfo(false)
-      .width(el.value.clientWidth)
-      .height(el.value.clientHeight)
-    graph.d3VelocityDecay(0.3)
+    fit()
 
-    // Slow camera orbit so the graph reads as alive without interaction.
-    let angle = 0
-    const radius = 230
-    const orbit = () => {
-      angle += 0.0016
-      graph.cameraPosition({
-        x: radius * Math.sin(angle),
-        y: 40 * Math.sin(angle * 0.5),
-        z: radius * Math.cos(angle),
-      })
-      raf = requestAnimationFrame(orbit)
-    }
-    orbit()
+    // Keep the renderer locked to the container — never let it spill out.
+    ro = new ResizeObserver(fit)
+    ro.observe(el.value)
+
+    // Let the force settle, frame the whole graph, then orbit at that distance.
+    graph.cameraPosition({ z: 320 })
+    setTimeout(() => {
+      graph.zoomToFit(800, 60)
+      setTimeout(() => {
+        const c = graph.cameraPosition()
+        const r = Math.hypot(c.x || 0, c.y || 0, c.z || 0) || 260
+        const y = c.y || 30
+        let angle = Math.atan2(c.x || 0, c.z || r)
+        const orbit = () => {
+          angle += 0.0013
+          graph.cameraPosition({ x: r * Math.sin(angle), y, z: r * Math.cos(angle) })
+          raf = requestAnimationFrame(orbit)
+        }
+        orbit()
+      }, 950)
+    }, 1500)
   } catch (e) {
     console.error('HealthGraph3D failed to init', e)
     failed.value = true
@@ -108,6 +160,7 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
   cancelAnimationFrame(raf)
+  ro?.disconnect()
   try { graph?._destructor?.() } catch { /* noop */ }
 })
 </script>
@@ -126,10 +179,15 @@ onBeforeUnmount(() => {
   position: relative;
   width: 100%;
   height: 100%;
+  overflow: hidden;       /* the canvas can never spill past this box */
 }
 .hg3d-canvas {
   width: 100%;
   height: 100%;
+}
+/* Purely decorative auto-orbit — let clicks pass through to slide nav. */
+.hg3d-canvas :deep(canvas) {
+  pointer-events: none;
 }
 .hg3d-fallback {
   position: absolute;
