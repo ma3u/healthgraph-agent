@@ -93,6 +93,45 @@
   vertical-align: middle;
 }
 
+/* Live-demo clickable link cards. Each is a real <a> — clickable during
+ * the talk so the speaker never types a URL on stage. */
+.demo-links {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  max-width: 52rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+.demo-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 13px;
+  border: 1px solid rgba(127, 127, 127, 0.28);
+  border-radius: 10px;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.demo-link:hover {
+  border-color: var(--slidev-theme-primary, #2563eb);
+  background: rgba(127, 127, 127, 0.06);
+}
+.demo-link .font-semibold {
+  font-size: 0.95rem;
+}
+.demo-link .u {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.7rem;
+  opacity: 0.6;
+}
+/* The 5th card spans both columns and centers, so the row isn't lopsided. */
+.demo-links .demo-link:last-child {
+  grid-column: 1 / -1;
+  justify-content: center;
+}
+
 /* Source chips — small pill tags for the fragmented-data-sources list */
 .chip {
   display: inline-block;

@@ -417,46 +417,64 @@ agent's tools, about 15 seconds end-to-end.
 layout: section
 ---
 
-<div class="kicker"><div class="i-tabler-player-play inline-block align-text-bottom mr-1" /> Live demo · ~3 minutes</div>
+<div class="kicker"><div class="i-tabler-player-play inline-block align-text-bottom mr-1" /> Live demo · ~5 minutes</div>
 
-# Open the phone. Tap "Last week summary".
+# Run it live — Xcode + iPhone 17 Pro Simulator
 
-<div class="opacity-70 mt-4 text-base">
-HealthKit → Aura graph → Agent invoke → Markdown overlay
+<div class="opacity-70 mt-1 text-sm">
+HealthKit (Simulator) → Aura graph → Agent invoke → Markdown overlay. Then click straight into the live cloud:
 </div>
 
-<div class="mt-10 grid grid-cols-2 gap-4 max-w-2xl mx-auto text-sm">
+<div class="demo-links mt-4">
 
-<div class="border border-gray-300 dark:border-gray-700 rounded-lg p-3">
-<div class="flex items-center gap-2 font-semibold">
-  <div class="i-tabler-cloud" /> Aura Console fallback
-</div>
-<div class="font-mono text-xs mt-1 opacity-70">console.neo4j.io</div>
+<a href="https://console.neo4j.io/projects/326809f3-c351-4eb7-8770-fcf5d0b6adc1/agents" target="_blank" class="demo-link">
+  <div class="i-tabler-robot text-2xl text-violet-500 shrink-0" />
+  <div><div class="font-semibold">Aura Agent</div><div class="u">console.neo4j.io · agents</div></div>
+</a>
+
+<a href="https://console.neo4j.io/projects/326809f3-c351-4eb7-8770-fcf5d0b6adc1/tools/dashboards/6nK3b74oETnBKqZVcYFJ?page=5fVoFTJ0Md1BnHmN8p5X" target="_blank" class="demo-link">
+  <div class="i-tabler-layout-dashboard text-2xl text-sky-500 shrink-0" />
+  <div><div class="font-semibold">Aura Dashboard</div><div class="u">console.neo4j.io · Whoop view</div></div>
+</a>
+
+<a href="https://console.neo4j.io/projects/326809f3-c351-4eb7-8770-fcf5d0b6adc1/data-api" target="_blank" class="demo-link">
+  <div class="i-tabler-api text-2xl text-emerald-500 shrink-0" />
+  <div><div class="font-semibold">Aura GraphQL Data API</div><div class="u">console.neo4j.io · data-api</div></div>
+</a>
+
+<a href="https://github.com/ma3u/healthgraph-agent/actions/workflows/snapshot.yml" target="_blank" class="demo-link">
+  <div class="i-tabler-rocket text-2xl text-amber-500 shrink-0" />
+  <div><div class="font-semibold">Snapshot pipeline</div><div class="u">github.com · Actions</div></div>
+</a>
+
+<a href="https://ma3u.github.io/healthgraph-agent/snapshot/" target="_blank" class="demo-link">
+  <div class="i-tabler-world text-2xl text-rose-500 shrink-0" />
+  <div><div class="font-semibold">GitHub Pages snapshot</div><div class="u">ma3u.github.io · snapshot</div></div>
+</a>
+
 </div>
 
-<div class="border border-gray-300 dark:border-gray-700 rounded-lg p-3">
-<div class="flex items-center gap-2 font-semibold">
-  <div class="i-tabler-world" /> Pages snapshot fallback
-</div>
-<div class="font-mono text-xs mt-1 opacity-70">ma3u.github.io/healthgraph-agent/snapshot/</div>
-</div>
-
+<div class="text-xs opacity-55 text-center mt-3">
+No physical phone on stage — the iPhone 17 Pro Simulator in Xcode runs the same build. Every card above is a live link: click it during the talk.
 </div>
 
 <!--
-Speaker (DEMO):
-1. Open HealthGraph Sync on the iPhone.
-2. Sync tab: show max(Day.date), then upload last 7 days delta.
-3. Dashboard tab: tap "Last week summary" chip.
-4. Show loading state (~15s).
-5. Answer overlay opens: point out the numbers (RHR vs baseline,
-   the → stable arrow, the bullet structure).
-6. Drag sheet down to .medium detent, then up to .large. Done.
+Speaker (DEMO ~5 min):
+1. Xcode is already open with the iPhone 17 Pro Simulator booted and the
+   HealthGraphSync app installed. Run it.
+2. Sync tab: show max(Day.date), upload the last days' delta.
+3. Dashboard tab: tap "Last week summary" — answer overlay opens (~15s),
+   point out RHR vs baseline, the → arrow, the bullet structure.
+4. Click "Aura Agent" → Console Agents → Playground: ask the same
+   question, show it's the SAME agent the app called.
+5. Click "Aura Dashboard" → the Whoop-style NeoDash view.
+6. Click "Aura GraphQL Data API" → the deployed Data API.
+7. Click "Snapshot pipeline" → the green daily GitHub Actions run.
+8. Click "GitHub Pages snapshot" → today's rendered Recovery card.
 
-If anything fails: switch to Aura Console -> Agents -> Playground
-and ask the same question there, or open the Pages snapshot in
-the browser.
+All five cards are real clickable links — no typing URLs on stage.
 -->
+
 
 ---
 
