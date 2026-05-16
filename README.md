@@ -8,28 +8,6 @@
   <img src="docs/app-icon-1024.png" alt="HealthGraphSync app icon" width="160" />
 </p>
 
-<p align="center">
-  <strong>🎤 <a href="https://ma3u.github.io/healthgraph-agent/talk/">Talk pitch deck — WeAreDevelopers Berlin 2026</a></strong>
-  &nbsp;·&nbsp;
-  🌐 <a href="https://ma3u.github.io/healthgraph-agent/snapshot/">Live daily snapshot</a>
-</p>
-
-<p align="center">
-  <sub>The pitch deck (Neo4j Theatre proposal) is published on GitHub Pages — also linked in the repo's <strong>About</strong> panel.</sub>
-</p>
-
-| Pillar | What it does | Where |
-| --- | --- | --- |
-| 🤖 **Aura Agent** | Longevity coach that reasons over your health graph via Text2Cypher + 5 Cypher-template tools, exposed over REST + MCP | [`agents/healthgraph-coach.json`](agents/healthgraph-coach.json), [`scripts/create_aura_agent.py`](scripts/create_aura_agent.py) |
-| 📊 **Aura Dashboard** | Whoop-style NeoDash dashboard (5 pages, 35 panels) loaded into Aura's built-in Dashboards | [`neodash/whoop_dashboard.json`](neodash/whoop_dashboard.json), [`scripts/upload_dashboard.py`](scripts/upload_dashboard.py) |
-| 🔍 **Aura GraphQL Data API + GitHub Page** | Curated SDL with `@cypher` MERGE mutations + daily Recovery snapshot at `ma3u.github.io/...` | [`cypher/graphql_schema.graphql`](cypher/graphql_schema.graphql), [`scripts/create_aura_data_api.py`](scripts/create_aura_data_api.py), [live](https://ma3u.github.io/healthgraph-agent/snapshot/) |
-| 📱 **iPhone Sync** | HealthKit → on-device delta scan → GraphQL mutations into your own Aura | [`ios/`](ios/), [`scripts/build_ios.sh`](scripts/build_ios.sh) |
-
-**BYO Aura**: every installer brings their own Neo4j Aura instance. There is
-no shared backend; the dev's Aura is for development only.
-
----
-
 ## Table of contents
 
 - [Hackathon achievements](#-hackathon-achievements)
@@ -38,7 +16,7 @@ no shared backend; the dev's Aura is for development only.
   - [🔍 Aura GraphQL Data API + GitHub Page](#3--aura-graphql-data-api--github-page)
   - [📱 iPhone App — Apple Health → Aura sync](#4--iphone-app--apple-health--aura-sync)
 - [Linked documentation](#linked-documentation)
-- [Issues & links](#issues--links)
+- [Status & links](#status--links)
 - [The idea](#the-idea)
 - [Why a graph?](#why-a-graph)
 - [Two ways to import your data](#two-ways-to-import-your-data)
@@ -51,12 +29,7 @@ no shared backend; the dev's Aura is for development only.
 - [Key health metrics](#key-health-metrics)
 - [Privacy & data handling](#privacy--data-handling)
 - [Tech stack](#tech-stack)
-- [Next steps](#next-steps)
 - [Hackathon checklist](#hackathon-checklist)
-
----
-
-The 🎤 [Talk deck](https://ma3u.github.io/healthgraph-agent/talk/) was built for a **Neo4j Theatre session proposal at the WeAreDevelopers conference, Berlin 2026** — proposed talk _"From Apple Health to Aura Agent"_: a live demo of the full pipeline (Apple Health export → ETL → Aura graph → 6-page dashboard → AI agent reasoning over the graph), preferred slot Thursday 9 July, morning. The proposal is submitted — fingers crossed for the spot. 🤞
 
 
 ---
@@ -126,15 +99,18 @@ The Dashboard tab embeds an **"Ask your graph"** panel ([`AgentChatView.swift`](
 | [`cypher/README.md`](cypher/README.md) | Cypher & GraphQL files: what's where, how to deploy |
 | [`backend/README.md`](archive/backend-legacy/README.md) (archived) | Original FastAPI sync service — superseded by direct Aura GraphQL |
 
-### Issues & links
+### Status & links
+
+**Current status (2026-05-16):** all four pillars are live end-to-end against a real Aura instance. Four of five tracked issues are closed; only Auth0 production sign-in (#5) remains open. The Aura instance has been cost-optimized to a 1 GB professional tier, and the talk deck is published on GitHub Pages.
 
 - ✅ Issue [#2 — Apple Health Sync to Aura + In-app Dashboard](https://github.com/ma3u/healthgraph-agent/issues/2) (closed)
 - ✅ Issue [#3 — GraphQL Data API for iOS + GitHub Pages personal dashboard](https://github.com/ma3u/healthgraph-agent/issues/3) (closed)
-- 📌 Issue [#4 — Aura Agent integration + Neo4j Skills](https://github.com/ma3u/healthgraph-agent/issues/4)
-- 📌 Issue [#5 — Auth0 sign-in + Bearer JWT path for iOS](https://github.com/ma3u/healthgraph-agent/issues/5)
-- 📌 Issue [#6 — HealthGraphCoach as code via Aura v2beta1 `/agents`](https://github.com/ma3u/healthgraph-agent/issues/6)
+- ✅ Issue [#4 — Aura Agent integration + Neo4j Skills](https://github.com/ma3u/healthgraph-agent/issues/4) (closed)
+- 📌 Issue [#5 — Auth0 sign-in + Bearer JWT path for iOS](https://github.com/ma3u/healthgraph-agent/issues/5) (open — only remaining work)
+- ✅ Issue [#6 — HealthGraphCoach as code via Aura v2beta1 `/agents`](https://github.com/ma3u/healthgraph-agent/issues/6) (closed)
 - 🏆 [Neo4j Aura Agent Hackathon 2026 — Apr 15 – Jun 15](https://community.neo4j.com/t/start-here-register-get-aura-credits-aura-agent-hackathon-2026/77191)
-- 🌐 Live site: [https://ma3u.github.io/healthgraph-agent/](https://ma3u.github.io/healthgraph-agent/)
+- 🎤 Talk deck: [ma3u.github.io/healthgraph-agent/talk](https://ma3u.github.io/healthgraph-agent/talk/)
+- 🌐 Live site: [ma3u.github.io/healthgraph-agent](https://ma3u.github.io/healthgraph-agent/)
 
 ---
 
@@ -519,9 +495,13 @@ METHOD=csv bash scripts/run_pipeline.sh
 
 ---
 
-## Next steps
 
-See [Issue #1: Deploy to Neo4j Aura and configure Aura Agent](https://github.com/ma3u/healthgraph-agent/issues/1) for the detailed roadmap.
+
+## 🎤 Neo4j Theatre session proposal at the WeAreDevelopers conference, Berlin 2026
+
+The [Talk deck](https://ma3u.github.io/healthgraph-agent/talk/) was built for a **Neo4j Theatre session proposal at the WeAreDevelopers conference, Berlin 2026** — proposed talk _"From Apple Health to Aura Agent"_: a live demo of the full pipeline (Apple Health export → ETL → Aura graph → 6-page dashboard → AI agent reasoning over the graph), preferred slot Thursday 9 July, morning. The proposal is submitted — fingers crossed for the spot. 🤞
+
+---
 
 ## Hackathon checklist
 
@@ -540,9 +520,12 @@ See [Issue #1: Deploy to Neo4j Aura and configure Aura Agent](https://github.com
 - [x] iOS "Ask your graph" panel — OAuth + invoke endpoint wired ([#4](https://github.com/ma3u/healthgraph-agent/issues/4))
 - [x] Install Neo4j Skills for Claude Code ([#4](https://github.com/ma3u/healthgraph-agent/issues/4))
 - [x] Test agent with longevity questions — REST smoke-test passed ([#6](https://github.com/ma3u/healthgraph-agent/issues/6))
-- [ ] Generate vector embeddings for similarity search
-- [ ] Auth0 production sign-in path ([#5](https://github.com/ma3u/healthgraph-agent/issues/5))
-- [ ] Capture demo Q&A in `docs/AGENT_DEMO.md`
-- [ ] Drop screenshots into `docs/images/hackathon/` (see [Hackathon achievements](#-hackathon-achievements) table)
-- [x] Submit to [community thread](https://community.neo4j.com/t/start-here-register-get-aura-credits-aura-agent-hackathon-2026/77191)
+- [x] Capture demo Q&As in [`docs/AGENT_DEMO.md`](docs/AGENT_DEMO.md) — three grounded answers from the live agent
+- [x] Screenshots in `docs/images/hackathon/` wired into the [Hackathon achievements](#-hackathon-achievements) table
+- [x] Cost-optimize the Aura instance — resized 8 GB → 1 GB professional; daily workflow auto-pauses it
+- [x] Build the talk deck (Slidev) and publish it to GitHub Pages at [`/talk/`](https://ma3u.github.io/healthgraph-agent/talk/)
+- [x] Submit the [WeAreDevelopers Berlin 2026 Neo4j Theatre proposal](#-neo4j-theatre-session-proposal-at-the-wearedevelopers-conference-berlin-2026)
+- [x] Submit to the [hackathon community thread](https://community.neo4j.com/t/start-here-register-get-aura-credits-aura-agent-hackathon-2026/77191)
+- [ ] Auth0 production sign-in path — last open item ([#5](https://github.com/ma3u/healthgraph-agent/issues/5))
+- [ ] Generate vector embeddings for similarity search (needs a bring-your-own embedding model)
 
