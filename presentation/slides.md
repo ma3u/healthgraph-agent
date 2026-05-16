@@ -612,38 +612,39 @@ Total uptime per day after: ~2-3 minutes.
 layout: center
 ---
 
-# Stats
+# 8.5 years, as a graph
 
-<div class="grid grid-cols-3 gap-12 mt-6">
+<div class="grid grid-cols-4 gap-6 mt-2">
 
-<div class="stat"><div class="n">3,117</div><div class="l">Day nodes in Aura</div></div>
-<div class="stat"><div class="n">3,180</div><div class="l">workouts modeled</div></div>
-<div class="stat"><div class="n">8.5 yr</div><div class="l">of biometrics</div></div>
-
-<div class="stat"><div class="n">6</div><div class="l">agent tools</div></div>
-<div class="stat"><div class="n">24</div><div class="l">Neo4j Skills for Claude</div></div>
-<div class="stat"><div class="n">&lt; 5 min</div><div class="l">provisioning, from clone</div></div>
+<div class="stat"><div class="n">10,854</div><div class="l">nodes (entities)</div></div>
+<div class="stat"><div class="n">16,754</div><div class="l">relationships</div></div>
+<div class="stat"><div class="n">4,061</div><div class="l">workouts</div></div>
+<div class="stat"><div class="n">3,117</div><div class="l">daily records</div></div>
 
 </div>
 
-<div class="mt-10 max-w-4xl mx-auto">
+```mermaid {theme: 'dark', scale: 0.62}
+graph LR
+  Person["Person<br/>1"] -->|USES| Device["Device<br/>32"]
+  Device -->|RECORDED| Workout["Workout<br/>4,061"]
+  Workout -->|ON_DAY| Day["Day<br/>3,117"]
+  Sleep["SleepSession<br/>79"] -->|ON_DAY| Day
+  Workout -->|FOLLOWED_BY| Sleep
+  Day -->|HAS_SUMMARY| Summary["DailySummary<br/>3,117"]
+  Day -->|PART_OF| Week["Week<br/>447"]
+  Day -->|NEXT_DAY| Day
+```
 
-| Instance size | Fits this graph? | Cost ≈ (paused / running) |
-| --- | --- | --- |
-| **Free 1 GB** | Yes (recommended for personal use) | $0 / $0 |
-| Professional 2 GB | Yes, comfortable | ~$1 / $95 per month |
-| Professional 4 GB | Plenty of headroom | ~$2 / $145 per month |
-| Professional 8 GB (dev) | Overkill for one person | ~$3 / $220 per month |
-
-</div>
-
-<div class="mt-4 text-xs opacity-60 text-center">
-Running cost is 24/7. Paused tier is ~20 % of running and what daily-cron + scripts/aura_pause.sh gets you.
+<div class="text-xs opacity-60 text-center">
+7 node types · 7 relationship types · 2017-10-29 → 2026-05-15 (8.54 years) · live on a 1&nbsp;GB Aura instance
 </div>
 
 <!--
-Speaker: Numbers to anchor. For your own use: Free 1GB is enough. Pro 8GB
-is for a multi-user / multi-year-of-headroom setup. Don't over-provision.
+Speaker: This is the whole point — 8.5 years of Apple Health, not as a flat
+export but as a connected graph. ~11k entities, ~17k relationships. The
+agent walks these edges: Workout FOLLOWED_BY SleepSession, Day NEXT_DAY Day.
+And it all fits in a 1 GB Aura instance — the dataset is tiny; the *value*
+is in the relationships, not the volume.
 -->
 
 ---
