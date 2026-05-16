@@ -96,9 +96,13 @@ onMounted(async () => {
       .nodeResolution(14)
       .nodeThreeObjectExtend(true)
       .nodeThreeObject((n: any) => {
+        // DailySummary is a secondary node — show it as a bare sphere so
+        // the labels stay on the entities that matter (person, device,
+        // date, workout, sleep, week).
+        if (n.type === 'DailySummary') return false
         const t = new SpriteText(n.label)
         t.color = '#0f172a'
-        t.backgroundColor = 'rgba(255,255,255,0.86)'
+        t.backgroundColor = 'rgba(255,255,255,0.88)'
         t.padding = 2
         t.borderRadius = 3
         t.fontWeight = '600'
@@ -113,11 +117,11 @@ onMounted(async () => {
       .linkDirectionalParticleSpeed(0.006)
       .linkThreeObjectExtend(true)
       .linkThreeObject((l: any) => {
+        // No background pill — bare faint text reads cleanly on the
+        // white slide without cluttering it with ~40 white rectangles.
         const t = new SpriteText(l.rel)
-        t.color = 'rgba(71,85,105,0.95)'
-        t.backgroundColor = 'rgba(255,255,255,0.7)'
-        t.padding = 1
-        t.textHeight = 2.7
+        t.color = 'rgba(100,116,139,0.75)'
+        t.textHeight = 2.2
         return t
       })
       .linkPositionUpdate((sprite: any, { start, end }: any) => {
