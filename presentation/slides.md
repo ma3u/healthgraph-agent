@@ -419,7 +419,7 @@ layout: section
 
 <div class="kicker"><div class="i-tabler-player-play inline-block align-text-bottom mr-1" /> Live demo · ~5 minutes</div>
 
-# Run it live — Xcode + iPhone 17 Pro Simulator
+# Six stops: Simulator → Aura → GitHub
 
 <div class="demo-links mt-6">
 
