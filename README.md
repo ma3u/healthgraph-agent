@@ -9,9 +9,13 @@
 </p>
 
 <p align="center">
-  <strong>🎤 <a href="https://ma3u.github.io/healthgraph-agent/talk/">View the presentation deck</a></strong>
+  <strong>🎤 <a href="https://ma3u.github.io/healthgraph-agent/talk/">Talk pitch deck — WeAreDevelopers Berlin 2026</a></strong>
   &nbsp;·&nbsp;
   🌐 <a href="https://ma3u.github.io/healthgraph-agent/snapshot/">Live daily snapshot</a>
+</p>
+
+<p align="center">
+  <sub>The pitch deck (Neo4j Theatre proposal) is published on GitHub Pages — also linked in the repo's <strong>About</strong> panel.</sub>
 </p>
 
 | Pillar | What it does | Where |
