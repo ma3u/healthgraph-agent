@@ -55,13 +55,13 @@ layout: center
 <div class="grid grid-cols-2 gap-12 mt-12">
 
 <div class="flex flex-col gap-4">
-  <div class="i-mdi-heart-pulse text-6xl text-pink-500" />
+  <div class="i-tabler-heartbeat text-6xl text-pink-500" />
   <div class="text-2xl font-semibold">A Whoop dashboard.</div>
   <div class="text-base opacity-70">For my Apple Watch data. Apple has the watch. Whoop has the coach. The data is mine.</div>
 </div>
 
 <div class="flex flex-col gap-4">
-  <div class="i-mdi-lock-open-outline text-6xl text-indigo-500" />
+  <div class="i-tabler-lock-open text-6xl text-indigo-500" />
   <div class="text-2xl font-semibold">Escape vendor lock-in.</div>
   <div class="text-base opacity-70">8.5 years of biometrics. Stop renting them back from any single vendor.</div>
 </div>
@@ -81,7 +81,7 @@ Both keep my data hostage. I want both, on my own data.
 <div class="grid grid-cols-1 gap-3 mt-4">
 
 <div class="flex items-start gap-4">
-  <div class="i-mdi-database-outline text-3xl text-rose-500 mt-1 shrink-0" />
+  <div class="i-tabler-database text-3xl text-rose-500 mt-1 shrink-0" />
   <div>
     <div class="font-semibold">Your health data lives in a dozen silos.</div>
     <div class="opacity-70 text-sm">Apple Health is just one. I also want blood panels, my gym, my classes, the German ePA. None of them talk to each other:</div>
@@ -98,7 +98,7 @@ Both keep my data hostage. I want both, on my own data.
 </div>
 
 <div class="flex items-start gap-4">
-  <div class="i-mdi-graph-outline text-3xl text-emerald-500 mt-1 shrink-0" />
+  <div class="i-tabler-topology-star-3 text-3xl text-emerald-500 mt-1 shrink-0" />
   <div>
     <div class="font-semibold">Your data is relational.</div>
     <div class="opacity-70 text-sm">Workout, next night's sleep, morning HRV, recovery. Tables hide the chain.</div>
@@ -106,7 +106,7 @@ Both keep my data hostage. I want both, on my own data.
 </div>
 
 <div class="flex items-start gap-4">
-  <div class="i-mdi-brain text-3xl text-violet-500 mt-1 shrink-0" />
+  <div class="i-tabler-brain text-3xl text-violet-500 mt-1 shrink-0" />
   <div>
     <div class="font-semibold">An LLM alone won't help.</div>
     <div class="opacity-70 text-sm">"How am I doing?" without grounded data = horoscope. The agent needs your graph.</div>
@@ -118,7 +118,7 @@ Both keep my data hostage. I want both, on my own data.
 <v-click>
 
 <div class="mt-6 text-lg flex items-center gap-3">
-  <div class="i-mdi-rocket-launch-outline text-2xl text-amber-500" />
+  <div class="i-tabler-rocket text-2xl text-amber-500" />
   You're a developer. One graph unifies every silo.
 </div>
 
@@ -149,25 +149,25 @@ layout: center
 <div class="grid grid-cols-4 gap-6 mt-10 max-w-5xl mx-auto">
 
 <div class="flex flex-col items-center gap-3">
-  <div class="i-mdi-folder-open-outline text-5xl text-rose-500" />
+  <div class="i-tabler-folder-open text-5xl text-rose-500" />
   <div class="font-semibold">Own</div>
   <div class="text-xs opacity-70 text-center">Pull your data out (Apple Health export.xml).</div>
 </div>
 
 <div class="flex flex-col items-center gap-3">
-  <div class="i-mdi-graph-outline text-5xl text-emerald-500" />
+  <div class="i-tabler-topology-star-3 text-5xl text-emerald-500" />
   <div class="font-semibold">Graph</div>
   <div class="text-xs opacity-70 text-center">Model relationships, not rows (Neo4j Aura).</div>
 </div>
 
 <div class="flex flex-col items-center gap-3">
-  <div class="i-mdi-api text-5xl text-sky-500" />
+  <div class="i-tabler-api text-5xl text-sky-500" />
   <div class="font-semibold">API</div>
   <div class="text-xs opacity-70 text-center">Typed mutations + queries (Aura GraphQL Data API).</div>
 </div>
 
 <div class="flex flex-col items-center gap-3">
-  <div class="i-mdi-robot-outline text-5xl text-violet-500" />
+  <div class="i-tabler-robot text-5xl text-violet-500" />
   <div class="font-semibold">Agent</div>
   <div class="text-xs opacity-70 text-center">Ground an LLM with Cypher templates (Aura Agent).</div>
 </div>
@@ -185,7 +185,7 @@ None require hosting bills. Everything runs on your own Aura instance.
 <div class="grid grid-cols-2 gap-8 mt-6">
 
 <div>
-  <div class="i-mdi-table text-3xl text-gray-500 mb-2" />
+  <div class="i-tabler-table text-3xl text-gray-500 mb-2" />
   <div class="text-sm opacity-70 mb-2">A flat table can tell you:</div>
   <blockquote class="text-base font-medium border-l-4 border-gray-400 pl-3">
     Your HRV was 31 ms on May 12.
@@ -193,7 +193,7 @@ None require hosting bills. Everything runs on your own Aura instance.
 </div>
 
 <div>
-  <div class="i-mdi-graph-outline text-3xl text-emerald-500 mb-2" />
+  <div class="i-tabler-topology-star-3 text-3xl text-emerald-500 mb-2" />
   <div class="text-sm opacity-70 mb-2">A graph can tell you:</div>
   <blockquote class="text-base font-medium border-l-4 border-emerald-500 pl-3">
     Your HRV dropped 8 ms the morning after a 90-min run that followed a 5-hour sleep night, in a week where you trained 28 hours.
@@ -224,22 +224,22 @@ layout: section
 <div class="grid grid-cols-4 gap-6 mt-10">
 
 <div class="flex flex-col items-center gap-2">
-  <div class="i-mdi-robot-outline text-5xl text-violet-500" />
+  <div class="i-tabler-robot text-5xl text-violet-500" />
   <div class="font-semibold text-sm">Aura Agent</div>
 </div>
 
 <div class="flex flex-col items-center gap-2">
-  <div class="i-mdi-view-dashboard-outline text-5xl text-sky-500" />
+  <div class="i-tabler-layout-dashboard text-5xl text-sky-500" />
   <div class="font-semibold text-sm">Aura Dashboard</div>
 </div>
 
 <div class="flex flex-col items-center gap-2">
-  <div class="i-mdi-api text-5xl text-emerald-500" />
+  <div class="i-tabler-api text-5xl text-emerald-500" />
   <div class="font-semibold text-sm">GraphQL API + Pages</div>
 </div>
 
 <div class="flex flex-col items-center gap-2">
-  <div class="i-mdi-cellphone text-5xl text-pink-500" />
+  <div class="i-tabler-device-mobile text-5xl text-pink-500" />
   <div class="font-semibold text-sm">iPhone Sync</div>
 </div>
 
@@ -251,7 +251,7 @@ Four pillars. Each a Neo4j Aura primitive. Each solving a piece of the pattern.
 
 ---
 
-<div class="kicker"><div class="i-mdi-robot-outline inline-block align-text-bottom mr-1" /> 1 · Aura Agent</div>
+<div class="kicker"><div class="i-tabler-robot inline-block align-text-bottom mr-1" /> 1 · Aura Agent</div>
 
 # HealthGraph Agent
 
@@ -293,7 +293,7 @@ they cover the build-time and run-time AI surfaces.
 
 ---
 
-<div class="kicker"><div class="i-mdi-view-dashboard-outline inline-block align-text-bottom mr-1" /> 2 · Aura Dashboard</div>
+<div class="kicker"><div class="i-tabler-layout-dashboard inline-block align-text-bottom mr-1" /> 2 · Aura Dashboard</div>
 
 # Whoop-style, in Console
 
@@ -332,7 +332,7 @@ logic Whoop uses. Different data ownership.
 
 ---
 
-<div class="kicker"><div class="i-mdi-api inline-block align-text-bottom mr-1" /> 3 · GraphQL Data API + GitHub Pages</div>
+<div class="kicker"><div class="i-tabler-api inline-block align-text-bottom mr-1" /> 3 · GraphQL Data API + GitHub Pages</div>
 
 # Daily snapshot, automated
 
@@ -352,9 +352,9 @@ logic Whoop uses. Different data ownership.
 Total uptime per day: ~2-3 minutes.
 
 <div class="mt-3 grid grid-cols-1 gap-1 font-mono text-xs">
-<div class="flex items-center gap-1"><div class="i-mdi-cloud-outline text-base opacity-60" /> console.neo4j.io · GraphQL Data APIs</div>
-<div class="flex items-center gap-1"><div class="i-mdi-cog-outline text-base opacity-60" /> github.com/ma3u/healthgraph-agent/actions</div>
-<div class="flex items-center gap-1"><div class="i-mdi-web text-base opacity-60" /> ma3u.github.io/healthgraph-agent/snapshot/</div>
+<div class="flex items-center gap-1"><div class="i-tabler-cloud text-base opacity-60" /> console.neo4j.io · GraphQL Data APIs</div>
+<div class="flex items-center gap-1"><div class="i-tabler-settings text-base opacity-60" /> github.com/ma3u/healthgraph-agent/actions</div>
+<div class="flex items-center gap-1"><div class="i-tabler-world text-base opacity-60" /> ma3u.github.io/healthgraph-agent/snapshot/</div>
 </div>
 
 </div>
@@ -374,7 +374,7 @@ that final pause step, the instance bleeds ~$10/day. Save your credits.
 
 ---
 
-<div class="kicker"><div class="i-mdi-cellphone inline-block align-text-bottom mr-1" /> 4 · iPhone</div>
+<div class="kicker"><div class="i-tabler-device-mobile inline-block align-text-bottom mr-1" /> 4 · iPhone</div>
 
 # HealthKit sync + "Ask your graph"
 
@@ -389,15 +389,15 @@ that final pause step, the instance bleeds ~$10/day. Save your credits.
 <div class="mt-4 text-sm opacity-80 grid grid-cols-3 gap-4">
 
 <div>
-  <div class="i-mdi-cloud-sync-outline text-xl mb-1 text-pink-500" />
+  <div class="i-tabler-cloud-data-connection text-xl mb-1 text-pink-500" />
   <strong>Sync.</strong> HealthKit → query Aura for max(Day.date) → upload only the delta.
 </div>
 <div>
-  <div class="i-mdi-pencil-outline text-xl mb-1 text-sky-500" />
+  <div class="i-tabler-pencil text-xl mb-1 text-sky-500" />
   <strong>Ask.</strong> Four chips compute concrete ISO date ranges at tap time.
 </div>
 <div>
-  <div class="i-mdi-lightning-bolt-outline text-xl mb-1 text-violet-500" />
+  <div class="i-tabler-bolt text-xl mb-1 text-violet-500" />
   <strong>Answer.</strong> Overlay sheet, Markdown rendering, trend arrows.
 </div>
 
@@ -413,7 +413,7 @@ agent's tools, about 15 seconds end-to-end.
 layout: section
 ---
 
-<div class="kicker"><div class="i-mdi-play-circle-outline inline-block align-text-bottom mr-1" /> Live demo · ~3 minutes</div>
+<div class="kicker"><div class="i-tabler-player-play inline-block align-text-bottom mr-1" /> Live demo · ~3 minutes</div>
 
 # Open the phone. Tap "Last week summary".
 
@@ -425,14 +425,14 @@ HealthKit → Aura graph → Agent invoke → Markdown overlay
 
 <div class="border border-gray-300 dark:border-gray-700 rounded-lg p-3">
 <div class="flex items-center gap-2 font-semibold">
-  <div class="i-mdi-cloud-outline" /> Aura Console fallback
+  <div class="i-tabler-cloud" /> Aura Console fallback
 </div>
 <div class="font-mono text-xs mt-1 opacity-70">console.neo4j.io</div>
 </div>
 
 <div class="border border-gray-300 dark:border-gray-700 rounded-lg p-3">
 <div class="flex items-center gap-2 font-semibold">
-  <div class="i-mdi-web" /> Pages snapshot fallback
+  <div class="i-tabler-world" /> Pages snapshot fallback
 </div>
 <div class="font-mono text-xs mt-1 opacity-70">ma3u.github.io/healthgraph-agent/snapshot/</div>
 </div>
@@ -456,7 +456,7 @@ the browser.
 
 ---
 
-<div class="kicker"><div class="i-mdi-code-json inline-block align-text-bottom mr-1" /> Agent as code</div>
+<div class="kicker"><div class="i-tabler-json inline-block align-text-bottom mr-1" /> Agent as code</div>
 
 # The agent is one JSON file
 
@@ -496,20 +496,20 @@ Diff in PR. Round-trip via `--pull` to capture Console edits. Push via
 
 ---
 
-<div class="kicker"><div class="i-mdi-key-outline inline-block align-text-bottom mr-1" /> BYO Aura</div>
+<div class="kicker"><div class="i-tabler-key inline-block align-text-bottom mr-1" /> BYO Aura</div>
 
 # Your data. Your Aura.
 
 <div class="grid grid-cols-2 gap-12 mt-8">
 
 <div class="flex flex-col gap-3">
-  <div class="i-mdi-shield-outline text-5xl text-emerald-500" />
+  <div class="i-tabler-shield text-5xl text-emerald-500" />
   <div class="text-xl font-semibold">No shared backend.</div>
   <div class="text-sm opacity-70">Your biometrics never leave your Aura instance. Mine never touches yours.</div>
 </div>
 
 <div class="flex flex-col gap-3">
-  <div class="i-mdi-lightning-bolt-outline text-5xl text-amber-500" />
+  <div class="i-tabler-bolt text-5xl text-amber-500" />
   <div class="text-xl font-semibold">~5 minutes to running.</div>
   <div class="text-sm opacity-70">Clone, fill .env, run two scripts. Working stack against your own Aura.</div>
 </div>
@@ -522,7 +522,7 @@ Speaker: The trade-off: you bring credits. Which leads to the next slide.
 
 ---
 
-<div class="kicker"><div class="i-mdi-piggy-bank-outline inline-block align-text-bottom mr-1" /> Don't burn your credits</div>
+<div class="kicker"><div class="i-tabler-pig-money inline-block align-text-bottom mr-1" /> Don't burn your credits</div>
 
 # Professional-db does not auto-pause
 
@@ -609,7 +609,7 @@ layout: section
 <div class="grid grid-cols-2 gap-8 mt-8 max-w-4xl mx-auto">
 
 <div class="flex items-start gap-3">
-  <div class="i-mdi-cash-multiple text-3xl text-emerald-500 mt-1 shrink-0" />
+  <div class="i-tabler-cash text-3xl text-emerald-500 mt-1 shrink-0" />
   <div>
     <div class="font-semibold">Finance</div>
     <div class="text-sm opacity-70">Transactions, entities, tax-year summaries. "Where did my money go?"</div>
@@ -617,7 +617,7 @@ layout: section
 </div>
 
 <div class="flex items-start gap-3">
-  <div class="i-mdi-school-outline text-3xl text-sky-500 mt-1 shrink-0" />
+  <div class="i-tabler-school text-3xl text-sky-500 mt-1 shrink-0" />
   <div>
     <div class="font-semibold">Learning</div>
     <div class="text-sm opacity-70">Flashcards, concepts, progress. "What should I review tonight?"</div>
@@ -625,7 +625,7 @@ layout: section
 </div>
 
 <div class="flex items-start gap-3">
-  <div class="i-mdi-code-tags text-3xl text-violet-500 mt-1 shrink-0" />
+  <div class="i-tabler-code text-3xl text-violet-500 mt-1 shrink-0" />
   <div>
     <div class="font-semibold">Productivity</div>
     <div class="text-sm opacity-70">Commits, projects, focus blocks. "Am I context-switching too much?"</div>
@@ -633,7 +633,7 @@ layout: section
 </div>
 
 <div class="flex items-start gap-3">
-  <div class="i-mdi-leaf text-3xl text-amber-500 mt-1 shrink-0" />
+  <div class="i-tabler-leaf text-3xl text-amber-500 mt-1 shrink-0" />
   <div>
     <div class="font-semibold">Anything you measure</div>
     <div class="text-sm opacity-70">Model relationships, ground the LLM, kill the silo.</div>
@@ -649,7 +649,7 @@ layout: section
 <div class="grid grid-cols-1 gap-4 mt-4 text-sm">
 
 <div class="flex items-start gap-3">
-  <div class="i-mdi-key-variant text-2xl text-rose-500 mt-1 shrink-0" />
+  <div class="i-tabler-key text-2xl text-rose-500 mt-1 shrink-0" />
   <div>
     <div class="font-semibold">Auth0 production sign-in.</div>
     <div class="opacity-70">Apple / Google / GitHub / Microsoft → Bearer JWT to the Data API. Currently dev-mode <code>x-api-key</code>.</div>
@@ -657,7 +657,7 @@ layout: section
 </div>
 
 <div class="flex items-start gap-3">
-  <div class="i-mdi-database-search-outline text-2xl text-emerald-500 mt-1 shrink-0" />
+  <div class="i-tabler-database-search text-2xl text-emerald-500 mt-1 shrink-0" />
   <div>
     <div class="font-semibold">Vector embeddings for similarity search.</div>
     <div class="opacity-70">Embed <code>DailySummary.description</code> to find "days that felt like that". Requires bringing your own LLM model (OpenAI, Vertex, etc.) — Aura's similarity-search tool takes the provider as config.</div>
@@ -665,7 +665,7 @@ layout: section
 </div>
 
 <div class="flex items-start gap-3">
-  <div class="i-mdi-cellphone-check text-2xl text-sky-500 mt-1 shrink-0" />
+  <div class="i-tabler-device-mobile-check text-2xl text-sky-500 mt-1 shrink-0" />
   <div>
     <div class="font-semibold">Background HealthKit sync.</div>
     <div class="opacity-70"><code>BGAppRefreshTask</code> + <code>HKObserverQuery</code> so the iPhone syncs without opening the app.</div>
@@ -721,15 +721,15 @@ class: text-center
 <div class="text-left flex flex-col gap-2">
   <div class="text-lg font-semibold">Matthias Buchhorn-Roth</div>
   <div class="flex items-center gap-2 text-sm opacity-75">
-    <div class="i-mdi-link-variant text-lg opacity-70" />
+    <div class="i-tabler-link text-lg opacity-70" />
     <span class="font-mono">linkedin.com/in/mbuchhorn</span>
   </div>
   <div class="flex items-center gap-2 text-sm opacity-75">
-    <div class="i-mdi-code-tags text-lg opacity-70" />
+    <div class="i-tabler-code text-lg opacity-70" />
     <span class="font-mono">github.com/ma3u</span>
   </div>
   <div class="flex items-center gap-2 text-sm opacity-75">
-    <div class="i-mdi-folder-outline text-lg opacity-70" />
+    <div class="i-tabler-folder text-lg opacity-70" />
     <span class="font-mono">github.com/ma3u/healthgraph-agent</span>
   </div>
 </div>
