@@ -22,6 +22,7 @@ no shared backend; the dev's Aura is for development only.
 
 ## Table of contents
 
+- [Pitch](#pitch)
 - [Hackathon achievements](#-hackathon-achievements)
   - [🤖 Aura Agent](#1--aura-agent)
   - [📊 Aura Dashboard](#2--aura-dashboard)
@@ -43,6 +44,24 @@ no shared backend; the dev's Aura is for development only.
 - [Tech stack](#tech-stack)
 - [Next steps](#next-steps)
 - [Hackathon checklist](#hackathon-checklist)
+
+---
+
+## Pitch
+
+> **From Apple Health to Aura Agent.** 8.5 years of my Apple Health data — **3,117 daily records, 4,061 workouts, 10,854 nodes, 16,754 relationships** — turned into a Neo4j Aura knowledge graph, with a Whoop-style coach on top: Recovery / Strain / Sleep scoring, overtraining detection, and an Aura Agent that answers _"am I overtraining?"_ from templated Cypher.
+
+Apple Health shows you charts. It never tells you **why**, or **how things relate**. Whoop has the coach — behind a subscription and its own hardware. And your health data sits in a dozen silos that never talk to each other: Apple Health, blood panels, the German ePA, eGym, Beat81.
+
+The developer-shaped fix is one repeatable pattern: **own your data → model it as a graph → expose it via an API → ground an LLM with Cypher templates.** The whole stack — iPhone sync, GraphQL Data API, NeoDash dashboard, Aura Agent — runs on _your own_ Aura instance. No shared backend, no data leaving your tenant. ~5 minutes from `git clone` to a working coach, and the dataset is small enough to live on a 1 GB Aura instance.
+
+Submitted to the **Neo4j Aura Agent Hackathon 2026** and presented at the **Neo4j Theatre @ WeAreDevelopers Berlin 2026**.
+
+| | |
+| --- | --- |
+| 🎤 Talk deck | [ma3u.github.io/healthgraph-agent/talk](https://ma3u.github.io/healthgraph-agent/talk/) |
+| 📝 Full hackathon submission | [`docs/HACKATHON_SUBMISSION.md`](docs/HACKATHON_SUBMISSION.md) |
+| 🌐 Live daily snapshot | [ma3u.github.io/healthgraph-agent/snapshot](https://ma3u.github.io/healthgraph-agent/snapshot/) |
 
 ---
 
@@ -515,7 +534,7 @@ See [Issue #1: Deploy to Neo4j Aura and configure Aura Agent](https://github.com
 - [x] Build ETL pipeline (Method 1: Python, Method 2: CSV)
 - [x] Synthetic test data generator (4 personas)
 - [x] 20 longevity-focused Cypher queries
-- [x] Load health data into Aura (3,087 days, 3,180 workouts)
+- [x] Load health data into Aura (3,117 days, 4,061 workouts — 10,854 nodes, 16,754 relationships)
 - [x] Longevity dashboard (Python charts + NeoDash)
 - [x] Deploy Aura GraphQL Data API via `scripts/create_aura_data_api.py` ([#3](https://github.com/ma3u/healthgraph-agent/issues/3))
 - [x] iPhone app — HealthKit → delta scan → GraphQL upload, verified on real device ([#2](https://github.com/ma3u/healthgraph-agent/issues/2))
