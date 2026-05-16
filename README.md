@@ -55,7 +55,9 @@ Apple Health shows you charts. It never tells you **why**, or **how things relat
 
 The developer-shaped fix is one repeatable pattern: **own your data → model it as a graph → expose it via an API → ground an LLM with Cypher templates.** The whole stack — iPhone sync, GraphQL Data API, NeoDash dashboard, Aura Agent — runs on _your own_ Aura instance. No shared backend, no data leaving your tenant. ~5 minutes from `git clone` to a working coach, and the dataset is small enough to live on a 1 GB Aura instance.
 
-Submitted to the **Neo4j Aura Agent Hackathon 2026** and presented at the **Neo4j Theatre @ WeAreDevelopers Berlin 2026**.
+Submitted to the **Neo4j Aura Agent Hackathon 2026**.
+
+The [`presentation/`](presentation/) deck was built for a **Neo4j Theatre session proposal at the WeAreDevelopers conference, Berlin 2026** — proposed talk _"From Apple Health to Aura Agent"_: a live demo of the full pipeline (Apple Health export → ETL → Aura graph → 6-page dashboard → AI agent reasoning over the graph), preferred slot Thursday 9 July, morning. The proposal is submitted — fingers crossed for the spot. 🤞
 
 | | |
 | --- | --- |
