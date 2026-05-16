@@ -269,7 +269,7 @@ Four pillars. Each a Neo4j Aura primitive. Each solving a piece of the pattern.
 - `longevity_trends` · monthly biomarkers
 - `exercise_balance` · cardio vs strength
 
-**Plus Neo4j Skills for Claude Code:** 21 skills installed via `npx skills add neo4j-contrib/neo4j-skills`. Different layer: Aura Agent runs against *your data*, Skills run against *your IDE*.
+**Plus Neo4j Skills for Claude Code:** 24 skills installed via `npx skills add neo4j-contrib/neo4j-skills`. Different layer: Aura Agent runs against *your data*, Skills run against *your IDE*. (More on the next slide.)
 
 <div class="mt-3 font-mono text-xs opacity-70">
 console.neo4j.io · Agents tab
@@ -496,6 +496,54 @@ Diff in PR. Round-trip via `--pull` to capture Console edits. Push via
 
 ---
 
+<div class="kicker"><div class="i-tabler-tools inline-block align-text-bottom mr-1" /> How this was built</div>
+
+# Neo4j Skills for Claude Code
+
+<div class="grid grid-cols-5 gap-6 mt-4">
+
+<div class="col-span-2 text-sm">
+
+Installable knowledge packages for AI coding agents — Claude Code, Cursor, Cline, Gemini CLI. One command:
+
+```bash
+npx skills add neo4j-contrib/neo4j-skills
+```
+
+**Progressive disclosure** keeps the context window lean: the agent reads a ~50-token summary, pulls the full ~2k-token protocol only when a task matches, and opens deep reference files on demand.
+
+It **auto-picks** the skill from the task — *"optimize this Cypher"* loads `neo4j-cypher-skill`; *"build a GraphRAG pipeline"* loads `neo4j-graphrag-skill`.
+
+</div>
+
+<div class="col-span-3 text-sm">
+
+<div class="font-semibold mb-3">Where the 24 installed skills carried this build:</div>
+
+<div class="flex flex-col gap-2">
+  <div class="flex items-start gap-2"><div class="i-tabler-code text-lg text-sky-500 mt-0.5 shrink-0" /><div><code>cypher</code> — the agent's 5 Cypher templates + 20 longevity queries</div></div>
+  <div class="flex items-start gap-2"><div class="i-tabler-api text-lg text-emerald-500 mt-0.5 shrink-0" /><div><code>graphql</code> — the <code>@cypher</code> SDL behind the Data API</div></div>
+  <div class="flex items-start gap-2"><div class="i-tabler-topology-star-3 text-lg text-violet-500 mt-0.5 shrink-0" /><div><code>modeling</code> — the Day / Workout / Sleep graph model</div></div>
+  <div class="flex items-start gap-2"><div class="i-tabler-cloud text-lg text-rose-500 mt-0.5 shrink-0" /><div><code>aura-provisioning</code> — the <code>create_aura_*.py</code> scripts</div></div>
+  <div class="flex items-start gap-2"><div class="i-tabler-database-search text-lg text-amber-500 mt-0.5 shrink-0" /><div><code>vector-index</code> + <code>graphrag</code> — the open similarity-search work</div></div>
+  <div class="flex items-start gap-2"><div class="i-tabler-plug-connected text-lg text-cyan-500 mt-0.5 shrink-0" /><div><code>mcp</code> — the agent's MCP endpoint</div></div>
+</div>
+
+</div>
+
+</div>
+
+<!--
+Speaker: This is the build-time half of the AI story. The Aura Agent reasons
+over my data at runtime; Neo4j Skills made Claude Code fluent in Neo4j while
+I was writing the Cypher templates, the GraphQL SDL, the provisioning
+scripts. 24 skills, one install, zero config — the agent loads whichever one
+the task needs, and unloads it after. Not Claude-Code-only: skills run in
+any Agent-Skills-compatible tool — Cursor, Cline, Gemini CLI, Codex.
+-->
+
+---
+
 <div class="kicker"><div class="i-tabler-key inline-block align-text-bottom mr-1" /> BYO Aura</div>
 
 # Your data. Your Aura.
@@ -573,7 +621,7 @@ layout: center
 <div class="stat"><div class="n">8.5 yr</div><div class="l">of biometrics</div></div>
 
 <div class="stat"><div class="n">6</div><div class="l">agent tools</div></div>
-<div class="stat"><div class="n">21</div><div class="l">Neo4j Skills for Claude</div></div>
+<div class="stat"><div class="n">24</div><div class="l">Neo4j Skills for Claude</div></div>
 <div class="stat"><div class="n">&lt; 5 min</div><div class="l">provisioning, from clone</div></div>
 
 </div>
