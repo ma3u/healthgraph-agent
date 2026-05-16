@@ -614,7 +614,7 @@ layout: center
 
 # 8.5 years, as a graph
 
-<div class="grid grid-cols-4 gap-6 mt-2">
+<div class="grid grid-cols-4 gap-6 mt-1">
 
 <div class="stat"><div class="n">10,854</div><div class="l">nodes (entities)</div></div>
 <div class="stat"><div class="n">16,754</div><div class="l">relationships</div></div>
@@ -623,29 +623,33 @@ layout: center
 
 </div>
 
-```mermaid {theme: 'dark', scale: 0.62}
-graph LR
-  Person["Person<br/>1"] -->|USES| Device["Device<br/>32"]
-  Device -->|RECORDED| Workout["Workout<br/>4,061"]
-  Workout -->|ON_DAY| Day["Day<br/>3,117"]
-  Sleep["SleepSession<br/>79"] -->|ON_DAY| Day
-  Workout -->|FOLLOWED_BY| Sleep
-  Day -->|HAS_SUMMARY| Summary["DailySummary<br/>3,117"]
-  Day -->|PART_OF| Week["Week<br/>447"]
-  Day -->|NEXT_DAY| Day
-```
+<div class="hg3d-stage">
+  <HealthGraph3D />
+</div>
 
-<div class="text-xs opacity-60 text-center">
+<div class="flex flex-wrap justify-center gap-x-4 gap-y-1 mt-1 text-xs">
+  <span><span class="dot" style="background:#ec4899" /> Person · 1</span>
+  <span><span class="dot" style="background:#94a3b8" /> Device · 32</span>
+  <span><span class="dot" style="background:#f59e0b" /> Workout · 4,061</span>
+  <span><span class="dot" style="background:#10b981" /> Day · 3,117</span>
+  <span><span class="dot" style="background:#38bdf8" /> DailySummary · 3,117</span>
+  <span><span class="dot" style="background:#6366f1" /> SleepSession · 79</span>
+  <span><span class="dot" style="background:#a855f7" /> Week · 447</span>
+</div>
+
+<div class="text-xs opacity-60 text-center mt-1">
 7 node types · 7 relationship types · 2017-10-29 → 2026-05-15 (8.54 years) · live on a 1&nbsp;GB Aura instance
 </div>
 
 <!--
-Speaker: This is the whole point — 8.5 years of Apple Health, not as a flat
-export but as a connected graph. ~11k entities, ~17k relationships. The
-agent walks these edges: Workout FOLLOWED_BY SleepSession, Day NEXT_DAY Day.
-And it all fits in a 1 GB Aura instance — the dataset is tiny; the *value*
-is in the relationships, not the volume.
+Speaker: This is the whole point — 8.5 years of Apple Health, not a flat
+export but a connected graph you can rotate and walk. ~11k entities, ~17k
+relationships. The agent walks these edges: Workout FOLLOWED_BY
+SleepSession, Day NEXT_DAY Day. The cloud here is a representative slice;
+the four numbers up top are the real totals. And it all fits on a 1 GB
+Aura instance — the value is in the relationships, not the volume.
 -->
+
 
 ---
 layout: section
