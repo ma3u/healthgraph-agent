@@ -8,6 +8,12 @@
   <img src="docs/app-icon-1024.png" alt="HealthGraphSync app icon" width="160" />
 </p>
 
+<p align="center">
+  <strong>🎤 <a href="https://ma3u.github.io/healthgraph-agent/talk/">View the presentation deck</a></strong>
+  &nbsp;·&nbsp;
+  🌐 <a href="https://ma3u.github.io/healthgraph-agent/snapshot/">Live daily snapshot</a>
+</p>
+
 | Pillar | What it does | Where |
 | --- | --- | --- |
 | 🤖 **Aura Agent** | Longevity coach that reasons over your health graph via Text2Cypher + 5 Cypher-template tools, exposed over REST + MCP | [`agents/healthgraph-coach.json`](agents/healthgraph-coach.json), [`scripts/create_aura_agent.py`](scripts/create_aura_agent.py) |
