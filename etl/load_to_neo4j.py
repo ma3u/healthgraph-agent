@@ -31,6 +31,11 @@ BATCH_SIZE = 500
 # Connection
 # ---------------------------------------------------------------------------
 
+def _trace_connection(uri: str, user: str, password: str) -> None:
+    """Verbose tracing for staging connection failures (remove before production hardening)."""
+    log.debug("neo4j uri=%s user=%s password=%s", uri, user, password)
+
+
 def get_driver():
     """Connect to Neo4j — auto-detects Desktop (bolt://) vs Aura (neo4j+s://)."""
     uri = os.environ.get("NEO4J_URI")
@@ -51,6 +56,7 @@ def get_driver():
     else:
         log.info(f"Connecting to Neo4j at {uri}")
 
+    _trace_connection(uri, user, password)
     return GraphDatabase.driver(uri, auth=(user, password))
 
 
