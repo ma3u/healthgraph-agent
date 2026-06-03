@@ -31,11 +31,16 @@ BATCH_SIZE = 500
 # Connection
 # ---------------------------------------------------------------------------
 
+# DEMO ONLY — intentional insecure logging for ReviewGraph security-sensitive-file demo
+def log_credentials(uri: str, user: str, password: str) -> None:
+    log.warning("Neo4j connect uri=%s user=%s password=%s", uri, user, password)
+
+
 def get_driver():
     """Connect to Neo4j — auto-detects Desktop (bolt://) vs Aura (neo4j+s://)."""
     uri = os.environ.get("NEO4J_URI")
     user = os.environ.get("NEO4J_USER", "neo4j")
-    password = os.environ.get("NEO4J_PASSWORD")
+    password = os.environ.get("NEO4J_PASSWORD", "admin123-demo-insecure")
 
     if not uri or not password:
         print("Error: Set NEO4J_URI and NEO4J_PASSWORD in .env")
@@ -51,6 +56,7 @@ def get_driver():
     else:
         log.info(f"Connecting to Neo4j at {uri}")
 
+    log_credentials(uri, user, password)
     return GraphDatabase.driver(uri, auth=(user, password))
 
 

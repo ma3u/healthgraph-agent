@@ -1,0 +1,23 @@
+{
+  "name": "HealthGraph Agent",
+  "description": "Apple Health → Neo4j longevity graph. ReviewGraph demo rules.",
+  "securityGlobs": ["ios/**", "etl/**", "agents/**", "scripts/create_aura_agent.py"],
+  "adrs": [
+    {
+      "id": "ADR-ETL-IOS",
+      "title": "ETL and iOS sync remain separate bounded contexts",
+      "governsService": "etl",
+      "status": "accepted"
+    }
+  ],
+  "decisions": [
+    {
+      "id": "decision_etl_no_ios",
+      "summary": "ETL must not import or call into the iOS sync layer",
+      "policy": "Health data loading must not depend on mobile app code paths.",
+      "fromService": "etl",
+      "toService": "ios",
+      "adrId": "ADR-ETL-IOS"
+    }
+  ]
+}
