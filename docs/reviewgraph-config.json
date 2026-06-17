@@ -1,0 +1,55 @@
+{
+  "name": "HealthGraph Agent",
+  "description": "Architecture and security rules for graph-backed code review.",
+  "securityGlobs": ["ios/**", "etl/**", "agents/**"],
+  "adrs": [
+    {
+      "id": "ADR-ETL-IOS",
+      "title": "ETL and iOS sync remain separate bounded contexts",
+      "governsService": "etl",
+      "status": "accepted"
+    }
+  ],
+  "decisions": [
+    {
+      "id": "decision_etl_no_ios",
+      "summary": "ETL must not import or call into the iOS sync layer",
+      "policy": "Batch load jobs must not invoke mobile sync code paths.",
+      "fromService": "etl",
+      "toService": "ios",
+      "adrId": "ADR-ETL-IOS"
+    }
+  ],
+  "incidents": [
+    {
+      "id": "INC-2025-export-dup",
+      "title": "Duplicate Neo4j writes after export handoff change",
+      "severity": "SEV2",
+      "impactedServices": ["etl", "ios"],
+      "tracedToPr": "PR-412",
+      "rootCause": "Cross-layer coupling",
+      "summary": "A batch loader called the iOS sync push path directly, causing duplicate Day nodes and conflicting device metadata."
+    }
+  ],
+  "lessons": [
+    {
+      "id": "lesson_etl_ios_handoff",
+      "statement": "Never call iOS sync routines from the Python ETL pipeline — use file-based handoff only.",
+      "fromIncident": "INC-2025-export-dup",
+      "recommends": "Require platform/architecture review when etl/ and ios/ both change in one PR.",
+      "appliesToModuleIds": ["etl"],
+      "appliesToPatternIds": ["pattern_cross_layer", "pattern_coupling_regression"]
+    }
+  ],
+  "priorPullRequests": [
+    {
+      "id": "PR-412",
+      "number": 412,
+      "title": "Wire mobile sync into nightly ETL job",
+      "state": "reverted",
+      "summary": "Introduced direct ETL → iOS coupling; reverted after duplicate graph writes in production.",
+      "files": ["etl/export_handoff.py"],
+      "coupling": { "from": "etl", "to": "ios" }
+    }
+  ]
+}

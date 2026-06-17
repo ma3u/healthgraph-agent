@@ -44,6 +44,8 @@ Thumbs.db
 # Output
 *.json
 !package.json
+!docs/reviewgraph-config.json
+!docs/reviewgraph-config.json
 !neodash/*.json
 !backend/samples/*.json
 !archive/backend-legacy/samples/*.json
