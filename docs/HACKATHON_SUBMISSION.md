@@ -11,7 +11,7 @@ Hi everyone — quick update on my submission. Since my last post I've added a f
 → Repo + README: https://github.com/ma3u/healthgraph-agent
 → Live daily snapshot: https://ma3u.github.io/healthgraph-agent/snapshot/
 
-The submission is now built on **four pillars**, each backed by a Neo4j Aura primitive:
+The submission is now built on **five pillars**, each backed by a Neo4j Aura primitive:
 
 ## 1. 🤖 Aura Agent (`HealthGraph Agent`)
 
@@ -46,6 +46,12 @@ Whoop-style NeoDash dashboard at `neodash/whoop_dashboard.json` — **5 pages, 3
 The Dashboard tab embeds an **"Ask your graph"** panel that calls the same `HealthGraph Agent` `/invoke` endpoint via OAuth2 client-credentials. Four suggestion chips compute concrete date ranges at tap time (ISO Mon–Sun for "last week", last 12 weeks for overtraining, last 30 / 60 days for workout-HRV correlations) so the agent always gets specific dates. The fresh answer auto-opens in a draggable overlay (`.medium` / `.large` detents) on top of the dashboard, with full Markdown rendering via `AttributedString(markdown:)` — paragraphs, bullets, numbered lists, inline `**bold**` / `*italic*` / `` `code` ``, and the trend arrows (↑ improving, ↓ declining, → stable) the agent emits.
 
 ![iPhone HealthGraphSync end-to-end — HealthKit delta upload, "Ask your graph" Dashboard panel, and the auto-opening answer overlay with Markdown rendering, trend arrows, and real numbers from the fixed health_overview tool](https://github.com/ma3u/healthgraph-agent/raw/main/docs/images/hackathon/09-iphone-trio-sync-ask-answer.jpeg)
+
+## 5. 💰 On-demand Aura — cost-efficient by design
+
+A graph you only pay for when you use it. The iPhone app **wakes** the Aura instance each morning — one resume covers the HealthKit sync + dashboard refresh + a few agent questions — and a watchdog **auto-pauses** it after 30 minutes of no database activity. That's a *real* sliding-TTL idle window (every sync/agent query stamps `lastActivityAt`), not just an in-flight check. Backbone: `scripts/aura_lifecycle.py` (`wake` / `touch` / `pause-if-idle --minutes 30` + a reference `/aura/wake` proxy), built on the same Aura API client-credentials as the rest.
+
+The math on an 8 GB AuraDB Professional: always-on ≈ **$520/mo**; paused bills at ~20%. Waking it ~1 h/day on demand ≈ **$120/mo — about 77% cheaper**. Because this is bring-your-own-Aura, that turns "run your own backend" from a ~$500/mo commitment into pocket money — the difference between a one-off demo and something installers actually keep running. (Hackathon credits today; real runway after.)
 
 ## BYO Aura
 

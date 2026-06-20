@@ -1,0 +1,62 @@
+name: Aura idle watchdog
+
+# Auto-pause the Aura instance after 30 min of no database activity (issue #13).
+#
+# Every sync / agent query stamps (:System {key:'aura'}).lastActivityAt. This job
+# wakes periodically and pauses the instance only when it is RUNNING and
+# now - lastActivityAt >= 30 min (and nothing is in flight). When already paused,
+# the script exits immediately — so this costs nothing while paused.
+#
+# NOTE on cadence: GitHub Actions schedules are best-effort and can be delayed
+# several minutes under load. That jitter is fine for a 30-min idle window. If you
+# need a tighter SLA, run `scripts/aura_lifecycle.py pause-if-idle` from a real
+# scheduler (cloud function / launchd / systemd timer) instead.
+#
+# Required repo secrets (Settings -> Secrets -> Actions):
+#   AURA_INSTANCEID, AURA_CLIENT_ID, AURA_CLIENT_SECRET   (management API)
+#   NEO4J_URI, NEO4J_USER, NEO4J_PASSWORD                 (read activity over Bolt)
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"   # ~every 15 min (best-effort)
+  workflow_dispatch:
+    inputs:
+      minutes:
+        description: "Idle threshold in minutes"
+        default: "30"
+      dry_run:
+        description: "Report the decision without pausing"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aura-idle-watchdog
+  cancel-in-progress: false
+
+jobs:
+  watchdog:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install neo4j
+
+      - name: Pause if idle
+        env:
+          AURA_INSTANCEID: ${{ secrets.AURA_INSTANCEID }}
+          AURA_CLIENT_ID: ${{ secrets.AURA_CLIENT_ID }}
+          AURA_CLIENT_SECRET: ${{ secrets.AURA_CLIENT_SECRET }}
+          NEO4J_URI: ${{ secrets.NEO4J_URI }}
+          NEO4J_USER: ${{ secrets.NEO4J_USER }}
+          NEO4J_PASSWORD: ${{ secrets.NEO4J_PASSWORD }}
+        run: |
+          python scripts/aura_lifecycle.py pause-if-idle \
+            --minutes "${{ github.event.inputs.minutes || '30' }}" \
+            ${{ github.event.inputs.dry_run == 'true' && '--dry-run' || '' }}
