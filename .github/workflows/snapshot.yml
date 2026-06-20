@@ -45,14 +45,31 @@ jobs:
           AURA_CLIENT_SECRET: ${{ secrets.AURA_CLIENT_SECRET }}
         run: python scripts/render_dashboard.py
 
+      # Offline Whoop-style dashboard (Recovery/Strain/Sleep + sparklines). Reads
+      # the graph over Bolt and writes docs/snapshot/dashboard.html — viewable
+      # while Aura is paused. continue-on-error so a missing NEO4J_* secret never
+      # blocks the existing snapshot.
+      - name: Render offline dashboard
+        continue-on-error: true
+        env:
+          NEO4J_URI: ${{ secrets.NEO4J_URI }}
+          NEO4J_USER: ${{ secrets.NEO4J_USER }}
+          NEO4J_PASSWORD: ${{ secrets.NEO4J_PASSWORD }}
+          AURA_INSTANCEID: ${{ secrets.AURA_INSTANCEID }}
+          AURA_CLIENT_ID: ${{ secrets.AURA_CLIENT_ID }}
+          AURA_CLIENT_SECRET: ${{ secrets.AURA_CLIENT_SECRET }}
+        run: |
+          pip install neo4j
+          python scripts/render_dashboard_snapshot.py
+
       - name: Commit if changed
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          if git diff --quiet docs/snapshot/index.html; then
-            echo "No change in snapshot."
+          git add docs/snapshot/
+          if git diff --cached --quiet; then
+            echo "No snapshot changes."
           else
-            git add docs/snapshot/index.html
             git commit -m "snapshot: $(date -u +%Y-%m-%d)"
             git push
           fi
