@@ -670,6 +670,72 @@ totals. And it all fits on a 1 GB Aura instance.
 
 
 ---
+
+<div class="kicker"><div class="i-tabler-bulb inline-block align-text-bottom mr-1" /> What I've learned (so far)</div>
+
+# Six lessons from the build
+
+<div class="grid grid-cols-2 gap-x-8 gap-y-4 mt-4 text-sm">
+
+<div class="flex items-start gap-3">
+  <div class="i-tabler-pig-money text-2xl text-amber-500 mt-0.5 shrink-0" />
+  <div>
+    <div class="font-semibold">Pause or pay.</div>
+    <div class="opacity-70">Professional Aura never auto-pauses. On-demand resume + a 30-min idle watchdog + app-triggered wake took it ~$520 → ~$120/mo (~77%).</div>
+  </div>
+</div>
+
+<div class="flex items-start gap-3">
+  <div class="i-tabler-cloud-off text-2xl text-sky-500 mt-0.5 shrink-0" />
+  <div>
+    <div class="font-semibold">Decouple the view from the DB.</div>
+    <div class="opacity-70">A static daily snapshot renders the dashboard while Aura sleeps. Offline-first is what makes aggressive pausing usable.</div>
+  </div>
+</div>
+
+<div class="flex items-start gap-3">
+  <div class="i-tabler-license text-2xl text-emerald-500 mt-0.5 shrink-0" />
+  <div>
+    <div class="font-semibold">Borrow the science, keep the graph.</div>
+    <div class="opacity-70">whoof & noop nail the offline UX but are flat stores. Re-implement the cited scoring (Tanaka, Banister TRIMP); the graph + agent is the moat. Mind the license.</div>
+  </div>
+</div>
+
+<div class="flex items-start gap-3">
+  <div class="i-tabler-shield-lock text-2xl text-rose-500 mt-0.5 shrink-0" />
+  <div>
+    <div class="font-semibold">Gate the AI.</div>
+    <div class="opacity-70">An AI "shortcut" PR logged the DB password in plaintext. Pre-commit (gitleaks/SwiftLint) + isolated-DB E2E tests now catch it before merge.</div>
+  </div>
+</div>
+
+<div class="flex items-start gap-3">
+  <div class="i-tabler-device-mobile-cog text-2xl text-violet-500 mt-0.5 shrink-0" />
+  <div>
+    <div class="font-semibold">iOS timing is best-effort.</div>
+    <div class="opacity-70">BGProcessingTask won't fire at exactly 06:30, and HealthKit must aggregate off the main thread (HKStatisticsCollectionQuery) or the UI hangs.</div>
+  </div>
+</div>
+
+<div class="flex items-start gap-3">
+  <div class="i-tabler-chart-dots text-2xl text-cyan-500 mt-0.5 shrink-0" />
+  <div>
+    <div class="font-semibold">A graph is only as good as what you logged.</div>
+    <div class="opacity-70">Sleep existed on ~78 of 3,117 days. Reimport can't conjure data that was never recorded — instrument collection first.</div>
+  </div>
+</div>
+
+</div>
+
+<!--
+Speaker: The six things I'd tell myself at the start. Cost bit hardest —
+Professional-db doesn't auto-pause, so I built a whole on-demand lifecycle.
+Security bit scariest — an AI-generated PR leaked the DB password; pre-commit
+plus isolated-DB tests now gate every change. And the data lesson is humbling:
+the graph only reasons over what your devices actually recorded.
+-->
+
+---
 layout: section
 ---
 
@@ -736,17 +802,29 @@ layout: section
 </div>
 
 <div class="flex items-start gap-3">
-  <div class="i-tabler-device-mobile-check text-2xl text-sky-500 mt-1 shrink-0" />
+  <div class="i-tabler-zzz text-2xl text-sky-500 mt-1 shrink-0" />
   <div>
-    <div class="font-semibold">Background HealthKit sync.</div>
-    <div class="opacity-70"><code>BGAppRefreshTask</code> + <code>HKObserverQuery</code> so the iPhone syncs without opening the app.</div>
+    <div class="font-semibold">Sleep stages → hypnogram.</div>
+    <div class="opacity-70">Parse REM / Core / Deep from HealthKit for a Whoop/noop-style sleep breakdown (only sleep <em>hours</em> today).</div>
+  </div>
+</div>
+
+<div class="flex items-start gap-3">
+  <div class="i-tabler-file-text text-2xl text-amber-500 mt-1 shrink-0" />
+  <div>
+    <div class="font-semibold">Document Intelligence (#10).</div>
+    <div class="opacity-70">Turn the clinical docs Apple Health bundles (CDA, ECG PDFs, lab records) into graph entities — console-only for now, API on Neo4j's roadmap.</div>
   </div>
 </div>
 
 </div>
 
-<div class="mt-6 font-mono opacity-70 text-xs">
-github.com/ma3u/healthgraph-agent · issues #5, #7+
+<div class="mt-5 text-xs opacity-60">
+Shipped since the last cut: on-demand Aura lifecycle · offline snapshot dashboard · background daily sync · VO₂max/HRV/RHR cards · pre-commit gates · E2E tests.
+</div>
+
+<div class="mt-3 font-mono opacity-70 text-xs">
+github.com/ma3u/healthgraph-agent · issues #5, #10
 </div>
 
 ---
