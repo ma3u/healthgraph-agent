@@ -12,6 +12,28 @@ clarify API/CLI availability](https://github.com/ma3u/healthgraph-agent/issues/1
 
 ---
 
+## Pilot status (2026-06-21)
+
+First run executed in the Aura Console against the 4 synthetic docs (instance
+`MyAppleHealthData`):
+
+- [x] Instance connected; 4 docs uploaded → **Processed** (4/4)
+- [x] Graph model **"HealthGraph DI"** generated — 6 labels (`Biomarker`, `LabResult`,
+      `Medication`, `Condition`, `Provider`, `ClinicalEvent`) with relationships
+      (`HAS_BIOMARKER`, `INCLUDES_RESULT`, `PRESCRIBES`, `IDENTIFIES`, `ORDERS`,
+      `SIGNS`/`READS`/`ATTENDS`, `RELATED_TO`, `FOR_PURPOSE`)
+- [x] **Run import** — clinical entities extracted into the graph (preview below)
+- [ ] Post-import: `link_clinical_to_days.cypher` → `validate_clinical.cypher`
+- [ ] Aura Agent hybrid question (clinical × `DailySummary`)
+
+![Imported clinical graph in Document Intelligence — extracted entities + relationships](clinical-model.png)
+
+> The model was generated from the four documents in ~1 minute with no extraction code —
+> a first step toward a private, graph-native electronic health record that aggregates
+> every silo onto the same `(:Day)` timeline.
+
+---
+
 > ## Preview / console-only — no real data
 >
 > - **Document Intelligence is in PREVIEW** and documented by Neo4j as AS-IS, for

@@ -671,6 +671,43 @@ totals. And it all fits on a 1 GB Aura instance.
 
 ---
 
+<div class="kicker"><div class="i-tabler-file-text inline-block align-text-bottom mr-1" /> Document Intelligence · the next silo</div>
+
+# Clinical docs → graph → a private EHR
+
+<div class="grid grid-cols-5 gap-6 mt-2">
+
+<div class="col-span-2 text-sm">
+
+Apple Health was step one. **Aura Document Intelligence** turns the clinical docs the export already bundles — **lab panels, ECG reports, physician letters** — into graph entities, **no extraction code**.
+
+From 4 docs it produced this graph — **Biomarker · LabResult · Medication · Condition · Provider · ClinicalEvent** — each tied back to its source chunk for provenance, and dated entities attach to the same `(:Day)` timeline as workouts and sleep.
+
+<div class="mt-3 opacity-90 font-semibold">One graph, every silo → my own private electronic health record.</div>
+
+<div class="mt-3 font-mono text-xs opacity-70">console.neo4j.io · Document Intelligence (preview)</div>
+
+</div>
+
+<div class="col-span-3">
+
+<img src="/images/11-document-intelligence-clinical-model.png" class="rounded-lg shadow-xl" />
+
+</div>
+
+</div>
+
+<!--
+Speaker: This is where the "dozen silos" slide pays off. Document Intelligence
+reads the clinical PDFs Apple Health bundles but the ETL ignored, and extracts a
+clean clinical graph — lab results, medications, conditions, providers — wired
+onto the same daily timeline. That's the path from a Whoop clone to a private EHR
+that aggregates everything. No extraction code; the model was generated from four
+documents in about a minute.
+-->
+
+---
+
 <div class="kicker"><div class="i-tabler-bulb inline-block align-text-bottom mr-1" /> What I've learned (so far)</div>
 
 # Six lessons from the build
@@ -812,8 +849,8 @@ layout: section
 <div class="flex items-start gap-3">
   <div class="i-tabler-file-text text-2xl text-amber-500 mt-1 shrink-0" />
   <div>
-    <div class="font-semibold">Document Intelligence (#10).</div>
-    <div class="opacity-70">Turn the clinical docs Apple Health bundles (CDA, ECG PDFs, lab records) into graph entities — console-only for now, API on Neo4j's roadmap.</div>
+    <div class="font-semibold">Document Intelligence → real export (#10).</div>
+    <div class="opacity-70">Pilot done on synthetic docs (model + import working). Next: ingest the real clinical export, plus DI's public API/CLI/MCP (on Neo4j's roadmap) to script it.</div>
   </div>
 </div>
 
