@@ -6,6 +6,9 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             List {
+                Section("Aura instance") {
+                    AuraStatusCard(endpoint: auth.connection?.graphqlURL, token: auth.idToken)
+                }
                 Section("Aura connection") {
                     LabeledContent("GraphQL endpoint",
                                    value: auth.connection?.graphqlURL.host ?? "—")

@@ -1,0 +1,31 @@
+# Tooling config for healthgraph-agent (lint + security for the Python ETL/scripts).
+# Not a package — only [tool.*] sections consumed by ruff and bandit via pre-commit.
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+extend-exclude = ["data", "ios", "docs", ".venv"]
+
+[tool.ruff.lint]
+# pyflakes(F), pycodestyle(E/W), isort(I), bugbear(B), pyupgrade(UP), comprehensions(C4)
+select = ["E", "W", "F", "I", "B", "UP", "C4"]
+ignore = ["E501"]  # line length is a formatter concern, not a hard error
+
+[tool.bandit]
+# Security scan for etl/ and scripts/. Skips intentional-usage false positives.
+exclude_dirs = ["data", "ios", "tests", ".venv"]
+skips = [
+  "B101",  # assert_used — fine in scripts/tests
+  "B310",  # urllib urlopen — used deliberately for the Aura REST API (https only)
+  "B404",  # import subprocess
+  "B603",  # subprocess without shell — args are not user-controlled
+]
+
+[tool.pytest.ini_options]
+# Integration/E2E tests live in tests/. They use the e2e_db fixture, which
+# spins up an ISOLATED enterprise database on the local Neo4j (never 'neo4j').
+testpaths = ["tests"]
+markers = [
+  "live: hits real Aura (opt-in via RUN_LIVE=1)",
+  "e2e: hits the local Neo4j via an isolated enterprise database",
+]

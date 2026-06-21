@@ -8,6 +8,9 @@ struct SyncView: View {
     var body: some View {
         NavigationStack {
             List {
+                Section("Aura instance") {
+                    AuraStatusCard(endpoint: auth.connection?.graphqlURL, token: auth.idToken)
+                }
                 Section {
                     Button {
                         guard let token = auth.idToken,

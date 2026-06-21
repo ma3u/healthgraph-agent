@@ -2,6 +2,9 @@ import SwiftUI
 import WebKit
 
 struct DashboardView: View {
+    /// The full live dashboard (NeoDash / Aura Console) — opened in Safari.
+    private var liveDashboardURL: URL? { AppConfig.auraDashboardURL ?? AppConfig.neodashURL }
+
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
@@ -9,25 +12,17 @@ struct DashboardView: View {
                     AgentChatView()
                     Divider()
                 }
-                if let url = AppConfig.neodashURL {
-                    WebView(url: url)
-                        .ignoresSafeArea(edges: .bottom)
-                } else {
-                    ContentUnavailableView(
-                        "No dashboard URL configured",
-                        systemImage: "chart.bar.xaxis",
-                        description: Text("Set NEODASH_URL in Info.plist to embed your dashboard here.")
-                    )
-                }
+                // Native, on-device Whoop-style dashboard — works while Aura is paused.
+                OfflineDashboardView()
             }
-            .navigationTitle("Dashboard")
+            .navigationTitle("Today")
             .toolbar {
-                if let auraURL = AppConfig.auraDashboardURL {
+                if let url = liveDashboardURL {
                     ToolbarItem(placement: .topBarTrailing) {
                         Button {
-                            UIApplication.shared.open(auraURL)
+                            UIApplication.shared.open(url)
                         } label: {
-                            Label("Open Whoop dashboard in Safari", systemImage: "safari")
+                            Label("Open full dashboard in Safari", systemImage: "safari")
                         }
                     }
                 }

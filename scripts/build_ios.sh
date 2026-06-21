@@ -28,7 +28,7 @@ fi
 # Pick the connected device unless DEVICE_ID is set explicitly
 if [ -z "${DEVICE_ID:-}" ]; then
     DEVICE_ID=$(xcrun devicectl list devices 2>/dev/null \
-                | awk '/connected.*iPhone/ {print $3; exit}')
+                | awk '/iPhone/ && /(connected|available)/ {print $3; exit}')
     if [ -z "$DEVICE_ID" ]; then
         echo "ERROR: no connected iPhone. Plug it in and try again." >&2
         exit 1
@@ -64,6 +64,14 @@ if [ -n "${AURA_AGENT_URL:-}" ] && [ -n "${AURA_AGENT_TOKEN_URL:-}" ] \
     /usr/libexec/PlistBuddy -c "Set :AURA_AGENT_CLIENT_SECRET $AURA_AGENT_CLIENT_SECRET" "$INFO_PLIST"
     echo "  patched AURA_AGENT_* (Dashboard 'Ask your graph' enabled)"
 fi
+# Aura instance management creds — lets the daily background sync resume a
+# paused instance before uploading (mirrors scripts/aura_lifecycle.py wake).
+if [ -n "${AURA_CLIENT_ID:-}" ] && [ -n "${AURA_CLIENT_SECRET:-}" ] && [ -n "${AURA_INSTANCEID:-}" ]; then
+    /usr/libexec/PlistBuddy -c "Set :AURA_CLIENT_ID $AURA_CLIENT_ID" "$INFO_PLIST"
+    /usr/libexec/PlistBuddy -c "Set :AURA_CLIENT_SECRET $AURA_CLIENT_SECRET" "$INFO_PLIST"
+    /usr/libexec/PlistBuddy -c "Set :AURA_INSTANCEID $AURA_INSTANCEID" "$INFO_PLIST"
+    echo "  patched AURA_CLIENT_*/AURA_INSTANCEID (daily sync can resume Aura)"
+fi
 # Auth0 production path — if AUTH0_DOMAIN is set in .env, switch from dev-mode
 # to real Auth0 sign-in. Clears DEV_AURA_* so AppConfig.isDevMode returns false.
 if [ -n "${AUTH0_DOMAIN:-}" ] && [ -n "${AUTH0_CLIENT_ID:-}" ]; then
@@ -83,7 +91,7 @@ echo "Building for $DEVICE_ID..."
 xcodebuild \
     -project HealthGraphSync.xcodeproj \
     -scheme HealthGraphSync \
-    -destination "id=$DEVICE_ID" \
+    -destination "generic/platform=iOS" \
     -configuration Debug \
     -allowProvisioningUpdates \
     build 2>&1 | tail -3
@@ -92,7 +100,7 @@ xcodebuild \
 APP_PATH=$(xcodebuild \
     -project HealthGraphSync.xcodeproj \
     -scheme HealthGraphSync \
-    -destination "id=$DEVICE_ID" \
+    -destination "generic/platform=iOS" \
     -configuration Debug \
     -showBuildSettings 2>/dev/null \
     | awk -F' = ' '/^[[:space:]]*BUILT_PRODUCTS_DIR/ {print $2}' | head -1)/HealthGraphSync.app
