@@ -125,6 +125,9 @@ def build_model(days: list[dict]) -> dict:
                 "recovery": recovery_score(d.get("hrv"), d.get("rhr"), sleep_p, baseline),
                 "strain": strain_score(d.get("active_kcal"), d.get("workout_min")),
                 "sleep": sleep_p,
+                "hrv": d.get("hrv"),
+                "rhr": d.get("rhr"),
+                "vo2max": d.get("vo2max"),
             }
         )
 
@@ -167,18 +170,20 @@ def _as_date(d) -> dt.date:
 # --------------------------------------------------------------------------- #
 # Rendering — self-contained HTML, inline SVG sparklines, no external assets
 # --------------------------------------------------------------------------- #
-def _sparkline(values: list[float], vmax: float, color: str) -> str:
+def _sparkline(values: list[float], vmax: float, color: str, vmin: float = 0.0) -> str:
     pts = [v for v in values if v is not None]
     if len(pts) < 2:
         return '<svg class="spark" viewBox="0 0 100 28"></svg>'
     n = len(values)
     step = 100 / (n - 1)
+    span = max(vmax - vmin, 1e-6)
     coords = []
     for i, v in enumerate(values):
         if v is None:
             continue
         x = i * step
-        y = 28 - (max(0.0, min(v, vmax)) / vmax) * 26 - 1
+        clamped = max(vmin, min(v, vmax))
+        y = 28 - ((clamped - vmin) / span) * 26 - 1
         coords.append(f"{x:.1f},{y:.1f}")
     poly = " ".join(coords)
     return (
@@ -215,6 +220,27 @@ def render_html(model: dict) -> str:
     rec_series = [d["recovery"] for d in disp]
     strain_series = [d["strain"] for d in disp]
     sleep_series = [d["sleep"] for d in disp]
+    vo2_series = [d.get("vo2max") for d in disp]
+    hrv_series = [d.get("hrv") for d in disp]
+    rhr_series = [d.get("rhr") for d in disp]
+
+    def _latest(series):
+        return next((v for v in reversed(series) if v is not None), None)
+
+    def _range(series, lo_default, hi_default, pad):
+        vals = [v for v in series if v is not None]
+        if not vals:
+            return (lo_default, hi_default)
+        return (max(min(vals) - pad, 0), max(vals) + pad)
+
+    vo2_latest, hrv_latest, rhr_latest = (
+        _latest(vo2_series),
+        _latest(hrv_series),
+        _latest(rhr_series),
+    )
+    vo2_lo, vo2_hi = _range(vo2_series, 0, 60, 1)
+    hrv_lo, hrv_hi = _range(hrv_series, 0, 80, 5)
+    rhr_lo, rhr_hi = _range(rhr_series, 40, 70, 3)
 
     cards = (
         _metric_card(
@@ -240,6 +266,30 @@ def render_html(model: dict) -> str:
             sleep_color,
             "Performance",
             _sparkline(sleep_series, 100, sleep_color),
+        )
+        + _metric_card(
+            "VO₂max",
+            f"{vo2_latest:.1f}" if vo2_latest is not None else "—",
+            " ml/kg·min",
+            "#14b8a6",
+            "Cardio fitness",
+            _sparkline(vo2_series, vo2_hi, "#14b8a6", vmin=vo2_lo),
+        )
+        + _metric_card(
+            "HRV",
+            f"{hrv_latest:.0f}" if hrv_latest is not None else "—",
+            " ms",
+            "#34d399",
+            "Higher is better",
+            _sparkline(hrv_series, hrv_hi, "#34d399", vmin=hrv_lo),
+        )
+        + _metric_card(
+            "Resting HR",
+            f"{rhr_latest:.0f}" if rhr_latest is not None else "—",
+            " bpm",
+            "#f472b6",
+            "Lower is better",
+            _sparkline(rhr_series, rhr_hi, "#f472b6", vmin=rhr_lo),
         )
     )
 
@@ -306,7 +356,7 @@ def render_html(model: dict) -> str:
   <div class="date">Data through {date_iso}</div>
   <footer>
     Offline snapshot · works while the Aura instance is paused · generated {generated}<br>
-    Derived scores only — no raw biometrics leave the device. Scores per docs/SCORING.md.
+    Recovery / Strain / Sleep scores + recent VO₂max · HRV · resting HR. Scores per docs/SCORING.md.
     · <a href="https://github.com/ma3u/healthgraph-agent">repo</a>
   </footer>
 </body>
@@ -322,7 +372,8 @@ MATCH (s:DailySummary)
 WITH s ORDER BY s.date DESC LIMIT $n
 RETURN s.date AS date, s.hrv_mean AS hrv, s.resting_heart_rate AS rhr,
        s.sleep_hours AS sleep_h, s.total_steps AS steps,
-       s.active_energy_kcal AS active_kcal, s.workout_minutes AS workout_min
+       s.active_energy_kcal AS active_kcal, s.workout_minutes AS workout_min,
+       s.vo2max AS vo2max
 ORDER BY s.date ASC
 """
 
@@ -356,6 +407,7 @@ def demo_days(n: int) -> list[dict]:
                 "steps": 9000 + 3000 * (1 + math.sin(phase)),
                 "active_kcal": 450 + 300 * (1 + math.sin(phase + 0.5)),
                 "workout_min": 0 if i % 3 == 0 else 35 + 20 * (i % 4),
+                "vo2max": 42 + 3 * math.sin(phase),
             }
         )
     return days
@@ -373,9 +425,12 @@ def selftest() -> int:
     assert len(model["display"]) == DISPLAY_DAYS, "display window"
     html = render_html(model)
     assert html.lstrip().startswith("<!doctype html>"), "html shape"
-    # Privacy: no raw-biometric unit strings should appear in the page.
-    for forbidden in (" bpm", " ms", "hrv_mean", "resting_heart_rate"):
-        assert forbidden not in html, f"leaked raw marker: {forbidden!r}"
+    # The page intentionally shows personal metrics now; check the cards rendered
+    # and that internal Cypher aliases never leak as text.
+    for label in ("Recovery", "Strain", "Sleep", "VO₂max", "HRV", "Resting HR"):
+        assert label in html, f"missing card: {label!r}"
+    for internal in ("hrv_mean", "resting_heart_rate"):
+        assert internal not in html, f"internal field leaked: {internal!r}"
     rec = round(latest["recovery"]) if latest["recovery"] is not None else None
     slp = round(latest["sleep"]) if latest["sleep"] is not None else None
     print(f"selftest OK — recovery={rec} strain={latest['strain']:.1f} sleep={slp}")
