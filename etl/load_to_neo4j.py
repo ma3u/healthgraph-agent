@@ -9,27 +9,36 @@ Uses MERGE operations throughout so the pipeline is idempotent (safe to re-run).
 Batches writes in chunks of 500 for performance.
 """
 
+import logging
 import os
 import sys
-import logging
-from dataclasses import asdict
-from pathlib import Path
 
 from dotenv import load_dotenv
 from neo4j import GraphDatabase
-from tqdm import tqdm
-
 from parse_health_xml import HealthExport, parse_health_export
-from transform import transform, TransformedData, DailySummary
+from transform import TransformedData, transform
 
 load_dotenv()
 log = logging.getLogger(__name__)
 
 BATCH_SIZE = 500
 
+# Optional target database. Default None => use the driver/server default
+# (unchanged behavior). Tests set NEO4J_DATABASE to an isolated enterprise db.
+DATABASE = os.environ.get("NEO4J_DATABASE")
+
+
+def _session(driver, **kwargs):
+    """Open a session, scoped to NEO4J_DATABASE when set (else server default)."""
+    if DATABASE:
+        return driver.session(database=DATABASE, **kwargs)
+    return driver.session(**kwargs)
+
+
 # ---------------------------------------------------------------------------
 # Connection
 # ---------------------------------------------------------------------------
+
 
 def get_driver():
     """Connect to Neo4j — auto-detects Desktop (bolt://) vs Aura (neo4j+s://)."""
@@ -68,7 +77,6 @@ SCHEMA_STATEMENTS = [
     "CREATE CONSTRAINT daily_summary_date IF NOT EXISTS FOR (s:DailySummary) REQUIRE s.date IS UNIQUE",
     "CREATE CONSTRAINT workout_id IF NOT EXISTS FOR (w:Workout) REQUIRE w.uid IS UNIQUE",
     "CREATE CONSTRAINT sleep_session_date IF NOT EXISTS FOR (s:SleepSession) REQUIRE s.date IS UNIQUE",
-
     # Indexes for common lookups
     "CREATE INDEX day_day_of_week IF NOT EXISTS FOR (d:Day) ON (d.day_of_week)",
     "CREATE INDEX workout_type IF NOT EXISTS FOR (w:Workout) ON (w.activity_type)",
@@ -78,7 +86,7 @@ SCHEMA_STATEMENTS = [
 
 def create_schema(driver):
     log.info("Creating schema constraints and indexes...")
-    with driver.session() as session:
+    with _session(driver) as session:
         for stmt in SCHEMA_STATEMENTS:
             try:
                 session.run(stmt)
@@ -92,6 +100,7 @@ def create_schema(driver):
 # ---------------------------------------------------------------------------
 # Batch helpers
 # ---------------------------------------------------------------------------
+
 
 def _batch(items, size=BATCH_SIZE):
     """Yield successive chunks from a list."""
@@ -109,9 +118,10 @@ def _run_batch(session, query, params_list, desc=""):
 # Loaders
 # ---------------------------------------------------------------------------
 
+
 def load_person(driver, export: HealthExport):
     log.info("Loading Person node...")
-    with driver.session() as session:
+    with _session(driver) as session:
         session.run(
             """
             MERGE (p:Person {name: $name})
@@ -128,7 +138,7 @@ def load_person(driver, export: HealthExport):
 
 def load_devices(driver, devices: list[str]):
     log.info(f"Loading {len(devices)} Device nodes...")
-    with driver.session() as session:
+    with _session(driver) as session:
         for dev in devices:
             session.run(
                 """
@@ -160,7 +170,7 @@ def load_metric_types(driver, metric_types: dict):
         m.category = row.category
     """
 
-    with driver.session() as session:
+    with _session(driver) as session:
         _run_batch(session, query, params)
 
 
@@ -186,7 +196,7 @@ def load_days_and_weeks(driver, data: TransformedData):
         w.start_date = date(row.start_date)
     """
 
-    with driver.session() as session:
+    with _session(driver) as session:
         _run_batch(session, week_query, week_params)
 
     # Days
@@ -208,7 +218,7 @@ def load_days_and_weeks(driver, data: TransformedData):
     MERGE (d)-[:PART_OF]->(w)
     """
 
-    with driver.session() as session:
+    with _session(driver) as session:
         _run_batch(session, day_query, day_params)
 
 
@@ -218,29 +228,31 @@ def load_daily_summaries(driver, data: TransformedData):
 
     params = []
     for s in summaries:
-        params.append({
-            "date": s.date,
-            "avg_heart_rate": s.avg_heart_rate,
-            "min_heart_rate": s.min_heart_rate,
-            "max_heart_rate": s.max_heart_rate,
-            "resting_heart_rate": s.resting_heart_rate,
-            "hrv_mean": s.hrv_mean,
-            "total_steps": s.total_steps,
-            "total_distance_km": s.total_distance_km,
-            "active_energy_kcal": s.active_energy_kcal,
-            "basal_energy_kcal": s.basal_energy_kcal,
-            "flights_climbed": s.flights_climbed,
-            "exercise_minutes": s.exercise_minutes,
-            "stand_hours": s.stand_hours,
-            "avg_blood_oxygen": s.avg_blood_oxygen,
-            "avg_respiratory_rate": s.avg_respiratory_rate,
-            "body_mass_kg": s.body_mass_kg,
-            "vo2max": s.vo2max,
-            "sleep_hours": s.sleep_hours,
-            "workout_count": s.workout_count,
-            "workout_minutes": s.workout_minutes,
-            "description": s.description,
-        })
+        params.append(
+            {
+                "date": s.date,
+                "avg_heart_rate": s.avg_heart_rate,
+                "min_heart_rate": s.min_heart_rate,
+                "max_heart_rate": s.max_heart_rate,
+                "resting_heart_rate": s.resting_heart_rate,
+                "hrv_mean": s.hrv_mean,
+                "total_steps": s.total_steps,
+                "total_distance_km": s.total_distance_km,
+                "active_energy_kcal": s.active_energy_kcal,
+                "basal_energy_kcal": s.basal_energy_kcal,
+                "flights_climbed": s.flights_climbed,
+                "exercise_minutes": s.exercise_minutes,
+                "stand_hours": s.stand_hours,
+                "avg_blood_oxygen": s.avg_blood_oxygen,
+                "avg_respiratory_rate": s.avg_respiratory_rate,
+                "body_mass_kg": s.body_mass_kg,
+                "vo2max": s.vo2max,
+                "sleep_hours": s.sleep_hours,
+                "workout_count": s.workout_count,
+                "workout_minutes": s.workout_minutes,
+                "description": s.description,
+            }
+        )
 
     query = """
     UNWIND $batch AS row
@@ -270,7 +282,7 @@ def load_daily_summaries(driver, data: TransformedData):
     MERGE (d)-[:HAS_SUMMARY]->(s)
     """
 
-    with driver.session() as session:
+    with _session(driver) as session:
         _run_batch(session, query, params)
 
 
@@ -280,21 +292,23 @@ def load_workouts(driver, export: HealthExport):
     params = []
     for w in export.workouts:
         uid = f"{w.display_type}_{w.start_date}"
-        params.append({
-            "uid": uid,
-            "activity_type": w.display_type,
-            "raw_type": w.activity_type,
-            "source_name": w.source_name,
-            "duration_min": w.duration,
-            "total_distance": w.total_distance,
-            "total_distance_unit": w.total_distance_unit,
-            "total_energy_burned": w.total_energy_burned,
-            "total_energy_burned_unit": w.total_energy_burned_unit,
-            "start_date": w.start_date,
-            "end_date": w.end_date,
-            "device": w.device,
-            "date": w.date,
-        })
+        params.append(
+            {
+                "uid": uid,
+                "activity_type": w.display_type,
+                "raw_type": w.activity_type,
+                "source_name": w.source_name,
+                "duration_min": w.duration,
+                "total_distance": w.total_distance,
+                "total_distance_unit": w.total_distance_unit,
+                "total_energy_burned": w.total_energy_burned,
+                "total_energy_burned_unit": w.total_energy_burned_unit,
+                "start_date": w.start_date,
+                "end_date": w.end_date,
+                "device": w.device,
+                "date": w.date,
+            }
+        )
 
     query = """
     UNWIND $batch AS row
@@ -316,7 +330,7 @@ def load_workouts(driver, export: HealthExport):
     MERGE (w)-[:ON_DAY]->(d)
     """
 
-    with driver.session() as session:
+    with _session(driver) as session:
         _run_batch(session, query, params)
 
     # Link workouts to devices
@@ -328,7 +342,7 @@ def load_workouts(driver, export: HealthExport):
     MERGE (dev)-[:RECORDED]->(w)
     """
 
-    with driver.session() as session:
+    with _session(driver) as session:
         _run_batch(session, device_query, params)
 
 
@@ -358,7 +372,7 @@ def load_sleep_sessions(driver, data: TransformedData):
     MERGE (s)-[:ON_DAY]->(d)
     """
 
-    with driver.session() as session:
+    with _session(driver) as session:
         _run_batch(session, query, params)
 
 
@@ -368,7 +382,8 @@ def load_temporal_relationships(driver, data: TransformedData):
     # NEXT_DAY
     next_day_params = [
         {"from_date": r.from_id, "to_date": r.to_id}
-        for r in data.temporal_rels if r.rel_type == "NEXT_DAY"
+        for r in data.temporal_rels
+        if r.rel_type == "NEXT_DAY"
     ]
 
     if next_day_params:
@@ -378,7 +393,7 @@ def load_temporal_relationships(driver, data: TransformedData):
         MATCH (d2:Day {date: date(row.to_date)})
         MERGE (d1)-[:NEXT_DAY]->(d2)
         """
-        with driver.session() as session:
+        with _session(driver) as session:
             _run_batch(session, query, next_day_params)
 
     # FOLLOWED_BY (Workout → SleepSession)
@@ -388,7 +403,8 @@ def load_temporal_relationships(driver, data: TransformedData):
             "sleep_date": r.to_id,
             "hours_between": r.hours_between,
         }
-        for r in data.temporal_rels if r.rel_type == "FOLLOWED_BY"
+        for r in data.temporal_rels
+        if r.rel_type == "FOLLOWED_BY"
     ]
 
     if followed_params:
@@ -399,7 +415,7 @@ def load_temporal_relationships(driver, data: TransformedData):
         MERGE (w)-[r:FOLLOWED_BY]->(s)
         SET r.hours_between = row.hours_between
         """
-        with driver.session() as session:
+        with _session(driver) as session:
             _run_batch(session, query, followed_params)
 
 
@@ -435,13 +451,14 @@ def load_activity_summaries(driver, export: HealthExport):
         d.ring_stand_goal = row.apple_stand_hours_goal
     """
 
-    with driver.session() as session:
+    with _session(driver) as session:
         _run_batch(session, query, params)
 
 
 # ---------------------------------------------------------------------------
 # Main pipeline
 # ---------------------------------------------------------------------------
+
 
 def load_all(driver, export: HealthExport, data: TransformedData):
     """Execute the full load pipeline."""
@@ -457,7 +474,7 @@ def load_all(driver, export: HealthExport, data: TransformedData):
     load_activity_summaries(driver, export)
 
     # Print final counts
-    with driver.session() as session:
+    with _session(driver) as session:
         result = session.run(
             """
             MATCH (n) RETURN labels(n)[0] AS label, count(*) AS count
@@ -483,6 +500,7 @@ def load_all(driver, export: HealthExport, data: TransformedData):
 # CLI
 # ---------------------------------------------------------------------------
 
+
 def main():
     import argparse
 
@@ -494,11 +512,14 @@ def main():
     parser = argparse.ArgumentParser(description="Load Apple Health data into Neo4j")
     parser.add_argument("input", help="Path to export.xml")
     parser.add_argument(
-        "--max-records", "-n", type=int,
+        "--max-records",
+        "-n",
+        type=int,
         help="Limit number of records to parse (for testing)",
     )
     parser.add_argument(
-        "--dry-run", action="store_true",
+        "--dry-run",
+        action="store_true",
         help="Parse and transform only, don't load into Neo4j",
     )
 

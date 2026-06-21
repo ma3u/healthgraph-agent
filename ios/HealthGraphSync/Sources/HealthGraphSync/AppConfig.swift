@@ -86,6 +86,22 @@ enum AppConfig {
         return raw.isEmpty ? nil : raw
     }
 
+    // Aura instance management (resume) for the daily background sync.
+    static var auraClientID: String? {
+        let raw = (Bundle.main.object(forInfoDictionaryKey: "AURA_CLIENT_ID") as? String) ?? ""
+        return raw.isEmpty ? nil : raw
+    }
+
+    static var auraClientSecret: String? {
+        let raw = (Bundle.main.object(forInfoDictionaryKey: "AURA_CLIENT_SECRET") as? String) ?? ""
+        return raw.isEmpty ? nil : raw
+    }
+
+    static var auraInstanceID: String? {
+        let raw = (Bundle.main.object(forInfoDictionaryKey: "AURA_INSTANCEID") as? String) ?? ""
+        return raw.isEmpty ? nil : raw
+    }
+
     static var isAgentConfigured: Bool {
         auraAgentURL != nil
             && auraAgentTokenURL != nil

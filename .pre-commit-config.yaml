@@ -1,0 +1,71 @@
+# Pre-commit hooks for healthgraph-agent.
+# Security checks mirror github.com/ma3u/TwoBreath-app (gitleaks secret scanning,
+# sensitive-file blocking, SwiftLint) and add Python lint/security for this repo.
+#
+# One-time setup:
+#   pip install pre-commit
+#   brew install gitleaks swiftlint      # used by the local hooks below
+#   pre-commit install                    # installs pre-commit + pre-push hooks
+#
+# Run on everything:  pre-commit run --all-files
+default_install_hook_types: [pre-commit, pre-push]
+exclude: '^(data/|ios/HealthGraphSync\.xcodeproj/|docs/snapshot/)'
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-json
+      - id: check-added-large-files
+        args: ["--maxkb=2048"]
+      - id: check-merge-conflict
+      - id: detect-private-key
+      - id: mixed-line-ending
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.8.6
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.8.0
+    hooks:
+      - id: bandit
+        args: ["-q", "-c", "pyproject.toml"]
+        additional_dependencies: ["bandit[toml]"]
+        files: ^(etl|scripts)/.*\.py$
+
+  - repo: local
+    hooks:
+      # ── Secret scanning (gitleaks) — mirrors TwoBreath ──────────
+      - id: gitleaks
+        name: gitleaks secret scan (staged)
+        entry: bash -c 'if command -v gitleaks >/dev/null 2>&1; then gitleaks protect --staged --config .gitleaks.toml --no-banner --redact; else echo "⚠️  gitleaks not installed — brew install gitleaks"; fi'
+        language: system
+        pass_filenames: false
+
+      - id: gitleaks-full
+        name: gitleaks full history scan (pre-push)
+        entry: bash -c 'if command -v gitleaks >/dev/null 2>&1; then gitleaks detect --config .gitleaks.toml --no-banner --redact; else echo "⚠️  gitleaks not installed"; fi'
+        language: system
+        pass_filenames: false
+        stages: [pre-push]
+
+      # ── Sensitive-file blocking — mirrors TwoBreath ─────────────
+      - id: block-sensitive-files
+        name: block sensitive files (.env/.pem/.key/...)
+        entry: scripts/hooks/check_sensitive_files.sh
+        language: script
+
+      # ── SwiftLint (iOS) — mirrors TwoBreath ─────────────────────
+      - id: swiftlint
+        name: SwiftLint (iOS)
+        entry: bash -c 'if command -v swiftlint >/dev/null 2>&1; then swiftlint lint --quiet --config .swiftlint.yml; else echo "⚠️  swiftlint not installed — brew install swiftlint"; fi'
+        language: system
+        pass_filenames: false
+        files: ^ios/.*\.swift$

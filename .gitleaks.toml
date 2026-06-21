@@ -1,0 +1,42 @@
+# Gitleaks configuration for healthgraph-agent.
+# Mirrors github.com/ma3u/TwoBreath-app, with Neo4j/Aura-specific rules.
+# Docs: https://github.com/gitleaks/gitleaks
+
+title = "HealthGraph Secret Scanner"
+
+[extend]
+useDefault = true
+
+# ── Project-specific rules ──────────────────────────────────
+[[rules]]
+id = "neo4j-aura-password"
+description = "Neo4j / Aura password assignment"
+regex = '''(?i)(neo4j|aura)[_-]?password\s*[:=]\s*['"]?[^\s'"]{8,}['"]?'''
+tags = ["password", "neo4j"]
+
+[[rules]]
+id = "aura-client-secret"
+description = "Aura API client secret"
+regex = '''(?i)aura[_-]?(client[_-]?)?secret\s*[:=]\s*['"]?[A-Za-z0-9._\-]{20,}['"]?'''
+tags = ["api-key", "aura"]
+
+[[rules]]
+id = "neo4j-bolt-uri-with-creds"
+description = "Bolt/neo4j+s URI embedding credentials"
+regex = '''neo4j\+s?://[^:@\s/]+:[^@\s/]+@'''
+tags = ["credentials", "neo4j"]
+
+[[rules]]
+id = "nams-api-key"
+description = "Neo4j Agent Memory Service key"
+regex = '''nams_[A-Za-z0-9]{20,}'''
+tags = ["api-key", "nams"]
+
+# ── Allowlist (not secrets) ─────────────────────────────────
+[allowlist]
+description = "Non-secret files and examples"
+paths = [
+  '''\.gitleaks\.toml$''',
+  '''(^|/)\.env\.example$''',
+  '''data/export_(athlete|biohacker|default|sedentary)\.xml$''',  # synthetic personas
+]

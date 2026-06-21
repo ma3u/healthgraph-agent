@@ -29,6 +29,7 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import math
+import os
 import sys
 from pathlib import Path
 
@@ -111,19 +112,21 @@ def build_model(days: list[dict]) -> dict:
     """days: ascending by date, each with hrv/rhr/sleep_h/steps/active_kcal/workout_min."""
     scored: list[dict] = []
     for i, d in enumerate(days):
-        window = days[max(0, i - BASELINE_DAYS):i]  # trailing, excludes today
+        window = days[max(0, i - BASELINE_DAYS) : i]  # trailing, excludes today
         hrv_b = [w["hrv"] for w in window if w["hrv"] is not None]
         rhr_b = [w["rhr"] for w in window if w["rhr"] is not None]
         hmu, hsd = _mean_std(hrv_b)
         rmu, rsd = _mean_std(rhr_b)
         baseline = {"hrv_mean": hmu, "hrv_std": hsd, "rhr_mean": rmu, "rhr_std": rsd}
         sleep_p = sleep_performance(d.get("sleep_h"))
-        scored.append({
-            "date": d["date"],
-            "recovery": recovery_score(d.get("hrv"), d.get("rhr"), sleep_p, baseline),
-            "strain": strain_score(d.get("active_kcal"), d.get("workout_min")),
-            "sleep": sleep_p,
-        })
+        scored.append(
+            {
+                "date": d["date"],
+                "recovery": recovery_score(d.get("hrv"), d.get("rhr"), sleep_p, baseline),
+                "strain": strain_score(d.get("active_kcal"), d.get("workout_min")),
+                "sleep": sleep_p,
+            }
+        )
 
     display = scored[-DISPLAY_DAYS:]
     latest = scored[-1]
@@ -214,21 +217,40 @@ def render_html(model: dict) -> str:
     sleep_series = [d["sleep"] for d in disp]
 
     cards = (
-        _metric_card("Recovery", round(rec) if rec is not None else "—", "%",
-                     rec_color, f"{rec_zone} · {rec_blurb}",
-                     _sparkline(rec_series, 100, rec_color))
-        + _metric_card("Strain", f"{strain:.1f}" if strain is not None else "—", "/21",
-                       strain_color, strain_band(strain) if strain is not None else "—",
-                       _sparkline(strain_series, 21, strain_color))
-        + _metric_card("Sleep", round(sleep) if sleep is not None else "—", "%",
-                       sleep_color, "Performance",
-                       _sparkline(sleep_series, 100, sleep_color))
+        _metric_card(
+            "Recovery",
+            round(rec) if rec is not None else "—",
+            "%",
+            rec_color,
+            f"{rec_zone} · {rec_blurb}",
+            _sparkline(rec_series, 100, rec_color),
+        )
+        + _metric_card(
+            "Strain",
+            f"{strain:.1f}" if strain is not None else "—",
+            "/21",
+            strain_color,
+            strain_band(strain) if strain is not None else "—",
+            _sparkline(strain_series, 21, strain_color),
+        )
+        + _metric_card(
+            "Sleep",
+            round(sleep) if sleep is not None else "—",
+            "%",
+            sleep_color,
+            "Performance",
+            _sparkline(sleep_series, 100, sleep_color),
+        )
     )
 
-    streak_chips = "".join(
-        f'<li><span class="num">{v}</span><span class="lbl">{k}</span></li>'
-        for k, v in model["streaks"].items() if v > 0
-    ) or '<li class="empty">No active streaks</li>'
+    streak_chips = (
+        "".join(
+            f'<li><span class="num">{v}</span><span class="lbl">{k}</span></li>'
+            for k, v in model["streaks"].items()
+            if v > 0
+        )
+        or '<li class="empty">No active streaks</li>'
+    )
 
     return f"""<!doctype html>
 <html lang="en">
@@ -308,10 +330,12 @@ ORDER BY s.date ASC
 def fetch_days(env: dict, n: int) -> list[dict]:
     from neo4j import GraphDatabase
 
-    driver = GraphDatabase.driver(
-        env["NEO4J_URI"], auth=(env["NEO4J_USER"], env["NEO4J_PASSWORD"])
-    )
-    with driver.session() as sess:
+    driver = GraphDatabase.driver(env["NEO4J_URI"], auth=(env["NEO4J_USER"], env["NEO4J_PASSWORD"]))
+    # Target an explicit database only when NEO4J_DATABASE is set (e.g. tests
+    # against an isolated db); otherwise use the server default (unchanged).
+    database = os.environ.get("NEO4J_DATABASE")
+    session_kwargs = {"database": database} if database else {}
+    with driver.session(**session_kwargs) as sess:
         rows = [dict(r) for r in sess.run(FETCH_CYPHER, n=n)]
     driver.close()
     return rows
@@ -323,15 +347,17 @@ def demo_days(n: int) -> list[dict]:
     days = []
     for i in range(n):
         phase = i / 7.0
-        days.append({
-            "date": start + dt.timedelta(days=i),
-            "hrv": 42 + 8 * math.sin(phase) - (i % 5),
-            "rhr": 56 + 4 * math.sin(phase + 1) + (i % 3),
-            "sleep_h": 7.6 + 0.8 * math.sin(phase + 2),
-            "steps": 9000 + 3000 * (1 + math.sin(phase)) ,
-            "active_kcal": 450 + 300 * (1 + math.sin(phase + 0.5)),
-            "workout_min": 0 if i % 3 == 0 else 35 + 20 * (i % 4),
-        })
+        days.append(
+            {
+                "date": start + dt.timedelta(days=i),
+                "hrv": 42 + 8 * math.sin(phase) - (i % 5),
+                "rhr": 56 + 4 * math.sin(phase + 1) + (i % 3),
+                "sleep_h": 7.6 + 0.8 * math.sin(phase + 2),
+                "steps": 9000 + 3000 * (1 + math.sin(phase)),
+                "active_kcal": 450 + 300 * (1 + math.sin(phase + 0.5)),
+                "workout_min": 0 if i % 3 == 0 else 35 + 20 * (i % 4),
+            }
+        )
     return days
 
 
@@ -350,19 +376,24 @@ def selftest() -> int:
     # Privacy: no raw-biometric unit strings should appear in the page.
     for forbidden in (" bpm", " ms", "hrv_mean", "resting_heart_rate"):
         assert forbidden not in html, f"leaked raw marker: {forbidden!r}"
-    print("selftest OK — recovery=%s strain=%.1f sleep=%s" % (
-        round(latest["recovery"]) if latest["recovery"] is not None else None,
-        latest["strain"],
-        round(latest["sleep"]) if latest["sleep"] is not None else None,
-    ))
+    rec = round(latest["recovery"]) if latest["recovery"] is not None else None
+    slp = round(latest["sleep"]) if latest["sleep"] is not None else None
+    print(f"selftest OK — recovery={rec} strain={latest['strain']:.1f} sleep={slp}")
     return 0
 
 
 def main() -> int:
-    p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    p = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     p.add_argument("--out", type=Path, default=DEFAULT_OUT, help="output HTML path")
     p.add_argument("--days", type=int, default=DISPLAY_DAYS, help="days to display (default 30)")
     p.add_argument("--demo", action="store_true", help="render from synthetic data (no DB)")
+    p.add_argument(
+        "--local",
+        action="store_true",
+        help="render from the local Neo4j (LOCAL_NEO4J_* env; default bolt://localhost:7687) — no Aura",
+    )
     p.add_argument("--selftest", action="store_true", help="run scoring/render checks and exit")
     args = p.parse_args()
 
@@ -372,6 +403,26 @@ def main() -> int:
     fetch_n = args.days + BASELINE_DAYS
     if args.demo:
         days = demo_days(fetch_n)
+    elif args.local:
+        try:
+            from dotenv import load_dotenv
+
+            load_dotenv(ROOT / ".env")
+        except Exception:
+            pass
+        pw = os.environ.get("LOCAL_NEO4J_PASSWORD")
+        if not pw:
+            sys.exit(
+                "Set LOCAL_NEO4J_PASSWORD (and optionally LOCAL_NEO4J_URI / "
+                "LOCAL_NEO4J_USER) in .env or env to render from the local Neo4j."
+            )
+        env = {
+            "NEO4J_URI": os.environ.get("LOCAL_NEO4J_URI", "bolt://localhost:7687"),
+            "NEO4J_USER": os.environ.get("LOCAL_NEO4J_USER", "neo4j"),
+            "NEO4J_PASSWORD": pw,
+        }
+        print(f"[local] {env['NEO4J_URI']} (no Aura resume needed)")
+        days = fetch_days(env, fetch_n)
     else:
         from render_snapshot import aura_resume_and_wait, aura_status, load_env
 

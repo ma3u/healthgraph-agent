@@ -278,6 +278,92 @@ final class HealthKitService: ObservableObject {
         )
     }
 
+    // MARK: - Daily aggregates (for the on-device dashboard)
+
+    /// Efficient per-day metrics for the offline dashboard. Uses
+    /// HKStatisticsCollectionQuery so HealthKit does the aggregation (no fetching
+    /// of tens of thousands of raw samples on the main actor — that was an ~8s hang).
+    func dailySummaries(daysBack: Int) async throws -> [Scoring.DaySummary] {
+        try await requestAuthorization()
+        let cal = Calendar.current
+        let end = Date()
+        let start = cal.startOfDay(for: cal.date(byAdding: .day, value: -daysBack, to: end) ?? end)
+        let interval = DateComponents(day: 1)
+
+        let bpm = HKUnit.count().unitDivided(by: .minute())
+        let ms = HKUnit.secondUnit(with: .milli)
+        let hrv = try await dailyQuantity(.heartRateVariabilitySDNN, options: .discreteAverage,
+                                          start: start, end: end, interval: interval) { $0.averageQuantity()?.doubleValue(for: ms) }
+        let rhr = try await dailyQuantity(.restingHeartRate, options: .discreteAverage,
+                                          start: start, end: end, interval: interval) { $0.averageQuantity()?.doubleValue(for: bpm) }
+        let steps = try await dailyQuantity(.stepCount, options: .cumulativeSum,
+                                            start: start, end: end, interval: interval) { $0.sumQuantity()?.doubleValue(for: .count()) }
+        let kcal = try await dailyQuantity(.activeEnergyBurned, options: .cumulativeSum,
+                                           start: start, end: end, interval: interval) { $0.sumQuantity()?.doubleValue(for: .kilocalorie()) }
+        let sleep = try await sleepHoursByDay(start: start, end: end)
+        let workout = try await workoutMinutesByDay(start: start, end: end)
+
+        var days: [Scoring.DaySummary] = []
+        var cursor = start
+        while cursor < end {
+            let key = cal.startOfDay(for: cursor)
+            days.append(.init(date: key, hrv: hrv[key], rhr: rhr[key], sleepHours: sleep[key],
+                              steps: steps[key], activeKcal: kcal[key], workoutMin: workout[key]))
+            cursor = cal.date(byAdding: .day, value: 1, to: cursor) ?? end
+        }
+        return days
+    }
+
+    private func dailyQuantity(_ id: HKQuantityTypeIdentifier, options: HKStatisticsOptions,
+                               start: Date, end: Date, interval: DateComponents,
+                               pick: @escaping @Sendable (HKStatistics) -> Double?) async throws -> [Date: Double] {
+        guard let type = HKQuantityType.quantityType(forIdentifier: id) else { return [:] }
+        let cal = Calendar.current
+        return try await withCheckedThrowingContinuation { continuation in
+            let query = HKStatisticsCollectionQuery(quantityType: type, quantitySamplePredicate: nil,
+                                                    options: options, anchorDate: start, intervalComponents: interval)
+            query.initialResultsHandler = { _, results, error in
+                if let error { continuation.resume(throwing: error); return }
+                var out: [Date: Double] = [:]
+                results?.enumerateStatistics(from: start, to: end) { stat, _ in
+                    if let v = pick(stat) { out[cal.startOfDay(for: stat.startDate)] = v }
+                }
+                continuation.resume(returning: out)
+            }
+            store.execute(query)
+        }
+    }
+
+    private func sleepHoursByDay(start: Date, end: Date) async throws -> [Date: Double] {
+        guard let type = HKCategoryType.categoryType(forIdentifier: .sleepAnalysis) else { return [:] }
+        let samples = try await fetchSamples(type: type, start: start, end: end)
+        let cal = Calendar.current
+        let asleep: Set<Int> = [
+            HKCategoryValueSleepAnalysis.asleepUnspecified.rawValue,
+            HKCategoryValueSleepAnalysis.asleepCore.rawValue,
+            HKCategoryValueSleepAnalysis.asleepDeep.rawValue,
+            HKCategoryValueSleepAnalysis.asleepREM.rawValue,
+        ]
+        var minutes: [Date: Double] = [:]
+        for s in samples {
+            guard let cs = s as? HKCategorySample, asleep.contains(cs.value) else { continue }
+            let key = cal.startOfDay(for: cs.startDate)
+            minutes[key, default: 0] += cs.endDate.timeIntervalSince(cs.startDate) / 60.0
+        }
+        return minutes.mapValues { $0 / 60.0 }
+    }
+
+    private func workoutMinutesByDay(start: Date, end: Date) async throws -> [Date: Double] {
+        let samples = try await fetchSamples(type: HKObjectType.workoutType(), start: start, end: end)
+        let cal = Calendar.current
+        var minutes: [Date: Double] = [:]
+        for s in samples {
+            guard let w = s as? HKWorkout else { continue }
+            minutes[cal.startOfDay(for: w.startDate), default: 0] += w.duration / 60.0
+        }
+        return minutes
+    }
+
     private func fetchSamples(type: HKSampleType, start: Date, end: Date) async throws -> [HKSample] {
         let predicate = HKQuery.predicateForSamples(withStart: start, end: end, options: .strictStartDate)
         let sortDescriptor = NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: true)

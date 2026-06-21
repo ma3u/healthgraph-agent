@@ -1,0 +1,7 @@
+# Test harness dependencies for integration/E2E tests against a LOCAL Neo4j.
+# Install with: python3 -m pip install -r tests/requirements-test.txt
+pytest>=8.0
+neo4j>=5.20
+lxml>=5.0
+python-dotenv>=1.0
+tqdm>=4.66

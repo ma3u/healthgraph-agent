@@ -49,6 +49,17 @@ targets:
         AURA_AGENT_TOKEN_URL: ""
         AURA_AGENT_CLIENT_ID: ""
         AURA_AGENT_CLIENT_SECRET: ""
+        # Aura instance management (resume) for the daily background sync.
+        # Injected by scripts/build_ios.sh from .env (AURA_CLIENT_*/AURA_INSTANCEID).
+        AURA_CLIENT_ID: ""
+        AURA_CLIENT_SECRET: ""
+        AURA_INSTANCEID: ""
+        # Background daily-sync task (BGProcessingTask).
+        UIBackgroundModes:
+          - processing
+          - fetch
+        BGTaskSchedulerPermittedIdentifiers:
+          - io.healthgraph.sync.dailysync
         # URL scheme so Auth0 can redirect back to the app after sign-in.
         CFBundleURLTypes:
           - CFBundleURLName: io.healthgraph.sync.callback
@@ -67,3 +78,15 @@ targets:
         SWIFT_EMIT_LOC_STRINGS: YES
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: ""
+
+  HealthGraphSyncTests:
+    type: bundle.unit-test
+    platform: iOS
+    dependencies:
+      - target: HealthGraphSync
+    sources:
+      - path: HealthGraphSync/Tests/HealthGraphSyncTests
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: io.healthgraph.sync.tests
+        GENERATE_INFOPLIST_FILE: YES

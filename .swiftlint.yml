@@ -1,0 +1,54 @@
+# SwiftLint configuration for HealthGraphSync.
+# Adapted from github.com/ma3u/TwoBreath-app.
+# Docs: https://realm.github.io/SwiftLint/rule-directory.html
+
+included:
+  - ios/HealthGraphSync/Sources
+
+excluded:
+  - ios/HealthGraphSync.xcodeproj
+  - ios/build
+  - DerivedData
+  - .build
+
+disabled_rules:
+  - trailing_comma            # allowed in multi-line literals
+  - todo                      # TODOs are fine during development
+  - type_name
+
+opt_in_rules:
+  - empty_count
+  - empty_string
+  - explicit_init
+  - first_where
+  - last_where
+  - redundant_nil_coalescing
+  - toggle_bool
+  - unneeded_parentheses_in_closure_argument
+  - operator_usage_whitespace
+
+line_length:
+  warning: 140
+  error: 200
+  ignores_comments: true
+  ignores_urls: true
+
+file_length:
+  warning: 500
+  error: 1000
+
+function_body_length:
+  warning: 60
+  error: 120
+
+function_parameter_count:
+  warning: 7
+  error: 9
+
+identifier_name:
+  min_length:
+    warning: 2
+    error: 1
+  excluded:
+    - id
+    - db

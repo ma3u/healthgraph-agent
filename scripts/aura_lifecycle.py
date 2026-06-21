@@ -126,12 +126,19 @@ def _driver():
     )
 
 
+def _db_kwargs() -> dict:
+    """database_= for execute_query when NEO4J_DATABASE is set (else default)."""
+    db = os.environ.get("NEO4J_DATABASE")
+    return {"database_": db} if db else {}
+
+
 def stamp_activity() -> None:
     """Record 'something happened' — call from every sync / agent query."""
     with _driver() as drv:
         drv.execute_query(
             "MERGE (s:System {key: $k}) SET s.lastActivityAt = datetime()",
             k=ACTIVITY_KEY,
+            **_db_kwargs(),
         )
 
 
@@ -139,7 +146,9 @@ def idle_minutes() -> float | None:
     """Minutes since the last stamped activity, or None if never stamped."""
     with _driver() as drv:
         recs, _, _ = drv.execute_query(
-            "MATCH (s:System {key: $k}) RETURN s.lastActivityAt AS t", k=ACTIVITY_KEY
+            "MATCH (s:System {key: $k}) RETURN s.lastActivityAt AS t",
+            k=ACTIVITY_KEY,
+            **_db_kwargs(),
         )
     if not recs or recs[0]["t"] is None:
         return None
@@ -153,7 +162,8 @@ def has_inflight_transactions() -> bool:
         recs, _, _ = drv.execute_query(
             "SHOW TRANSACTIONS YIELD currentQuery "
             "WHERE NOT currentQuery STARTS WITH 'SHOW TRANSACTIONS' "
-            "RETURN count(*) AS active"
+            "RETURN count(*) AS active",
+            **_db_kwargs(),
         )
     return bool(recs and recs[0]["active"] > 0)
 
@@ -290,7 +300,9 @@ def cmd_serve(args) -> int:
 
 
 def main() -> int:
-    p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    p = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     sub = p.add_subparsers(dest="cmd", required=True)
 
     sub.add_parser("status", help="print instance status")
