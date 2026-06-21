@@ -367,6 +367,31 @@ final class HealthKitService: ObservableObject {
         return minutes
     }
 
+    /// Sleep-stage segments for the most recent night (for the hypnogram view).
+    func lastNightHypnogram() async throws -> [SleepSegment] {
+        guard let type = HKCategoryType.categoryType(forIdentifier: .sleepAnalysis) else { return [] }
+        let end = Date()
+        let start = Calendar.current.date(byAdding: .hour, value: -36, to: end) ?? end
+        let samples = try await fetchSamples(type: type, start: start, end: end)
+        let segs: [SleepSegment] = samples.compactMap { s in
+            guard let cs = s as? HKCategorySample else { return nil }
+            let stage: SleepStage
+            switch cs.value {
+            case HKCategoryValueSleepAnalysis.asleepDeep.rawValue: stage = .deep
+            case HKCategoryValueSleepAnalysis.asleepCore.rawValue: stage = .core
+            case HKCategoryValueSleepAnalysis.asleepREM.rawValue: stage = .rem
+            case HKCategoryValueSleepAnalysis.awake.rawValue: stage = .awake
+            case HKCategoryValueSleepAnalysis.asleepUnspecified.rawValue: stage = .asleep
+            default: return nil   // skip inBed envelope + unknown values
+            }
+            return SleepSegment(stage: stage, start: cs.startDate, end: cs.endDate)
+        }.sorted { $0.start < $1.start }
+        // Keep only the most recent night (segments within ~16h of the last one).
+        guard let lastEnd = segs.last?.end else { return [] }
+        let nightStart = Calendar.current.date(byAdding: .hour, value: -16, to: lastEnd) ?? start
+        return segs.filter { $0.end > nightStart }
+    }
+
     private func fetchSamples(type: HKSampleType, start: Date, end: Date) async throws -> [HKSample] {
         let predicate = HKQuery.predicateForSamples(withStart: start, end: end, options: .strictStartDate)
         let sortDescriptor = NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: true)

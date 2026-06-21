@@ -7,6 +7,7 @@ import SwiftUI
 final class OfflineDashboardModel: ObservableObject {
     @Published var scores: [Scoring.DayScore] = []
     @Published var streaks: [(label: String, count: Int)] = []
+    @Published var hypnogram: [SleepSegment] = []
     @Published var loading = false
     @Published var error: String?
 
@@ -18,6 +19,7 @@ final class OfflineDashboardModel: ObservableObject {
             let summaries = try await HealthKitService.shared.dailySummaries(daysBack: total)
             scores = Scoring.buildScores(summaries)
             streaks = Self.streaks(from: summaries)
+            hypnogram = (try? await HealthKitService.shared.lastNightHypnogram()) ?? []
         } catch {
             self.error = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
         }
@@ -54,6 +56,7 @@ struct OfflineDashboardView: View {
                 ScrollView {
                     VStack(spacing: 16) {
                         cards()
+                        if !model.hypnogram.isEmpty { hypnogramCard }
                         if !model.streaks.isEmpty { streaksGrid }
                         Text("On-device · works while Aura is paused" + latestDataNote)
                             .font(.caption2).foregroundStyle(.secondary)
@@ -151,6 +154,16 @@ struct OfflineDashboardView: View {
             }
         }
         .frame(maxWidth: .infinity)
+        .padding()
+        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 18))
+    }
+
+    private var hypnogramCard: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("LAST NIGHT").font(.caption2).tracking(1.5).foregroundStyle(.secondary)
+            HypnogramView(segments: model.hypnogram)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding()
         .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 18))
     }
