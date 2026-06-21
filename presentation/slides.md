@@ -681,7 +681,7 @@ totals. And it all fits on a 1 GB Aura instance.
 
 Apple Health was step one. **Aura Document Intelligence** turns the clinical docs the export already bundles — **lab panels, ECG reports, physician letters** — into graph entities, **no extraction code**.
 
-From 4 docs it generated this model — **Biomarker · LabResult · Medication · Condition · Provider · ClinicalEvent** — each tied back to its source chunk for provenance, and dated entities attach to the same `(:Day)` timeline as workouts and sleep.
+From 4 docs it produced this graph — **Biomarker · LabResult · Medication · Condition · Provider · ClinicalEvent** — each tied back to its source chunk for provenance, and dated entities attach to the same `(:Day)` timeline as workouts and sleep.
 
 <div class="mt-3 opacity-90 font-semibold">One graph, every silo → my own private electronic health record.</div>
 

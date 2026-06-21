@@ -22,11 +22,11 @@ First run executed in the Aura Console against the 4 synthetic docs (instance
       `Medication`, `Condition`, `Provider`, `ClinicalEvent`) with relationships
       (`HAS_BIOMARKER`, `INCLUDES_RESULT`, `PRESCRIBES`, `IDENTIFIES`, `ORDERS`,
       `SIGNS`/`READS`/`ATTENDS`, `RELATED_TO`, `FOR_PURPOSE`)
-- [ ] **Run import** (in progress)
+- [x] **Run import** — clinical entities extracted into the graph (preview below)
 - [ ] Post-import: `link_clinical_to_days.cypher` → `validate_clinical.cypher`
 - [ ] Aura Agent hybrid question (clinical × `DailySummary`)
 
-![Generated clinical graph model from Document Intelligence](clinical-model.png)
+![Imported clinical graph in Document Intelligence — extracted entities + relationships](clinical-model.png)
 
 > The model was generated from the four documents in ~1 minute with no extraction code —
 > a first step toward a private, graph-native electronic health record that aggregates
