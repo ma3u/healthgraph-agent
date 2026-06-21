@@ -7,7 +7,7 @@
 <title>HealthGraph dashboard</title>
 <style>
   :root {
-    --accent: #f59e0b;
+    --accent: #10b981;
     --bg: #0b0d10;
     --fg: #e8eef4;
     --muted: #8392a3;
@@ -75,38 +75,38 @@
     <h1>HealthGraph</h1>
 
     <div class="card recovery">
-      <div class="score">44<sup>%</sup></div>
-      <span class="zone">YELLOW</span>
-      <div class="blurb">Maintain</div>
-      <div class="date" style="margin-top: 1rem">Data through 2026-06-16</div>
+      <div class="score">72<sup>%</sup></div>
+      <span class="zone">GREEN</span>
+      <div class="blurb">Recover & train</div>
+      <div class="date" style="margin-top: 1rem">Data through 2026-06-21</div>
     </div>
 
     <div class="card">
       <h2>Last 7 days · averages</h2>
       <div class="stat-grid">
-        <div class="stat"><div class="num">54</div><div class="lbl">RHR (bpm)</div></div>
-        <div class="stat"><div class="num">35</div><div class="lbl">HRV (ms)</div></div>
+        <div class="stat"><div class="num">52</div><div class="lbl">RHR (bpm)</div></div>
+        <div class="stat"><div class="num">38</div><div class="lbl">HRV (ms)</div></div>
         <div class="stat"><div class="num">3.1</div><div class="lbl">Sleep (h)</div></div>
-        <div class="stat"><div class="num">16008</div><div class="lbl">Steps</div></div>
+        <div class="stat"><div class="num">15017</div><div class="lbl">Steps</div></div>
       </div>
     </div>
 
     <div class="card">
       <h2>This week · workouts</h2>
       <div class="stat-grid" style="margin-bottom: 0.75rem">
-        <div class="stat"><div class="num">19</div><div class="lbl">Sessions</div></div>
-        <div class="stat"><div class="num">1022</div><div class="lbl">Minutes</div></div>
+        <div class="stat"><div class="num">15</div><div class="lbl">Sessions</div></div>
+        <div class="stat"><div class="num">1095</div><div class="lbl">Minutes</div></div>
       </div>
-      <div class="date">6× HighIntensityIntervalTraining, 1× FunctionalStrengthTraining, 1× Rowing, 1× Yoga, 2× Running, 2× Other, 6× Cycling</div>
+      <div class="date">2× Yoga, 2× Running, 5× HighIntensityIntervalTraining, 4× Cycling, 1× FunctionalStrengthTraining, 1× Rowing</div>
     </div>
 
     <div class="card">
       <h2>Active streaks</h2>
-      <ul class="streaks"><li><span class="num">9</span><span class="lbl">RHR < 60</span></li></ul>
+      <ul class="streaks"><li><span class="num">4</span><span class="lbl">Steps ≥ 10k</span></li><li><span class="num">14</span><span class="lbl">RHR < 60</span></li><li><span class="num">1</span><span class="lbl">HRV ≥ 38</span></li></ul>
     </div>
 
     <footer>
-      Generated 2026-06-20 07:47 UTC · queried via <a href="https://github.com/ma3u/healthgraph-agent/blob/main/cypher/graphql_schema.graphql">Aura GraphQL Data API</a> ·
+      Generated 2026-06-21 11:53 UTC · queried via <a href="https://github.com/ma3u/healthgraph-agent/blob/main/cypher/graphql_schema.graphql">Aura GraphQL Data API</a> ·
       <a href="https://github.com/ma3u/healthgraph-agent">repo</a>
     </footer>
   </main>
