@@ -9,7 +9,8 @@ they exercise exactly what CI / a manual run does — no database required:
 The rendered page must be:
   * valid-ish HTML (starts with ``<!doctype html>``),
   * a real dashboard (mentions Recovery / Strain / Sleep, has inline sparklines),
-  * PRIVACY-CLEAN — no raw-biometric markers leak into the page, and
+  * PERSONAL but self-describing — derived scores + raw VO2max/HRV/RHR cards
+    (user-approved); internal Cypher aliases must not leak, and
   * SELF-CONTAINED — no scripts, and no external URLs except the github.com/ma3u
     repo link (so it renders offline while Aura is paused).
 """
@@ -85,11 +86,15 @@ def test_demo_has_inline_sparklines(tmp_path):
     assert html.count('<svg class="spark"') >= 3
 
 
-def test_demo_has_no_raw_biometric_markers(tmp_path):
-    """Privacy: only derived scores may appear — never raw biometric values/units."""
+def test_demo_shows_metric_cards(tmp_path):
+    """The snapshot is intentionally personal (user-approved): derived scores PLUS
+    raw VO2max / HRV / resting-HR cards. Only internal Cypher aliases must not leak.
+    """
     _, html = _render_demo(tmp_path)
-    for forbidden in (" bpm", " ms", "hrv_mean", "resting_heart_rate", "sleep_hours"):
-        assert forbidden not in html, f"raw-biometric marker leaked into HTML: {forbidden!r}"
+    for label in ("Recovery", "Strain", "Sleep", "VO₂max", "HRV", "Resting HR"):
+        assert label in html, f"dashboard missing metric card {label!r}"
+    for internal in ("hrv_mean", "resting_heart_rate"):
+        assert internal not in html, f"internal field name leaked into HTML: {internal!r}"
 
 
 def test_demo_is_self_contained(tmp_path):
