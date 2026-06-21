@@ -40,12 +40,18 @@ enum DailySync {
         try? BGTaskScheduler.shared.submit(req)
     }
 
+    /// Next 06:30 UTC — aligned with the GitHub Actions snapshot cron so the iPhone
+    /// sync and the Aura morning uptime share one window (06:30 UTC ≈ 08:30 CEST).
+    /// BGProcessingTask timing is best-effort; the OS may shift it, and the task
+    /// resumes Aura itself via AuraAdmin if it isn't already up.
     private static func nextMorning() -> Date {
-        let cal = Calendar.current
+        var cal = Calendar(identifier: .gregorian)
+        cal.timeZone = TimeZone(identifier: "UTC") ?? cal.timeZone
         let now = Date()
         var comps = cal.dateComponents([.year, .month, .day], from: now)
-        comps.hour = 7
-        comps.minute = 0
+        comps.hour = 6
+        comps.minute = 30
+        comps.timeZone = TimeZone(identifier: "UTC")
         var target = cal.date(from: comps) ?? now.addingTimeInterval(3600)
         if target <= now { target = cal.date(byAdding: .day, value: 1, to: target) ?? target }
         return target

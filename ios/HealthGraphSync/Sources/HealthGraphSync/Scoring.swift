@@ -14,6 +14,7 @@ enum Scoring {
         var steps: Double?
         var activeKcal: Double?
         var workoutMin: Double?
+        var vo2max: Double? = nil   // mL/kg/min (raw — longevity headline metric)
     }
 
     struct DayScore: Identifiable {
@@ -22,6 +23,9 @@ enum Scoring {
         let recovery: Double?   // 0–100
         let strain: Double      // 0–21
         let sleep: Double?      // 0–100
+        let vo2max: Double?     // mL/kg/min (raw)
+        let hrv: Double?        // ms (raw)
+        let rhr: Double?        // bpm (raw)
     }
 
     static let displayDays = 30
@@ -93,7 +97,10 @@ enum Scoring {
                                    hrvMean: hMean, hrvStd: hStd,
                                    rhrMean: rMean, rhrStd: rStd),
                 strain: strain(activeKcal: d.activeKcal, workoutMin: d.workoutMin),
-                sleep: sp))
+                sleep: sp,
+                vo2max: d.vo2max,
+                hrv: d.hrv,
+                rhr: d.rhr))
         }
         return out
     }

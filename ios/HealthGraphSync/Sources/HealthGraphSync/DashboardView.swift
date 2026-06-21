@@ -2,8 +2,15 @@ import SwiftUI
 import WebKit
 
 struct DashboardView: View {
-    /// The full live dashboard (NeoDash / Aura Console) — opened in Safari.
-    private var liveDashboardURL: URL? { AppConfig.auraDashboardURL ?? AppConfig.neodashURL }
+    /// The full Whoop-style static dashboard on GitHub Pages — opened in Safari.
+    /// NEODASH_URL is the snapshot dir (…/snapshot/); append dashboard.html to land
+    /// on the full dashboard instead of the Recovery landing page.
+    private var pagesURL: URL? {
+        if let base = AppConfig.neodashURL {
+            return base.appendingPathComponent("dashboard.html")
+        }
+        return AppConfig.auraDashboardURL
+    }
 
     var body: some View {
         NavigationStack {
@@ -17,12 +24,12 @@ struct DashboardView: View {
             }
             .navigationTitle("Today")
             .toolbar {
-                if let url = liveDashboardURL {
+                if let url = pagesURL {
                     ToolbarItem(placement: .topBarTrailing) {
                         Button {
                             UIApplication.shared.open(url)
                         } label: {
-                            Label("Open full dashboard in Safari", systemImage: "safari")
+                            Label("Open snapshot (GitHub Pages)", systemImage: "safari")
                         }
                     }
                 }
