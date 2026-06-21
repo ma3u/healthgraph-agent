@@ -300,6 +300,8 @@ final class HealthKitService: ObservableObject {
                                             start: start, end: end, interval: interval) { $0.sumQuantity()?.doubleValue(for: .count()) }
         let kcal = try await dailyQuantity(.activeEnergyBurned, options: .cumulativeSum,
                                            start: start, end: end, interval: interval) { $0.sumQuantity()?.doubleValue(for: .kilocalorie()) }
+        let vo2 = try await dailyQuantity(.vo2Max, options: .discreteAverage,
+                                          start: start, end: end, interval: interval) { $0.averageQuantity()?.doubleValue(for: HKUnit(from: "ml/kg*min")) }
         let sleep = try await sleepHoursByDay(start: start, end: end)
         let workout = try await workoutMinutesByDay(start: start, end: end)
 
@@ -308,7 +310,8 @@ final class HealthKitService: ObservableObject {
         while cursor < end {
             let key = cal.startOfDay(for: cursor)
             days.append(.init(date: key, hrv: hrv[key], rhr: rhr[key], sleepHours: sleep[key],
-                              steps: steps[key], activeKcal: kcal[key], workoutMin: workout[key]))
+                              steps: steps[key], activeKcal: kcal[key], workoutMin: workout[key],
+                              vo2max: vo2[key]))
             cursor = cal.date(byAdding: .day, value: 1, to: cursor) ?? end
         }
         return days
