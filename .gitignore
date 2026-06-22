@@ -12,6 +12,11 @@ data/apple_health_export*.zip
 # Generated charts (may contain personal health data)
 data/charts/
 
+# Real Cronometer exports (personal nutrition/biometric data) — NEVER commit.
+# Synthetic samples live under docs/connectors/cronometer/sample/ and ARE checked in.
+data/cronometer/
+data/*cronometer*.csv
+
 # Environment
 .env
 .venv/
