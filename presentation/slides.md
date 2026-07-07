@@ -45,37 +45,11 @@ transition: fade-out
 </div>
 
 <!--
-Speaker: Hi everyone. Quick framing: I built this over the hackathon window
-to scratch my own itch. By the end of 20 minutes I want you to see a
-pattern you can apply to any quantified-self domain, not just health.
--->
-
----
-layout: center
----
-
-<div class="kicker">Two things I wanted</div>
-
-<div class="grid grid-cols-2 gap-12 mt-12">
-
-<div class="flex flex-col gap-4">
-  <div class="i-tabler-heartbeat text-6xl text-pink-500" />
-  <div class="text-2xl font-semibold">A Whoop dashboard.</div>
-  <div class="text-base opacity-70">For my Apple Watch data. Apple has the watch. Whoop has the coach. The data is mine.</div>
-</div>
-
-<div class="flex flex-col gap-4">
-  <div class="i-tabler-lock-open text-6xl text-indigo-500" />
-  <div class="text-2xl font-semibold">Escape vendor lock-in.</div>
-  <div class="text-base opacity-70">8.5 years of biometrics. Stop renting them back from any single vendor.</div>
-</div>
-
-</div>
-
-<!--
-Speaker: I'm an Apple Watch user. Apple shows me charts; it doesn't coach me.
-Whoop has the coach UX I want, but their hardware and $239/year subscription.
-Both keep my data hostage. I want both, on my own data.
+Speaker: Hi everyone. I'm an Apple Watch user. Apple shows me charts; it
+doesn't coach me. Whoop has the coach, but their hardware, their
+subscription, their silo. I built the coach on my own data over the
+hackathon window. In 15 minutes you'll see a pattern you can apply to any
+quantified-self domain.
 -->
 
 ---
@@ -88,7 +62,7 @@ Both keep my data hostage. I want both, on my own data.
   <div class="i-tabler-database text-3xl text-rose-500 mt-1 shrink-0" />
   <div>
     <div class="font-semibold">Your health data lives in a dozen silos.</div>
-    <div class="opacity-70 text-sm">Apple Health is just one. I also want blood panels, my gym, my classes, the German ePA. None of them talk to each other:</div>
+    <div class="opacity-70 text-sm">None of them talk to each other:</div>
     <div class="flex flex-wrap gap-1.5 mt-2">
       <span class="chip">Apple Health</span>
       <span class="chip">Aware</span>
@@ -105,7 +79,7 @@ Both keep my data hostage. I want both, on my own data.
   <div class="i-tabler-topology-star-3 text-3xl text-emerald-500 mt-1 shrink-0" />
   <div>
     <div class="font-semibold">Your data is relational.</div>
-    <div class="opacity-70 text-sm">Workout, next night's sleep, morning HRV, recovery. Tables hide the chain.</div>
+    <div class="opacity-70 text-sm">Workout → sleep → morning HRV → recovery. Tables hide the chain.</div>
   </div>
 </div>
 
@@ -113,7 +87,7 @@ Both keep my data hostage. I want both, on my own data.
   <div class="i-tabler-brain text-3xl text-violet-500 mt-1 shrink-0" />
   <div>
     <div class="font-semibold">An LLM alone won't help.</div>
-    <div class="opacity-70 text-sm">"How am I doing?" without grounded data = horoscope. The agent needs your graph.</div>
+    <div class="opacity-70 text-sm">"How am I doing?" without grounded data = horoscope.</div>
   </div>
 </div>
 
@@ -123,25 +97,16 @@ Both keep my data hostage. I want both, on my own data.
 
 <div class="mt-6 text-lg flex items-center gap-3">
   <div class="i-tabler-rocket text-2xl text-amber-500" />
-  You're a developer. One graph unifies every silo.
+  You're a developer. One graph unifies every silo — and the data stays yours.
 </div>
 
 </v-click>
 
 <!--
-Speaker: Apple Health was my starting point, but the real vision is broader.
-Blood panels, the German ePA (national electronic patient record), the eGym
-strength machines, my Beat81 HIIT classes, Aware, even findings from medical
-studies. Seven sources, seven silos. A graph is the one model that lets all
-of them share nodes — the same :Day, the same :Person — instead of seven
-disconnected exports.
--->
-
-
-<!--
-Speaker: Three pains, one developer-shaped solution. Spend the next 20 minutes
-with me. By the end you'll see a pattern you can apply to any personal
-data domain.
+Speaker: 8.5 years of biometrics, rented back to me by every vendor. And
+Apple Health is just one silo — blood panels, the German ePA, eGym, Beat81.
+A graph is the one model where all of them share the same :Day and the same
+:Person instead of seven disconnected exports.
 -->
 
 ---
@@ -179,7 +144,7 @@ layout: center
 </div>
 
 <div class="mt-12 text-center opacity-60 text-sm">
-None require hosting bills. Everything runs on your own Aura instance.
+Everything runs on your own Aura instance.
 </div>
 
 ---
@@ -250,7 +215,7 @@ layout: section
 </div>
 
 <div class="opacity-70 mt-10 text-base text-center">
-Four pillars. Each a Neo4j Aura primitive. Each solving a piece of the pattern.
+Four pillars. Each a Neo4j Aura primitive.
 </div>
 
 ---
@@ -263,17 +228,17 @@ Four pillars. Each a Neo4j Aura primitive. Each solving a piece of the pattern.
 
 <div class="col-span-2 text-sm">
 
-**What it is.** A cloud-hosted reasoning layer sitting on top of your Aura graph. The Agent picks a tool, runs Cypher, reads results, and produces a grounded answer in natural language.
+A cloud-hosted reasoning layer on top of your Aura graph: pick a tool, run Cypher, answer grounded.
 
-**Tools (6):** Text2Cypher + 5 parameterized templates:
+**Tools (6):** Text2Cypher + 5 templates:
 
-- `health_overview` · daily metrics + 30-day baseline
+- `health_overview` · daily + 30-day baseline
 - `workout_recovery` · workout → next-day HRV
 - `overtraining_check` · weekly CAUTION flags
 - `longevity_trends` · monthly biomarkers
 - `exercise_balance` · cardio vs strength
 
-Defined **as code** via the Aura v2beta1 `/agents` API, MCP enabled, REST-invokable.
+Defined **as code**, MCP enabled, REST-invokable.
 
 <div class="mt-3 font-mono text-xs opacity-70">
 console.neo4j.io · Agents tab
@@ -290,9 +255,8 @@ console.neo4j.io · Agents tab
 </div>
 
 <!--
-Speaker: Two complementary things. The Aura Agent is the cloud brain over the
-graph; Neo4j Skills are a developer accelerator inside your editor. Together
-they cover the build-time and run-time AI surfaces.
+Speaker: The cloud brain over the graph. Six tools; the five templates are
+parameterized Cypher I wrote, Text2Cypher covers the rest.
 -->
 
 ---
@@ -308,9 +272,7 @@ they cover the build-time and run-time AI surfaces.
 **5 pages, 35 panels:**
 
 - Daily hero: Recovery % / Strain / Sleep
-- Recovery deep-dive
-- Strain deep-dive
-- Sleep deep-dive
+- Recovery · Strain · Sleep deep-dives
 - 8.5-year Health Monitor
 
 Score formulas open-sourced in `docs/SCORING.md`.
@@ -330,7 +292,7 @@ Aura Console · Tools · Dashboards
 </div>
 
 <!--
-Speaker: This is the Whoop UI I wanted, rebuilt on my own graph. Same scoring
+Speaker: The Whoop UI I wanted, rebuilt on my own graph. Same scoring
 logic Whoop uses. Different data ownership.
 -->
 
@@ -344,7 +306,7 @@ logic Whoop uses. Different data ownership.
 
 <div class="col-span-2 text-sm">
 
-**GraphQL Data API.** Three `@cypher` MERGE mutations: `ingestDay` · `ingestWorkout` · `ingestSleep`. Deployed via the v1beta5 REST endpoint.
+**GraphQL Data API.** Three `@cypher` MERGE mutations: `ingestDay` · `ingestWorkout` · `ingestSleep`.
 
 **GitHub Actions, daily at 06:30 UTC:**
 
@@ -355,10 +317,8 @@ logic Whoop uses. Different data ownership.
 
 Total uptime per day: ~2-3 minutes.
 
-<div class="mt-3 grid grid-cols-1 gap-1 font-mono text-xs">
-<div class="flex items-center gap-1"><div class="i-tabler-cloud text-base opacity-60" /> console.neo4j.io · GraphQL Data APIs</div>
-<div class="flex items-center gap-1"><div class="i-tabler-settings text-base opacity-60" /> github.com/ma3u/healthgraph-agent/actions</div>
-<div class="flex items-center gap-1"><div class="i-tabler-world text-base opacity-60" /> ma3u.github.io/healthgraph-agent/snapshot/</div>
+<div class="mt-3 font-mono text-xs opacity-70">
+ma3u.github.io/healthgraph-agent/snapshot/
 </div>
 
 </div>
@@ -372,8 +332,8 @@ Total uptime per day: ~2-3 minutes.
 </div>
 
 <!--
-Speaker: Critical lesson: professional-db tier does NOT auto-pause. Without
-that final pause step, the instance bleeds ~$10/day. Save your credits.
+Speaker: The dashboard you can look at while the database sleeps. And the
+pause step at the end is what keeps the credits alive — more on that soon.
 -->
 
 ---
@@ -394,38 +354,36 @@ that final pause step, the instance bleeds ~$10/day. Save your credits.
 
 <div>
   <div class="i-tabler-cloud-data-connection text-xl mb-1 text-pink-500" />
-  <strong>Sync.</strong> HealthKit → query Aura for max(Day.date) → upload only the delta.
+  <strong>Sync.</strong> HealthKit → upload only the delta.
 </div>
 <div>
   <div class="i-tabler-pencil text-xl mb-1 text-sky-500" />
-  <strong>Ask.</strong> Four chips compute concrete ISO date ranges at tap time.
+  <strong>Ask.</strong> Chips compute ISO date ranges at tap time.
 </div>
 <div>
   <div class="i-tabler-bolt text-xl mb-1 text-violet-500" />
-  <strong>Answer.</strong> Overlay sheet, Markdown rendering, trend arrows.
+  <strong>Answer.</strong> Markdown overlay, ~15 s end-to-end.
 </div>
 
 </div>
 
 <!--
-Speaker: This is where it all comes together. Real-device demo coming up next.
-The answer overlay has actual numbers from my own graph, queried by the
-agent's tools, about 15 seconds end-to-end.
+Speaker: This is where it all comes together — and it's the live demo, now.
 -->
 
 ---
 layout: section
 ---
 
-<div class="kicker"><div class="i-tabler-player-play inline-block align-text-bottom mr-1" /> Live demo · ~5 minutes</div>
+<div class="kicker"><div class="i-tabler-player-play inline-block align-text-bottom mr-1" /> Live demo · ~4 minutes</div>
 
-# Six stops: Simulator → Aura → GitHub
+# Simulator → Aura → GitHub
 
 <div class="demo-links mt-6">
 
 <div class="demo-link">
   <div class="i-tabler-brand-apple text-2xl text-gray-700 shrink-0" />
-  <div><div class="font-semibold">Open Xcode + iPhone 17 Pro Simulator</div><div class="u">HealthGraphSync · runs the same build</div></div>
+  <div><div class="font-semibold">iPhone Simulator: sync + ask</div><div class="u">HealthGraphSync · runs the same build</div></div>
 </div>
 
 <a href="https://console.neo4j.io/projects/326809f3-c351-4eb7-8770-fcf5d0b6adc1/agents" target="_blank" class="demo-link">
@@ -438,16 +396,6 @@ layout: section
   <div><div class="font-semibold">Aura Dashboard</div><div class="u">console.neo4j.io · Whoop view</div></div>
 </a>
 
-<a href="https://console.neo4j.io/projects/326809f3-c351-4eb7-8770-fcf5d0b6adc1/data-api" target="_blank" class="demo-link">
-  <div class="i-tabler-api text-2xl text-emerald-500 shrink-0" />
-  <div><div class="font-semibold">Aura GraphQL Data API</div><div class="u">console.neo4j.io · data-api</div></div>
-</a>
-
-<a href="https://github.com/ma3u/healthgraph-agent/actions/workflows/snapshot.yml" target="_blank" class="demo-link">
-  <div class="i-tabler-rocket text-2xl text-amber-500 shrink-0" />
-  <div><div class="font-semibold">Snapshot pipeline</div><div class="u">github.com · Actions</div></div>
-</a>
-
 <a href="https://ma3u.github.io/healthgraph-agent/snapshot/" target="_blank" class="demo-link">
   <div class="i-tabler-world text-2xl text-rose-500 shrink-0" />
   <div><div class="font-semibold">GitHub Pages snapshot</div><div class="u">ma3u.github.io · snapshot</div></div>
@@ -456,20 +404,20 @@ layout: section
 </div>
 
 <!--
-Speaker (DEMO ~5 min):
+Speaker (DEMO ~4 min, 4 stops):
 1. Xcode is already open with the iPhone 17 Pro Simulator booted and the
-   HealthGraphSync app installed. Run it.
-2. Sync tab: show max(Day.date), upload the last days' delta.
-3. Dashboard tab: tap "Last week summary" — answer overlay opens (~15s),
+   HealthGraphSync app installed. Sync tab: show max(Day.date), upload the
+   last days' delta.
+2. Dashboard tab: tap "Last week summary" — answer overlay opens (~15s),
    point out RHR vs baseline, the → arrow, the bullet structure.
-4. Click "Aura Agent" → Console Agents → Playground: ask the same
-   question, show it's the SAME agent the app called.
-5. Click "Aura Dashboard" → the Whoop-style NeoDash view.
-6. Click "Aura GraphQL Data API" → the deployed Data API.
-7. Click "Snapshot pipeline" → the green daily GitHub Actions run.
-8. Click "GitHub Pages snapshot" → today's rendered Recovery card.
+3. Click "Aura Agent" → Console Playground: it's the SAME agent the app
+   called. Click "Aura Dashboard" → the Whoop-style view.
+4. Click "GitHub Pages snapshot" → today's rendered Recovery card from the
+   06:30 GitHub Actions run.
 
-All five cards are real clickable links — no typing URLs on stage.
+All cards are real clickable links — no typing URLs on stage.
+Backup if the demo dies: docs/images/hackathon/08-iphone-agent-answer-
+overlay-markdown.jpeg.
 -->
 
 
@@ -504,128 +452,53 @@ All five cards are real clickable links — no typing URLs on stage.
 ```
 
 <div class="mt-2 text-sm opacity-70">
-<code>scripts/create_aura_agent.py</code> via Aura v2beta1 <code>/agents</code> API. Three modes: <code>status</code> · <code>--pull</code> · <code>--push</code>.
+<code>scripts/create_aura_agent.py</code> via Aura v2beta1 <code>/agents</code> API: <code>status</code> · <code>--pull</code> · <code>--push</code>.
 </div>
 
 <!--
-Speaker: System prompt, tools, Cypher templates — all in one checked-in JSON.
-Diff in PR. Round-trip via `--pull` to capture Console edits. Push via
-`--push` to deploy. Agents-as-code, finally.
+Speaker: System prompt, tools, Cypher templates — one checked-in JSON.
+Diff in PR, round-trip Console edits with --pull, deploy with --push.
+Agents-as-code, finally.
 -->
 
 ---
 
-<div class="kicker"><div class="i-tabler-tools inline-block align-text-bottom mr-1" /> How this was built</div>
+<div class="kicker"><div class="i-tabler-pig-money inline-block align-text-bottom mr-1" /> BYO Aura · don't burn your credits</div>
 
-# Neo4j Skills for Claude Code
-
-<div class="grid grid-cols-5 gap-6 mt-4">
-
-<div class="col-span-2 text-sm">
-
-Installable knowledge packages for AI coding agents — Claude Code, Cursor, Cline, Gemini CLI. One command:
-
-```bash
-npx skills add neo4j-contrib/neo4j-skills
-```
-
-**Progressive disclosure** keeps the context window lean: the agent reads a ~50-token summary, pulls the full ~2k-token protocol only when a task matches, and opens deep reference files on demand.
-
-It **auto-picks** the skill from the task — *"optimize this Cypher"* loads `neo4j-cypher-skill`; *"build a GraphRAG pipeline"* loads `neo4j-graphrag-skill`.
-
-</div>
-
-<div class="col-span-3 text-sm">
-
-<div class="font-semibold mb-3">Where the 24 installed skills carried this build:</div>
-
-<div class="flex flex-col gap-2">
-  <div class="flex items-start gap-2"><div class="i-tabler-code text-lg text-sky-500 mt-0.5 shrink-0" /><div><code>cypher</code> — the agent's 5 Cypher templates + 20 longevity queries</div></div>
-  <div class="flex items-start gap-2"><div class="i-tabler-api text-lg text-emerald-500 mt-0.5 shrink-0" /><div><code>graphql</code> — the <code>@cypher</code> SDL behind the Data API</div></div>
-  <div class="flex items-start gap-2"><div class="i-tabler-topology-star-3 text-lg text-violet-500 mt-0.5 shrink-0" /><div><code>modeling</code> — the Day / Workout / Sleep graph model</div></div>
-  <div class="flex items-start gap-2"><div class="i-tabler-cloud text-lg text-rose-500 mt-0.5 shrink-0" /><div><code>aura-provisioning</code> — the <code>create_aura_*.py</code> scripts</div></div>
-  <div class="flex items-start gap-2"><div class="i-tabler-database-search text-lg text-amber-500 mt-0.5 shrink-0" /><div><code>vector-index</code> + <code>graphrag</code> — the open similarity-search work</div></div>
-  <div class="flex items-start gap-2"><div class="i-tabler-plug-connected text-lg text-cyan-500 mt-0.5 shrink-0" /><div><code>mcp</code> — the agent's MCP endpoint</div></div>
-</div>
-
-</div>
-
-</div>
-
-<!--
-Speaker: This is the build-time half of the AI story. The Aura Agent reasons
-over my data at runtime; Neo4j Skills made Claude Code fluent in Neo4j while
-I was writing the Cypher templates, the GraphQL SDL, the provisioning
-scripts. 24 skills, one install, zero config — the agent loads whichever one
-the task needs, and unloads it after. Not Claude-Code-only: skills run in
-any Agent-Skills-compatible tool — Cursor, Cline, Gemini CLI, Codex.
--->
-
----
-
-<div class="kicker"><div class="i-tabler-key inline-block align-text-bottom mr-1" /> BYO Aura</div>
-
-# Your data. Your Aura.
-
-<div class="grid grid-cols-2 gap-12 mt-8">
-
-<div class="flex flex-col gap-3">
-  <div class="i-tabler-shield text-5xl text-emerald-500" />
-  <div class="text-xl font-semibold">No shared backend.</div>
-  <div class="text-sm opacity-70">Your biometrics never leave your Aura instance. Mine never touches yours.</div>
-</div>
-
-<div class="flex flex-col gap-3">
-  <div class="i-tabler-bolt text-5xl text-amber-500" />
-  <div class="text-xl font-semibold">~5 minutes to running.</div>
-  <div class="text-sm opacity-70">Clone, fill .env, run two scripts. Working stack against your own Aura.</div>
-</div>
-
-</div>
-
-<!--
-Speaker: The trade-off: you bring credits. Which leads to the next slide.
--->
-
----
-
-<div class="kicker"><div class="i-tabler-pig-money inline-block align-text-bottom mr-1" /> Don't burn your credits</div>
-
-# Professional-db does not auto-pause
+# Your data. Your Aura. Your bill.
 
 <div class="grid grid-cols-2 gap-8 mt-6">
 
 <div>
 
-| Tier | Auto-pause? | Burn rate |
-| --- | --- | --- |
-| Free | Yes (3 days idle) | $0 |
-| AuraDS | Yes | varies |
-| **Professional** | **No** | **~$0.30 – $0.40 /hr** |
+**No shared backend.** Your biometrics never leave your Aura instance. Clone, fill `.env`, two scripts — ~5 minutes to running.
 
-If your workflow only resumes, your instance lives forever.
+**The catch:** Professional-db never auto-pauses at ~$0.30–0.40/hr. If your workflow only resumes, your instance lives forever.
 
 </div>
 
 <div>
 
-The fix. One extra step in the daily cron:
+The fix — one extra step in the daily cron:
 
 ```yaml
 - name: Pause Aura instance
   if: always()
-  env:
-    AURA_INSTANCEID: ${{ secrets.AURA_INSTANCEID }}
-    AURA_CLIENT_ID:  ${{ secrets.AURA_CLIENT_ID }}
-    AURA_CLIENT_SECRET: ${{ secrets.AURA_CLIENT_SECRET }}
   run: bash scripts/aura_pause.sh pause
 ```
 
-Total uptime per day after: ~2-3 minutes.
+Plus a 30-min idle watchdog + app-triggered wake:<br/>
+**~$520 → ~$120/mo (−77%).**
 
 </div>
 
 </div>
+
+<!--
+Speaker: Bring-your-own-Aura is the privacy posture AND the cost story.
+The hard lesson: Professional tier does not auto-pause. On-demand resume,
+an idle watchdog, and the pause step in the cron cut my bill by ~77%.
+-->
 
 ---
 layout: center
@@ -659,13 +532,10 @@ layout: center
 </div>
 
 <!--
-Speaker: This is the whole point — 8.5 years of Apple Health, not a flat
-export but a connected graph you can rotate and walk. Every node carries
-its real label: my name, my devices, the dates, the workout types; every
-edge its relationship. ~11k entities, ~17k relationships. The agent walks
-these edges — Workout FOLLOWED_BY SleepSession, Day NEXT_DAY Day. The
-cloud here is a readable slice; the four numbers up top are the real
-totals. And it all fits on a 1 GB Aura instance.
+Speaker: The whole point in one picture — 8.5 years of Apple Health as a
+connected graph. The agent walks these edges: Workout FOLLOWED_BY
+SleepSession, Day NEXT_DAY Day. ~11k nodes, ~17k relationships, on a
+1 GB Aura instance.
 -->
 
 
@@ -679,13 +549,11 @@ totals. And it all fits on a 1 GB Aura instance.
 
 <div class="col-span-2 text-sm">
 
-Apple Health was step one. **Aura Document Intelligence** turns the clinical docs the export already bundles — **lab panels, ECG reports, physician letters** — into graph entities, **no extraction code**.
+**Aura Document Intelligence** turns the clinical docs the export already bundles — lab panels, ECG reports, physician letters — into graph entities, **no extraction code**.
 
-From 4 docs it produced this graph — **Biomarker · LabResult · Medication · Condition · Provider · ClinicalEvent** — each tied back to its source chunk for provenance, and dated entities attach to the same `(:Day)` timeline as workouts and sleep.
+From 4 docs: **Biomarker · LabResult · Medication · Condition · Provider · ClinicalEvent**, each with source-chunk provenance, dated entities on the same `(:Day)` timeline.
 
 <div class="mt-3 opacity-90 font-semibold">One graph, every silo → my own private electronic health record.</div>
-
-<div class="mt-3 font-mono text-xs opacity-70">console.neo4j.io · Document Intelligence (preview)</div>
 
 </div>
 
@@ -698,43 +566,25 @@ From 4 docs it produced this graph — **Biomarker · LabResult · Medication ·
 </div>
 
 <!--
-Speaker: This is where the "dozen silos" slide pays off. Document Intelligence
-reads the clinical PDFs Apple Health bundles but the ETL ignored, and extracts a
-clean clinical graph — lab results, medications, conditions, providers — wired
-onto the same daily timeline. That's the path from a Whoop clone to a private EHR
-that aggregates everything. No extraction code; the model was generated from four
-documents in about a minute.
+Speaker: This is where the "dozen silos" slide pays off. DI reads the
+clinical PDFs the ETL ignored and wires them onto the same daily timeline.
+That's the path from a Whoop clone to a private EHR. Model generated from
+four documents in about a minute.
 -->
 
 ---
 
 <div class="kicker"><div class="i-tabler-bulb inline-block align-text-bottom mr-1" /> What I've learned (so far)</div>
 
-# Six lessons from the build
+# Four lessons from the build
 
 <div class="grid grid-cols-2 gap-x-8 gap-y-4 mt-4 text-sm">
-
-<div class="flex items-start gap-3">
-  <div class="i-tabler-pig-money text-2xl text-amber-500 mt-0.5 shrink-0" />
-  <div>
-    <div class="font-semibold">Pause or pay.</div>
-    <div class="opacity-70">Professional Aura never auto-pauses. On-demand resume + a 30-min idle watchdog + app-triggered wake took it ~$520 → ~$120/mo (~77%).</div>
-  </div>
-</div>
 
 <div class="flex items-start gap-3">
   <div class="i-tabler-cloud-off text-2xl text-sky-500 mt-0.5 shrink-0" />
   <div>
     <div class="font-semibold">Decouple the view from the DB.</div>
-    <div class="opacity-70">A static daily snapshot renders the dashboard while Aura sleeps. Offline-first is what makes aggressive pausing usable.</div>
-  </div>
-</div>
-
-<div class="flex items-start gap-3">
-  <div class="i-tabler-license text-2xl text-emerald-500 mt-0.5 shrink-0" />
-  <div>
-    <div class="font-semibold">Borrow the science, keep the graph.</div>
-    <div class="opacity-70">whoof & noop nail the offline UX but are flat stores. Re-implement the cited scoring (Tanaka, Banister TRIMP); the graph + agent is the moat. Mind the license.</div>
+    <div class="opacity-70">A static daily snapshot renders while Aura sleeps. Offline-first makes aggressive pausing usable.</div>
   </div>
 </div>
 
@@ -742,15 +592,15 @@ documents in about a minute.
   <div class="i-tabler-shield-lock text-2xl text-rose-500 mt-0.5 shrink-0" />
   <div>
     <div class="font-semibold">Gate the AI.</div>
-    <div class="opacity-70">An AI "shortcut" PR logged the DB password in plaintext. Pre-commit (gitleaks/SwiftLint) + isolated-DB E2E tests now catch it before merge.</div>
+    <div class="opacity-70">An AI "shortcut" PR logged the DB password in plaintext. Pre-commit (gitleaks) + isolated-DB E2E tests now catch it before merge.</div>
   </div>
 </div>
 
 <div class="flex items-start gap-3">
-  <div class="i-tabler-device-mobile-cog text-2xl text-violet-500 mt-0.5 shrink-0" />
+  <div class="i-tabler-license text-2xl text-emerald-500 mt-0.5 shrink-0" />
   <div>
-    <div class="font-semibold">iOS timing is best-effort.</div>
-    <div class="opacity-70">BGProcessingTask won't fire at exactly 06:30, and HealthKit must aggregate off the main thread (HKStatisticsCollectionQuery) or the UI hangs.</div>
+    <div class="font-semibold">Borrow the science, keep the graph.</div>
+    <div class="opacity-70">Re-implement the cited scoring (Tanaka, Banister TRIMP); the graph + agent is the moat.</div>
   </div>
 </div>
 
@@ -758,111 +608,18 @@ documents in about a minute.
   <div class="i-tabler-chart-dots text-2xl text-cyan-500 mt-0.5 shrink-0" />
   <div>
     <div class="font-semibold">A graph is only as good as what you logged.</div>
-    <div class="opacity-70">Sleep existed on ~78 of 3,117 days. Reimport can't conjure data that was never recorded — instrument collection first.</div>
+    <div class="opacity-70">Sleep existed on ~78 of 3,117 days. Instrument collection first.</div>
   </div>
 </div>
 
 </div>
 
 <!--
-Speaker: The six things I'd tell myself at the start. Cost bit hardest —
-Professional-db doesn't auto-pause, so I built a whole on-demand lifecycle.
-Security bit scariest — an AI-generated PR leaked the DB password; pre-commit
-plus isolated-DB tests now gate every change. And the data lesson is humbling:
-the graph only reasons over what your devices actually recorded.
+Speaker: Four things I'd tell myself at the start. Security bit scariest —
+an AI-generated PR leaked the DB password; pre-commit plus isolated-DB
+tests now gate every change. And the data lesson is humbling: the graph
+only reasons over what your devices actually recorded.
 -->
-
----
-layout: section
----
-
-<div class="kicker">Take this back to your work</div>
-
-# The pattern works for anything quantified
-
-<div class="grid grid-cols-2 gap-8 mt-8 max-w-4xl mx-auto">
-
-<div class="flex items-start gap-3">
-  <div class="i-tabler-cash text-3xl text-emerald-500 mt-1 shrink-0" />
-  <div>
-    <div class="font-semibold">Finance</div>
-    <div class="text-sm opacity-70">Transactions, entities, tax-year summaries. "Where did my money go?"</div>
-  </div>
-</div>
-
-<div class="flex items-start gap-3">
-  <div class="i-tabler-school text-3xl text-sky-500 mt-1 shrink-0" />
-  <div>
-    <div class="font-semibold">Learning</div>
-    <div class="text-sm opacity-70">Flashcards, concepts, progress. "What should I review tonight?"</div>
-  </div>
-</div>
-
-<div class="flex items-start gap-3">
-  <div class="i-tabler-code text-3xl text-violet-500 mt-1 shrink-0" />
-  <div>
-    <div class="font-semibold">Productivity</div>
-    <div class="text-sm opacity-70">Commits, projects, focus blocks. "Am I context-switching too much?"</div>
-  </div>
-</div>
-
-<div class="flex items-start gap-3">
-  <div class="i-tabler-leaf text-3xl text-amber-500 mt-1 shrink-0" />
-  <div>
-    <div class="font-semibold">Anything you measure</div>
-    <div class="text-sm opacity-70">Model relationships, ground the LLM, kill the silo.</div>
-  </div>
-</div>
-
-</div>
-
----
-
-# What's still open (PRs welcome 🙏)
-
-<div class="grid grid-cols-1 gap-4 mt-4 text-sm">
-
-<div class="flex items-start gap-3">
-  <div class="i-tabler-key text-2xl text-rose-500 mt-1 shrink-0" />
-  <div>
-    <div class="font-semibold">Auth0 production sign-in.</div>
-    <div class="opacity-70">Apple / Google / GitHub / Microsoft → Bearer JWT to the Data API. Currently dev-mode <code>x-api-key</code>.</div>
-  </div>
-</div>
-
-<div class="flex items-start gap-3">
-  <div class="i-tabler-database-search text-2xl text-emerald-500 mt-1 shrink-0" />
-  <div>
-    <div class="font-semibold">Vector embeddings for similarity search.</div>
-    <div class="opacity-70">Embed <code>DailySummary.description</code> to find "days that felt like that". Requires bringing your own LLM model (OpenAI, Vertex, etc.) — Aura's similarity-search tool takes the provider as config.</div>
-  </div>
-</div>
-
-<div class="flex items-start gap-3">
-  <div class="i-tabler-zzz text-2xl text-sky-500 mt-1 shrink-0" />
-  <div>
-    <div class="font-semibold">Sleep stages → hypnogram.</div>
-    <div class="opacity-70">Parse REM / Core / Deep from HealthKit for a Whoop/noop-style sleep breakdown (only sleep <em>hours</em> today).</div>
-  </div>
-</div>
-
-<div class="flex items-start gap-3">
-  <div class="i-tabler-file-text text-2xl text-amber-500 mt-1 shrink-0" />
-  <div>
-    <div class="font-semibold">Document Intelligence → real export (#10).</div>
-    <div class="opacity-70">Pilot done on synthetic docs (model + import working). Next: ingest the real clinical export, plus DI's public API/CLI/MCP (on Neo4j's roadmap) to script it.</div>
-  </div>
-</div>
-
-</div>
-
-<div class="mt-5 text-xs opacity-60">
-Shipped since the last cut: on-demand Aura lifecycle · offline snapshot dashboard · background daily sync · VO₂max/HRV/RHR cards · pre-commit gates · E2E tests.
-</div>
-
-<div class="mt-3 font-mono opacity-70 text-xs">
-github.com/ma3u/healthgraph-agent · issues #5, #10
-</div>
 
 ---
 layout: center
@@ -886,8 +643,15 @@ bash scripts/build_ios.sh                # iPhone app
 ```
 
 <div class="mt-6 opacity-70 text-sm">
-Live daily snapshot: <code>ma3u.github.io/healthgraph-agent/snapshot/</code>
+The pattern works for anything quantified — finance, learning, productivity.<br/>
+PRs welcome: Auth0 sign-in · vector similarity · sleep stages · DI on the real export (issues #5, #10).
 </div>
+
+<!--
+Speaker: Same pattern for any personal data domain: own the export, model
+the relationships, type the API, ground the agent. Clone it, bring your own
+Aura, and if you want to hack on it — the open issues are right there.
+-->
 
 ---
 layout: center
