@@ -467,37 +467,37 @@ Agents-as-code, finally.
 
 # Your data. Your Aura. Your bill.
 
-<div class="grid grid-cols-2 gap-8 mt-6">
-
-<div>
-
-**No shared backend.** Your biometrics never leave your Aura instance. Clone, fill `.env`, two scripts — ~5 minutes to running.
-
-**The catch:** Professional-db never auto-pauses at ~$0.30–0.40/hr. If your workflow only resumes, your instance lives forever.
-
+<div class="mt-6 text-base">
+This whole demo runs on the <strong>smallest AuraDB Professional: 1&nbsp;GB ≈ $65/mo</strong> always-on — and Professional <strong>never auto-pauses</strong>. So a pipeline pauses it for you:
 </div>
 
-<div>
-
-The fix — one extra step in the daily cron:
-
-```yaml
-- name: Pause Aura instance
-  if: always()
-  run: bash scripts/aura_pause.sh pause
-```
-
-Plus a 30-min idle watchdog + app-triggered wake:<br/>
-**~$520 → ~$120/mo (−77%).**
-
+<div class="flow-row mt-8">
+  <div class="flow-step"><div class="i-tabler-brand-github text-3xl text-gray-600" /><div class="t">GitHub Actions</div><div class="s">cron 06:30 UTC</div></div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-step"><div class="i-tabler-player-play text-3xl text-emerald-500" /><div class="t">Resume</div><div class="s">Aura REST API</div></div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-step"><div class="i-tabler-refresh text-3xl text-sky-500" /><div class="t">Sync + snapshot</div><div class="s">~2-3 min of uptime</div></div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-step"><div class="i-tabler-player-pause text-3xl text-rose-500" /><div class="t">Pause</div><div class="s">if:&nbsp;always()</div></div>
 </div>
 
+<div class="mt-8 grid grid-cols-2 gap-8 text-sm opacity-80">
+<div>
+Paused bills ~20% of running. The iPhone app <strong>wakes it on demand</strong>; a second workflow pauses it again after 30 idle minutes.
+</div>
+<div>
+Result: <strong>~$65 → ~$15/mo (−77%)</strong>.<br/>
+<span class="font-mono text-xs opacity-70">aura_lifecycle.py wake · aura_pause.sh pause</span>
+</div>
 </div>
 
 <!--
 Speaker: Bring-your-own-Aura is the privacy posture AND the cost story.
-The hard lesson: Professional tier does not auto-pause. On-demand resume,
-an idle watchdog, and the pause step in the cron cut my bill by ~77%.
+The smallest Professional instance — 1 GB, about $65 a month always-on —
+holds all 8.5 years. It never auto-pauses, so a GitHub Actions cron drives
+the Aura REST API: resume, do the day's sync and snapshot, pause again —
+if: always(), so a failed render still pauses. The app wakes it on demand
+and an idle watchdog pauses it after 30 minutes. Net: about 77% cheaper.
 -->
 
 ---
@@ -576,49 +576,51 @@ four documents in about a minute.
 
 <div class="kicker"><div class="i-tabler-bulb inline-block align-text-bottom mr-1" /> What I've learned (so far)</div>
 
-# Four lessons from the build
+# How the Aura features add up to a private EHR
 
-<div class="grid grid-cols-2 gap-x-8 gap-y-4 mt-4 text-sm">
+<div class="grid grid-cols-1 gap-4 mt-6 text-sm max-w-4xl">
 
-<div class="flex items-start gap-3">
-  <div class="i-tabler-cloud-off text-2xl text-sky-500 mt-0.5 shrink-0" />
+<div class="flex items-start gap-4">
+  <div class="i-tabler-robot text-3xl text-violet-500 mt-0.5 shrink-0" />
   <div>
-    <div class="font-semibold">Decouple the view from the DB.</div>
-    <div class="opacity-70">A static daily snapshot renders while Aura sleeps. Offline-first makes aggressive pausing usable.</div>
+    <div><span class="font-semibold text-violet-500">Aura Agent</span> <span class="font-semibold">→ a coach that knows my record.</span> <span class="opacity-70">Cypher templates ground the LLM in my graph — no horoscope answers.</span></div>
+    <div class="opacity-60 text-xs mt-0.5">Lesson: gate AI-written code — pre-commit (gitleaks) caught a PR that logged the DB password.</div>
   </div>
 </div>
 
-<div class="flex items-start gap-3">
-  <div class="i-tabler-shield-lock text-2xl text-rose-500 mt-0.5 shrink-0" />
+<div class="flex items-start gap-4">
+  <div class="i-tabler-api text-3xl text-emerald-500 mt-0.5 shrink-0" />
   <div>
-    <div class="font-semibold">Gate the AI.</div>
-    <div class="opacity-70">An AI "shortcut" PR logged the DB password in plaintext. Pre-commit (gitleaks) + isolated-DB E2E tests now catch it before merge.</div>
+    <div><span class="font-semibold text-emerald-500">GraphQL Data API</span> <span class="font-semibold">→ the phone writes straight into the record.</span> <span class="opacity-70">Three typed mutations, zero backend to host.</span></div>
+    <div class="opacity-60 text-xs mt-0.5">Lesson: decouple the view — a static snapshot renders while Aura sleeps, so pausing costs nothing.</div>
   </div>
 </div>
 
-<div class="flex items-start gap-3">
-  <div class="i-tabler-license text-2xl text-emerald-500 mt-0.5 shrink-0" />
+<div class="flex items-start gap-4">
+  <div class="i-tabler-layout-dashboard text-3xl text-sky-500 mt-0.5 shrink-0" />
   <div>
-    <div class="font-semibold">Borrow the science, keep the graph.</div>
-    <div class="opacity-70">Re-implement the cited scoring (Tanaka, Banister TRIMP); the graph + agent is the moat.</div>
+    <div><span class="font-semibold text-sky-500">Aura Dashboards</span> <span class="font-semibold">→ the Whoop view of the record, no subscription.</span> <span class="opacity-70">35 panels straight on the graph.</span></div>
+    <div class="opacity-60 text-xs mt-0.5">Lesson: borrow the published science (Tanaka, TRIMP) — the graph + agent is the moat.</div>
   </div>
 </div>
 
-<div class="flex items-start gap-3">
-  <div class="i-tabler-chart-dots text-2xl text-cyan-500 mt-0.5 shrink-0" />
+<div class="flex items-start gap-4">
+  <div class="i-tabler-file-text text-3xl text-amber-500 mt-0.5 shrink-0" />
   <div>
-    <div class="font-semibold">A graph is only as good as what you logged.</div>
-    <div class="opacity-70">Sleep existed on ~78 of 3,117 days. Instrument collection first.</div>
+    <div><span class="font-semibold text-amber-500">Document Intelligence</span> <span class="font-semibold">→ clinical documents join the record.</span> <span class="opacity-70">Lab panels and doctor letters become graph entities on the same timeline — no extraction code.</span></div>
+    <div class="opacity-60 text-xs mt-0.5">Lesson: a graph only knows what you logged — sleep existed on 78 of 3,117 days. Instrument collection first.</div>
   </div>
 </div>
 
 </div>
 
 <!--
-Speaker: Four things I'd tell myself at the start. Security bit scariest —
-an AI-generated PR leaked the DB password; pre-commit plus isolated-DB
-tests now gate every change. And the data lesson is humbling: the graph
-only reasons over what your devices actually recorded.
+Speaker: The takeaway in one slide. Each Aura feature covers one layer of a
+private electronic health record: the Agent answers from it, the Data API
+feeds it, Dashboards show it, Document Intelligence extends it to clinical
+documents. Under each: the hard-won lesson from that layer — the leaked
+password, the pause economics, the borrowed science, and the humbling one:
+the graph only reasons over what your devices actually recorded.
 -->
 
 ---

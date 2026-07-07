@@ -12,6 +12,19 @@
     "Segoe UI", system-ui, sans-serif;
 }
 
+/* Default-layout slides rarely fill the full 16:9 canvas; without this the
+ * content hugs the top and leaves a large empty band below. Centering the
+ * block vertically balances the whitespace instead. */
+.slidev-layout.default {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.slidev-layout.default > h1:first-child,
+.slidev-layout.default > .kicker:first-child {
+  margin-top: 0;
+}
+
 .slidev-layout h1,
 .slidev-layout h2,
 .slidev-layout h3 {
@@ -163,6 +176,38 @@
   opacity: 0.6;
 }
 
+/* Horizontal lifecycle flow — 4 steps joined by arrows */
+.flow-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+.flow-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 14px 18px;
+  border: 1px solid rgba(127, 127, 127, 0.28);
+  border-radius: 12px;
+  min-width: 8.5rem;
+  text-align: center;
+}
+.flow-step .t {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+.flow-step .s {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.68rem;
+  opacity: 0.6;
+}
+.flow-arrow {
+  font-size: 1.5rem;
+  opacity: 0.45;
+}
+
 /* Source chips — small pill tags for the fragmented-data-sources list */
 .chip {
   display: inline-block;
@@ -175,16 +220,23 @@
   white-space: nowrap;
 }
 
-/* Two-up image rows with rounded corners */
+/* Image rows with rounded corners. Portrait iPhone screenshots are much
+ * taller than the slide, so cap their height and let the width follow —
+ * three slim phones side by side, nothing cropped. px, not vh: vh measures
+ * the real viewport, and Slidev renders slides on a fixed 980×552 canvas
+ * that is then transform-scaled, so viewport units blow past the slide. */
 .img-row {
   display: grid;
   grid-auto-flow: column;
   grid-auto-columns: 1fr;
   gap: 12px;
+  justify-items: center;
 }
 .img-row img {
   border-radius: 12px;
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.18);
+  max-height: 300px;
+  width: auto;
 }
 
 /* Disable Slidev's "Goto" dialog (#slidev-goto-dialog).

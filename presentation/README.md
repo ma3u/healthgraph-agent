@@ -64,7 +64,7 @@ Images live in [`docs/images/hackathon/`](../docs/images/hackathon/) and are sym
 | 12 — BYO Aura + credits | 1:00 | Privacy posture + don't burn credits |
 | 13 — 3D graph | 0:30 | Land the numbers |
 | 14 — Document Intelligence | 0:45 | The next silo → private EHR |
-| 15 — Four lessons | 1:00 | Decouple · gate the AI · science · logging |
+| 15 — Aura features → EHR | 1:00 | Each feature = one layer of the record + its lesson |
 | 16 — Try it | 0:30 | Commands + PRs welcome |
 | 17 — Thanks / Q&A | open | |
 
