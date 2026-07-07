@@ -50,22 +50,19 @@ Images live in [`docs/images/hackathon/`](../docs/images/hackathon/) and are sym
 
 | Slide | Time | Beat |
 | --- | --- | --- |
-| 1 — Title | 0:45 | Hook + speaker intro + personal "why" |
-| 2 — The problem | 1:15 | Silos · relational data · ungrounded LLMs |
-| 3 — The pattern | 1:00 | "own → graph → API → agent" |
-| 4 — Why a graph | 1:00 | Causality chains vs tables |
+| 1 — Title | 1:00 | Hook + speaker intro + personal "why" |
+| 2 — The problem | 1:30 | Silos · relational data · ungrounded LLMs |
+| 3 — The pattern | 1:15 | "own → graph → API → agent" |
+| 4 — Why a graph | 1:15 | Causality chains vs tables |
 | 5 — Four pillars | 0:30 | What we'll see next |
-| 6 — Pillar 1: Agent | 1:15 | 6 tools, agents-as-code |
-| 7 — Pillar 2: Dashboard | 0:45 | Whoop UI, BYO data |
-| 8 — Pillar 3: GraphQL + Pages | 0:45 | Daily snapshot pipeline |
-| 9 — Pillar 4: iPhone | 0:30 | Bridge into the demo |
-| 10 — **Live demo** | 4:00 | Sync → ask → agent → snapshot (4 stops) |
-| 11 — Agent as JSON | 1:00 | The deliverable PR-able file |
-| 12 — BYO Aura + credits | 1:00 | Privacy posture + don't burn credits |
-| 13 — 3D graph | 0:30 | Land the numbers |
-| 14 — Document Intelligence | 0:45 | The next silo → private EHR |
-| 15 — Aura features → EHR | 1:00 | Each feature = one layer of the record + its lesson |
-| 16 — Try it | 0:30 | Commands + PRs welcome |
-| 17 — Thanks / Q&A | open | |
-
-Demo backup: `docs/images/hackathon/08-iphone-agent-answer-overlay-markdown.jpeg` if the iPhone is offline.
+| 6 — Pillar 1: Agent | 1:30 | 6 tools, agents-as-code |
+| 7 — Pillar 2: Dashboard | 1:00 | Whoop UI, BYO data |
+| 8 — Pillar 3: GraphQL + Pages | 1:00 | Daily snapshot pipeline |
+| 9 — Pillar 4: iPhone | 1:15 | Sync → ask → answer, from screenshots |
+| 10 — Agent as JSON | 1:15 | The deliverable PR-able file |
+| 11 — BYO Aura + credits | 1:15 | Smallest instance + pause pipeline |
+| 12 — 3D graph | 0:45 | Land the numbers |
+| 13 — Document Intelligence | 1:00 | The next silo → private EHR |
+| 14 — Aura features → EHR | 1:15 | Each feature = one layer of the record + its lesson |
+| 15 — Try it | 0:45 | Commands + PRs welcome |
+| 16 — Thanks / Q&A | open | |

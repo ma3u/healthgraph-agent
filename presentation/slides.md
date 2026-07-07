@@ -368,58 +368,11 @@ pause step at the end is what keeps the credits alive — more on that soon.
 </div>
 
 <!--
-Speaker: This is where it all comes together — and it's the live demo, now.
+Speaker: This is where it all comes together. Sync pulls only the delta
+since Aura's latest day, the chips build concrete date ranges, and the
+answer overlay shows the agent's grounded reply — about 15 seconds
+end-to-end. These are real screenshots from the running app.
 -->
-
----
-layout: section
----
-
-<div class="kicker"><div class="i-tabler-player-play inline-block align-text-bottom mr-1" /> Live demo · ~4 minutes</div>
-
-# Simulator → Aura → GitHub
-
-<div class="demo-links mt-6">
-
-<div class="demo-link">
-  <div class="i-tabler-brand-apple text-2xl text-gray-700 shrink-0" />
-  <div><div class="font-semibold">iPhone Simulator: sync + ask</div><div class="u">HealthGraphSync · runs the same build</div></div>
-</div>
-
-<a href="https://console.neo4j.io/projects/326809f3-c351-4eb7-8770-fcf5d0b6adc1/agents" target="_blank" class="demo-link">
-  <div class="i-tabler-robot text-2xl text-violet-500 shrink-0" />
-  <div><div class="font-semibold">Aura Agent</div><div class="u">console.neo4j.io · agents</div></div>
-</a>
-
-<a href="https://console.neo4j.io/projects/326809f3-c351-4eb7-8770-fcf5d0b6adc1/tools/dashboards/6nK3b74oETnBKqZVcYFJ?page=5fVoFTJ0Md1BnHmN8p5X" target="_blank" class="demo-link">
-  <div class="i-tabler-layout-dashboard text-2xl text-sky-500 shrink-0" />
-  <div><div class="font-semibold">Aura Dashboard</div><div class="u">console.neo4j.io · Whoop view</div></div>
-</a>
-
-<a href="https://ma3u.github.io/healthgraph-agent/snapshot/" target="_blank" class="demo-link">
-  <div class="i-tabler-world text-2xl text-rose-500 shrink-0" />
-  <div><div class="font-semibold">GitHub Pages snapshot</div><div class="u">ma3u.github.io · snapshot</div></div>
-</a>
-
-</div>
-
-<!--
-Speaker (DEMO ~4 min, 4 stops):
-1. Xcode is already open with the iPhone 17 Pro Simulator booted and the
-   HealthGraphSync app installed. Sync tab: show max(Day.date), upload the
-   last days' delta.
-2. Dashboard tab: tap "Last week summary" — answer overlay opens (~15s),
-   point out RHR vs baseline, the → arrow, the bullet structure.
-3. Click "Aura Agent" → Console Playground: it's the SAME agent the app
-   called. Click "Aura Dashboard" → the Whoop-style view.
-4. Click "GitHub Pages snapshot" → today's rendered Recovery card from the
-   06:30 GitHub Actions run.
-
-All cards are real clickable links — no typing URLs on stage.
-Backup if the demo dies: docs/images/hackathon/08-iphone-agent-answer-
-overlay-markdown.jpeg.
--->
-
 
 ---
 
