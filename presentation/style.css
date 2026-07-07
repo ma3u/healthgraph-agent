@@ -176,6 +176,21 @@
   opacity: 0.6;
 }
 
+/* Numbered step badge for recipe lists */
+.step-no {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 999px;
+  background: rgba(127, 127, 127, 0.14);
+  border: 1px solid rgba(127, 127, 127, 0.25);
+  font-size: 0.75rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
 /* Horizontal lifecycle flow — 4 steps joined by arrows */
 .flow-row {
   display: flex;

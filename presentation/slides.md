@@ -300,40 +300,45 @@ logic Whoop uses. Different data ownership.
 
 <div class="kicker"><div class="i-tabler-api inline-block align-text-bottom mr-1" /> 3 · GraphQL Data API + GitHub Pages</div>
 
-# Daily snapshot, automated
+# Build your daily dashboard with a GitHub Action
 
-<div class="grid grid-cols-5 gap-6 mt-2">
+<div class="grid grid-cols-5 gap-8 mt-2 items-center">
 
-<div class="col-span-2 text-sm">
+<div class="col-span-3 text-sm">
 
-**GraphQL Data API.** Three `@cypher` MERGE mutations: `ingestDay` · `ingestWorkout` · `ingestSleep`.
+One workflow, every morning at 06:30 UTC:
 
-**GitHub Actions, daily at 06:30 UTC:**
+<div class="grid grid-cols-1 gap-2 mt-4">
+  <div class="flex items-center gap-3"><span class="step-no">1</span><div><strong>Wake Aura</strong> — <code>aura_lifecycle.py wake</code> resumes the paused instance via the REST API.</div></div>
+  <div class="flex items-center gap-3"><span class="step-no">2</span><div><strong>Query the graph</strong> — the GraphQL Data API returns the last 7 days + 30-day baselines.</div></div>
+  <div class="flex items-center gap-3"><span class="step-no">3</span><div><strong>Render static HTML</strong> — <code>render_snapshot.py</code> turns it into one Recovery card. No JS, no server.</div></div>
+  <div class="flex items-center gap-3"><span class="step-no">4</span><div><strong>Commit to <code>/docs/snapshot/</code></strong> — GitHub Pages redeploys the page for free.</div></div>
+  <div class="flex items-center gap-3"><span class="step-no">5</span><div><strong>Pause Aura</strong> — <code>if: always()</code>. Total uptime: ~2-3 minutes a day.</div></div>
+</div>
 
-1. Auto-resume the paused instance
-2. Render the Recovery snapshot
-3. Commit + push to `/docs/snapshot/`
-4. Pause the instance again
+<div class="mt-5 font-medium">The dashboard is always on — the database almost never is.</div>
 
-Total uptime per day: ~2-3 minutes.
-
-<div class="mt-3 font-mono text-xs opacity-70">
-ma3u.github.io/healthgraph-agent/snapshot/
+<div class="mt-2 font-mono text-xs opacity-70">
+ma3u.github.io/healthgraph-agent/snapshot/ · .github/workflows/snapshot.yml
 </div>
 
 </div>
 
-<div class="col-span-3">
+<div class="col-span-2 flex justify-center">
 
-<img src="/images/05-github-pages-recovery-snapshot.png" class="rounded-lg shadow-xl" />
+<img src="/images/05-github-pages-recovery-snapshot.png" class="rounded-lg shadow-xl" style="max-height: 400px; width: auto;" />
 
 </div>
 
 </div>
 
 <!--
-Speaker: The dashboard you can look at while the database sleeps. And the
-pause step at the end is what keeps the credits alive — more on that soon.
+Speaker: This is the recipe for a free, zero-hosting daily dashboard. A
+scheduled GitHub Action wakes the database, pulls the numbers through the
+GraphQL Data API, renders one static HTML card, commits it, and GitHub
+Pages serves it. Then it pauses the database again — the dashboard is
+always available, the database ran three minutes. Same Data API also has
+the ingest mutations the iPhone app writes through.
 -->
 
 ---
@@ -378,13 +383,12 @@ end-to-end. These are real screenshots from the running app.
 
 <div class="kicker"><div class="i-tabler-json inline-block align-text-bottom mr-1" /> Agent as code</div>
 
-# The agent is one JSON file
+# The agent is one JSON file — no click-ops
 
-```json {2-7,10-19|all}
+```json {2-6,9-18|all}
 {
   "name": "HealthGraph Agent",
   "dbid": "7d4ba607",
-  "is_private": false,
   "is_mcp_enabled": true,
   "system_prompt": "You are a longevity-focused health analytics assistant...",
   "tools": [
@@ -404,14 +408,20 @@ end-to-end. These are real screenshots from the running app.
 }
 ```
 
-<div class="mt-2 text-sm opacity-70">
-<code>scripts/create_aura_agent.py</code> via Aura v2beta1 <code>/agents</code> API: <code>status</code> · <code>--pull</code> · <code>--push</code>.
+<div class="grid grid-cols-3 gap-4 mt-4 text-sm">
+  <div class="flex items-start gap-2"><div class="i-tabler-git-pull-request text-xl text-violet-500 mt-0.5 shrink-0" /><div><strong>Review it like code.</strong> <span class="opacity-70">System prompt + Cypher tools live in git — every change is a diff in a PR.</span></div></div>
+  <div class="flex items-start gap-2"><div class="i-tabler-rocket text-xl text-emerald-500 mt-0.5 shrink-0" /><div><strong>Reproducible.</strong> <span class="opacity-70"><code>--push</code> deploys the same coach to <em>your</em> Aura — that's what makes BYO work.</span></div></div>
+  <div class="flex items-start gap-2"><div class="i-tabler-refresh text-xl text-sky-500 mt-0.5 shrink-0" /><div><strong>Round-trip.</strong> <span class="opacity-70"><code>--pull</code> captures Console edits back into git. Nothing is lost in the UI.</span></div></div>
 </div>
 
 <!--
-Speaker: System prompt, tools, Cypher templates — one checked-in JSON.
-Diff in PR, round-trip Console edits with --pull, deploy with --push.
-Agents-as-code, finally.
+Speaker: Why this slide matters: the whole reasoning layer — system prompt,
+tools, Cypher templates — is one checked-in JSON, driven through the Aura
+v2beta1 /agents API by create_aura_agent.py. Three benefits: you review
+agent changes like code in a PR; anyone can --push the identical coach to
+their own Aura, which is what makes bring-your-own-instance real; and
+--pull round-trips Console experiments back into git, so no click-ops
+drift. Agents-as-code, finally.
 -->
 
 ---
