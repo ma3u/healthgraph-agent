@@ -345,7 +345,7 @@ ma3u.github.io/healthgraph-agent/snapshot/ · .github/workflows/snapshot.yml
 
 <div class="col-span-2 flex justify-center">
 
-<img src="/images/05-github-pages-recovery-snapshot.png" class="rounded-lg shadow-xl" style="max-height: 400px; width: auto;" />
+<img src="/images/05-github-pages-recovery-snapshot-72green.png" class="rounded-lg shadow-xl" style="max-height: 400px; width: auto;" />
 
 </div>
 
@@ -366,27 +366,21 @@ the ingest mutations the iPhone app writes through.
 
 # HealthKit sync + "Ask your graph"
 
-<div class="img-row mt-4">
+<div class="phone-row mt-3">
 
-<img src="/images/06-iphone-healthkit-sync-delta-upload.jpeg" />
-<img src="/images/07-iphone-dashboard-ask-your-graph.jpeg" />
-<img src="/images/08-iphone-agent-answer-overlay-markdown.jpeg" />
-
+<div class="phone">
+  <img src="/images/06-iphone-healthkit-sync-delta-upload.jpeg" />
+  <div class="cap"><strong>Sync.</strong> HealthKit → upload only the delta.</div>
 </div>
 
-<div class="mt-4 text-sm opacity-80 grid grid-cols-3 gap-4">
+<div class="phone">
+  <img src="/images/07-iphone-dashboard-today.jpg" />
+  <div class="cap"><strong>Dashboard.</strong> Recovery · Strain · Sleep, on-device — ask chips on top.</div>
+</div>
 
-<div>
-  <div class="i-tabler-cloud-data-connection text-xl mb-1 text-pink-500" />
-  <strong>Sync.</strong> HealthKit → upload only the delta.
-</div>
-<div>
-  <div class="i-tabler-pencil text-xl mb-1 text-sky-500" />
-  <strong>Ask.</strong> Chips compute ISO date ranges at tap time.
-</div>
-<div>
-  <div class="i-tabler-bolt text-xl mb-1 text-violet-500" />
-  <strong>Answer.</strong> Markdown overlay, ~15 s end-to-end.
+<div class="phone">
+  <img src="/images/08-iphone-agent-answer-overlay-markdown.jpeg" />
+  <div class="cap"><strong>Answer.</strong> Markdown overlay, ~15 s end-to-end.</div>
 </div>
 
 </div>

@@ -205,6 +205,37 @@
   border-radius: 16px;
 }
 
+/* Phone screenshot trio — full-height portraits with caption overlays.
+ * px, not vh: Slidev renders on a fixed 980×552 canvas (see .img-row). */
+.phone-row {
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+}
+.phone {
+  position: relative;
+}
+.phone img {
+  max-height: 400px;
+  width: auto;
+  border-radius: 14px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.18);
+}
+.phone .cap {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(4px);
+  border-radius: 9px;
+  padding: 5px 9px;
+  font-size: 0.66rem;
+  line-height: 1.35;
+  text-align: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
+}
+
 /* Journey chips — the personal-story strip on the problem slide.
  * <a> chips are live links to the Neo4j community threads. */
 .journey,
