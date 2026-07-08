@@ -56,57 +56,58 @@ quantified-self domain.
 
 # The problem you also have
 
-<div class="grid grid-cols-1 gap-3 mt-4">
+<div class="text-base mt-1 opacity-80">I want to see the effect of <strong>everything I do</strong> on my health and performance:</div>
 
-<div class="flex items-start gap-4">
-  <div class="i-tabler-database text-3xl text-rose-500 mt-1 shrink-0" />
-  <div>
-    <div class="font-semibold">Your health data lives in a dozen silos.</div>
-    <div class="opacity-70 text-sm">None of them talk to each other:</div>
-    <div class="flex flex-wrap gap-1.5 mt-2">
-      <span class="chip">Apple Health</span>
-      <span class="chip">Aware</span>
-      <span class="chip">Blood tests</span>
-      <span class="chip">ePA</span>
-      <span class="chip">Medical studies</span>
-      <span class="chip">eGym</span>
-      <span class="chip">Beat81</span>
-    </div>
+<div class="grid grid-cols-12 gap-4 mt-5 items-center">
+
+<div class="col-span-7 grid grid-cols-2 gap-2.5">
+  <div class="factor"><div class="i-tabler-barbell text-2xl text-amber-500 shrink-0" /><div><div class="t">Training</div><div class="s">Apple Watch · eGym · Beat81</div></div></div>
+  <div class="factor"><div class="i-tabler-zzz text-2xl text-indigo-500 shrink-0" /><div><div class="t">Sleep</div><div class="s">Apple Health</div></div></div>
+  <div class="factor"><div class="i-tabler-salad text-2xl text-emerald-500 shrink-0" /><div><div class="t">Nutrition</div><div class="s">Cronometer</div></div></div>
+  <div class="factor"><div class="i-tabler-pill text-2xl text-pink-500 shrink-0" /><div><div class="t">Supplements</div><div class="s">Cronometer</div></div></div>
+  <div class="factor"><div class="i-tabler-plane text-2xl text-sky-500 shrink-0" /><div><div class="t">Travelling</div><div class="s">Calendar</div></div></div>
+  <div class="factor"><div class="i-tabler-virus text-2xl text-rose-500 shrink-0" /><div><div class="t">Sickness</div><div class="s">ePA · doctor letters</div></div></div>
+</div>
+
+<div class="col-span-1 text-center">
+  <div class="text-3xl opacity-40">→</div>
+  <div class="text-xs opacity-50 mt-1">effect?</div>
+</div>
+
+<div class="col-span-4">
+  <div class="outcome">
+    <div class="i-tabler-heartbeat text-4xl text-rose-500" />
+    <div class="font-semibold text-base mt-1">Health &amp; performance</div>
+    <div class="font-mono text-xs opacity-60 mt-1">Recovery · HRV · RHR · VO₂max</div>
+    <div class="text-xs opacity-70 mt-2">Which lever moved which number?</div>
   </div>
 </div>
 
-<div class="flex items-start gap-4">
-  <div class="i-tabler-topology-star-3 text-3xl text-emerald-500 mt-1 shrink-0" />
-  <div>
-    <div class="font-semibold">Your data is relational.</div>
-    <div class="opacity-70 text-sm">Workout → sleep → morning HRV → recovery. Tables hide the chain.</div>
-  </div>
 </div>
 
-<div class="flex items-start gap-4">
-  <div class="i-tabler-brain text-3xl text-violet-500 mt-1 shrink-0" />
-  <div>
-    <div class="font-semibold">An LLM alone won't help.</div>
-    <div class="opacity-70 text-sm">"How am I doing?" without grounded data = horoscope.</div>
-  </div>
-</div>
-
+<div class="grid grid-cols-3 gap-4 mt-6 text-xs opacity-80">
+  <div class="flex items-start gap-2"><div class="i-tabler-database text-lg text-rose-500 shrink-0" /><div>Every factor logs into a <strong>different silo</strong> — none talk to each other.</div></div>
+  <div class="flex items-start gap-2"><div class="i-tabler-topology-star-3 text-lg text-emerald-500 shrink-0" /><div>Effects <strong>chain across days</strong> — workout → sleep → HRV. Tables hide the chain.</div></div>
+  <div class="flex items-start gap-2"><div class="i-tabler-brain text-lg text-violet-500 shrink-0" /><div>An <strong>LLM alone</strong> can't see any of it — "How am I doing?" = horoscope.</div></div>
 </div>
 
 <v-click>
 
-<div class="mt-6 text-lg flex items-center gap-3">
-  <div class="i-tabler-rocket text-2xl text-amber-500" />
-  You're a developer. One graph unifies every silo — and the data stays yours.
+<div class="mt-5 text-base flex items-center gap-3">
+  <div class="i-tabler-rocket text-xl text-amber-500" />
+  You're a developer. One graph joins every factor on the same timeline — and the data stays yours.
 </div>
 
 </v-click>
 
 <!--
-Speaker: 8.5 years of biometrics, rented back to me by every vendor. And
-Apple Health is just one silo — blood panels, the German ePA, eGym, Beat81.
-A graph is the one model where all of them share the same :Day and the same
-:Person instead of seven disconnected exports.
+Speaker: This is the real question behind the project: I train, I sleep, I
+eat, I take supplements, I travel, I get sick — six kinds of events, each
+logged in a different app, and I want to know what each one does to my
+recovery, HRV, resting heart rate, VO2max. Three reasons I can't answer it
+today: the silos don't talk, the effects chain across days so tables hide
+them, and an LLM without the data just guesses. One graph on one timeline
+is the developer-shaped fix.
 -->
 
 ---
