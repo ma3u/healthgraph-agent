@@ -661,9 +661,9 @@ class: text-center
   <a href="https://github.com/ma3u/healthgraph-agent" target="_blank" class="journey repo-chip"><div class="i-tabler-brand-github text-lg text-violet-500 shrink-0" /> github.com/ma3u/healthgraph-agent <span class="opacity-60 font-normal">· clone it, PRs welcome</span></a>
 </div>
 
-<div class="flex flex-col items-center gap-2">
+<div class="flex flex-col items-center gap-2 shrink-0">
   <div class="bg-white p-3 rounded-xl shadow-lg">
-    <img src="/linkedin-qr.png" class="w-44 h-44" />
+    <img src="/linkedin-qr.png" style="width: 176px; height: 176px; max-width: none;" />
   </div>
   <div class="text-xs font-semibold opacity-70"><div class="i-tabler-brand-linkedin inline-block align-text-bottom text-sky-600" /> Connect on LinkedIn</div>
 </div>
