@@ -199,32 +199,42 @@ layout: section
 
 <div class="kicker">What I built</div>
 
-<div class="grid grid-cols-4 gap-6 mt-10">
+<div class="grid grid-cols-5 gap-5 mt-10">
 
 <div class="flex flex-col items-center gap-2">
   <div class="i-tabler-robot text-5xl text-violet-500" />
   <div class="font-semibold text-sm">Aura Agent</div>
+  <div class="text-xs opacity-60 text-center">grounded coach, 6 tools</div>
 </div>
 
 <div class="flex flex-col items-center gap-2">
   <div class="i-tabler-layout-dashboard text-5xl text-sky-500" />
   <div class="font-semibold text-sm">Aura Dashboard</div>
+  <div class="text-xs opacity-60 text-center">Whoop view, 35 panels</div>
 </div>
 
 <div class="flex flex-col items-center gap-2">
   <div class="i-tabler-api text-5xl text-emerald-500" />
-  <div class="font-semibold text-sm">GraphQL API + Pages</div>
+  <div class="font-semibold text-sm">GraphQL Data API</div>
+  <div class="text-xs opacity-60 text-center">typed ingest + queries</div>
+</div>
+
+<div class="flex flex-col items-center gap-2">
+  <div class="i-tabler-brand-github text-5xl text-amber-500" />
+  <div class="font-semibold text-sm">GitHub Actions + Pages</div>
+  <div class="text-xs opacity-60 text-center">daily static snapshot</div>
 </div>
 
 <div class="flex flex-col items-center gap-2">
   <div class="i-tabler-device-mobile text-5xl text-pink-500" />
-  <div class="font-semibold text-sm">iPhone Sync</div>
+  <div class="font-semibold text-sm">iPhone Sync + Dashboard</div>
+  <div class="text-xs opacity-60 text-center">HealthKit → Aura → ask</div>
 </div>
 
 </div>
 
 <div class="opacity-70 mt-10 text-base text-center">
-Four pillars. Each a Neo4j Aura primitive.
+Test and use the Aura capabilities on my personal needs.
 </div>
 
 ---
@@ -307,7 +317,7 @@ logic Whoop uses. Different data ownership.
 
 ---
 
-<div class="kicker"><div class="i-tabler-api inline-block align-text-bottom mr-1" /> GraphQL Data API + GitHub Pages</div>
+<div class="kicker"><div class="i-tabler-api inline-block align-text-bottom mr-1" /> GraphQL Data API + GitHub Actions + Pages</div>
 
 # Build your daily dashboard with a GitHub Action
 
