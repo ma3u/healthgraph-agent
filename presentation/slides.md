@@ -93,7 +93,7 @@ quantified-self domain.
 
 <div class="mt-5 flex items-center gap-2.5 text-sm flex-wrap">
   <div class="font-semibold opacity-70 shrink-0">My story:</div>
-  <a href="https://community.neo4j.com/t/start-here-register-get-aura-credits-aura-agent-hackathon/77191" target="_blank" class="journey"><div class="i-tabler-school text-base text-violet-500 shrink-0" /> Learn Aura Agent</a>
+  <a href="https://graphacademy.neo4j.com/courses/aura-agents?ref=community-hackathon-aura-agents" target="_blank" class="journey"><div class="i-tabler-school text-base text-violet-500 shrink-0" /> Learn Aura Agent</a>
   <span class="flow-arrow text-base">→</span>
   <span class="journey"><div class="i-tabler-coin-euro text-base text-amber-500 shrink-0" /> Earn €100 credits</span>
   <span class="flow-arrow text-base">→</span>
