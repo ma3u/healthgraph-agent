@@ -93,13 +93,13 @@ quantified-self domain.
 
 <div class="mt-5 flex items-center gap-2.5 text-sm flex-wrap">
   <div class="font-semibold opacity-70 shrink-0">My story:</div>
-  <a href="https://community.neo4j.com/t/start-here-register-get-aura-credits-aura-agent-hackathon/77191" target="_blank" class="journey"><div class="i-tabler-school text-base text-violet-500 shrink-0" /> 1 · Learn Aura Agent</a>
+  <a href="https://community.neo4j.com/t/start-here-register-get-aura-credits-aura-agent-hackathon/77191" target="_blank" class="journey"><div class="i-tabler-school text-base text-violet-500 shrink-0" /> Learn Aura Agent</a>
   <span class="flow-arrow text-base">→</span>
-  <span class="journey"><div class="i-tabler-coin-euro text-base text-amber-500 shrink-0" /> 2 · Earn €100 credits</span>
+  <span class="journey"><div class="i-tabler-coin-euro text-base text-amber-500 shrink-0" /> Earn €100 credits</span>
   <span class="flow-arrow text-base">→</span>
-  <span class="journey"><div class="i-tabler-tool text-base text-sky-500 shrink-0" /> 3 · Aura Hackathon, June</span>
+  <span class="journey"><div class="i-tabler-tool text-base text-sky-500 shrink-0" /> Aura Hackathon, June</span>
   <span class="flow-arrow text-base">→</span>
-  <a href="https://community.neo4j.com/t/aura-agent-hackathon-project-showcase/79285" target="_blank" class="journey"><div class="i-tabler-trophy text-base text-emerald-500 shrink-0" /> 4 · Placed 5th of 40</a>
+  <a href="https://community.neo4j.com/t/aura-agent-hackathon-project-showcase/79285" target="_blank" class="journey"><div class="i-tabler-trophy text-base text-emerald-500 shrink-0" /> Placed 5th of 40</a>
 </div>
 
 </v-click>
@@ -229,7 +229,7 @@ Four pillars. Each a Neo4j Aura primitive.
 
 ---
 
-<div class="kicker"><div class="i-tabler-robot inline-block align-text-bottom mr-1" /> 1 · Aura Agent</div>
+<div class="kicker"><div class="i-tabler-robot inline-block align-text-bottom mr-1" /> Aura Agent</div>
 
 # HealthGraph Agent
 
@@ -270,7 +270,7 @@ parameterized Cypher I wrote, Text2Cypher covers the rest.
 
 ---
 
-<div class="kicker"><div class="i-tabler-layout-dashboard inline-block align-text-bottom mr-1" /> 2 · Aura Dashboard</div>
+<div class="kicker"><div class="i-tabler-layout-dashboard inline-block align-text-bottom mr-1" /> Aura Dashboard</div>
 
 # Whoop-style, in Console
 
@@ -307,7 +307,7 @@ logic Whoop uses. Different data ownership.
 
 ---
 
-<div class="kicker"><div class="i-tabler-api inline-block align-text-bottom mr-1" /> 3 · GraphQL Data API + GitHub Pages</div>
+<div class="kicker"><div class="i-tabler-api inline-block align-text-bottom mr-1" /> GraphQL Data API + GitHub Pages</div>
 
 # Build your daily dashboard with a GitHub Action
 
@@ -352,7 +352,7 @@ the ingest mutations the iPhone app writes through.
 
 ---
 
-<div class="kicker"><div class="i-tabler-device-mobile inline-block align-text-bottom mr-1" /> 4 · iPhone</div>
+<div class="kicker"><div class="i-tabler-device-mobile inline-block align-text-bottom mr-1" /> iPhone</div>
 
 # HealthKit sync + "Ask your graph"
 
