@@ -642,37 +642,28 @@ layout: center
 class: text-center
 ---
 
-# Thanks 🙏
+# Own your data. Ask your graph.
 
 <div class="text-xl opacity-70 mt-2">
-  Questions?
+  Thanks 🙏 · Questions?
 </div>
 
-<div class="flex items-center justify-center gap-10 mt-10">
+<div class="flex items-center justify-center gap-12 mt-10">
 
-<img src="/linkedin-photo.png" class="w-32 h-32 rounded-full shadow-lg" />
+<img src="/speaker-triathlon.jpg" class="h-72 rounded-2xl shadow-xl" />
 
-<div class="text-left flex flex-col gap-2">
-  <div class="text-lg font-semibold">Matthias Buchhorn-Roth</div>
-  <div class="flex items-center gap-2 text-sm opacity-75">
-    <div class="i-tabler-link text-lg opacity-70" />
-    <span class="font-mono">linkedin.com/in/mbuchhorn</span>
-  </div>
-  <div class="flex items-center gap-2 text-sm opacity-75">
-    <div class="i-tabler-code text-lg opacity-70" />
-    <span class="font-mono">github.com/ma3u</span>
-  </div>
-  <div class="flex items-center gap-2 text-sm opacity-75">
-    <div class="i-tabler-folder text-lg opacity-70" />
-    <span class="font-mono">github.com/ma3u/healthgraph-agent</span>
-  </div>
+<div class="text-left flex flex-col gap-2.5">
+  <div class="text-xl font-semibold mb-1">Matthias Buchhorn-Roth</div>
+  <a href="https://www.linkedin.com/in/mbuchhorn" target="_blank" class="journey"><div class="i-tabler-brand-linkedin text-lg text-sky-600 shrink-0" /> linkedin.com/in/mbuchhorn</a>
+  <a href="https://github.com/ma3u" target="_blank" class="journey"><div class="i-tabler-brand-github text-lg shrink-0" /> github.com/ma3u</a>
+  <a href="https://github.com/ma3u/healthgraph-agent" target="_blank" class="journey repo-chip"><div class="i-tabler-brand-github text-lg text-violet-500 shrink-0" /> github.com/ma3u/healthgraph-agent <span class="opacity-60 font-normal">· clone it, PRs welcome</span></a>
 </div>
 
 <div class="flex flex-col items-center gap-2">
   <div class="bg-white p-3 rounded-xl shadow-lg">
-    <img src="/linkedin-qr.png" class="w-40 h-40" />
+    <img src="/linkedin-qr.png" class="w-44 h-44" />
   </div>
-  <div class="text-xs font-semibold opacity-70">Connect on LinkedIn</div>
+  <div class="text-xs font-semibold opacity-70"><div class="i-tabler-brand-linkedin inline-block align-text-bottom text-sky-600" /> Connect on LinkedIn</div>
 </div>
 
 </div>

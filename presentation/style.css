@@ -226,6 +226,12 @@ a.journey:hover {
   border-color: var(--slidev-theme-primary, #2563eb);
   background: rgba(127, 127, 127, 0.06);
 }
+/* Emphasized repo chip on the closing slide */
+.slidev-layout a.repo-chip {
+  border-color: rgba(139, 92, 246, 0.55);
+  background: rgba(139, 92, 246, 0.07);
+  font-size: 0.8rem;
+}
 
 /* Numbered step badge for recipe lists */
 .step-no {
