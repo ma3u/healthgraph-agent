@@ -642,6 +642,10 @@ layout: center
 class: text-center
 ---
 
+<img src="/speaker-triathlon.jpg" class="absolute inset-y-0 left-0 h-full w-auto" />
+
+<div style="margin-left: 265px">
+
 # Own your data. Ask your graph.
 
 <div class="text-xl opacity-70 mt-2">
@@ -649,8 +653,6 @@ class: text-center
 </div>
 
 <div class="flex items-center justify-center gap-12 mt-10">
-
-<img src="/speaker-triathlon.jpg" class="h-72 rounded-2xl shadow-xl" />
 
 <div class="text-left flex flex-col gap-2.5">
   <div class="text-xl font-semibold mb-1">Matthias Buchhorn-Roth</div>
@@ -664,6 +666,8 @@ class: text-center
     <img src="/linkedin-qr.png" class="w-44 h-44" />
   </div>
   <div class="text-xs font-semibold opacity-70"><div class="i-tabler-brand-linkedin inline-block align-text-bottom text-sky-600" /> Connect on LinkedIn</div>
+</div>
+
 </div>
 
 </div>
