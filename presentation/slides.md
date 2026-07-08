@@ -374,13 +374,13 @@ the ingest mutations the iPhone app writes through.
 </div>
 
 <div class="phone">
-  <img src="/images/07-iphone-dashboard-today.jpg" />
-  <div class="cap"><strong>Dashboard.</strong> Recovery · Strain · Sleep, on-device — ask chips on top.</div>
+  <img src="/images/08-iphone-agent-answer-overlay-markdown.jpeg" />
+  <div class="cap"><strong>Ask.</strong> Chips → grounded answer overlay, ~15 s end-to-end.</div>
 </div>
 
 <div class="phone">
-  <img src="/images/08-iphone-agent-answer-overlay-markdown.jpeg" />
-  <div class="cap"><strong>Answer.</strong> Markdown overlay, ~15 s end-to-end.</div>
+  <img src="/images/07-iphone-dashboard-today.jpg" />
+  <div class="cap"><strong>Dashboard.</strong> Recovery · Strain · Sleep, Whoop-style on-device.</div>
 </div>
 
 </div>
