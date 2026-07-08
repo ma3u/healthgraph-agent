@@ -1,13 +1,11 @@
 ---
 theme: seriph
 title: From Apple Health to Aura Agent
-info: |
-  ## From Apple Health to Aura Agent
-  Build a Whoop-style coach for your own data.
-  Escape the vendor lock-in.
-
-  Neo4j Theatre @ WeAreDevelopers Berlin 2026
-  Speaker: Matthias Buchhorn-Roth · github.com/ma3u
+# titleTemplate drops Slidev's default " - Slidev" suffix from <title>;
+# info doubles as the <meta name="description">, so keep it one clean line.
+titleTemplate: '%s'
+info: Build a Whoop-style coach on your own Apple Health data — Neo4j Aura graph, GraphQL Data API, Aura Agent, iPhone sync. Neo4j Theatre @ WeAreDevelopers Berlin 2026 · Matthias Buchhorn-Roth (@ma3u).
+favicon: https://ma3u.github.io/healthgraph-agent/talk/favicon.png
 class: text-center cover-slide
 highlighter: shiki
 lineNumbers: true
