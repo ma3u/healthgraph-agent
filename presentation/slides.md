@@ -91,9 +91,15 @@ quantified-self domain.
 
 <v-click>
 
-<div class="mt-5 text-base flex items-center gap-3">
-  <div class="i-tabler-rocket text-xl text-amber-500" />
-  You're a developer. One graph joins every factor on the same timeline — and the data stays yours.
+<div class="mt-5 flex items-center gap-2.5 text-sm flex-wrap">
+  <div class="font-semibold opacity-70 shrink-0">My story:</div>
+  <a href="https://community.neo4j.com/t/start-here-register-get-aura-credits-aura-agent-hackathon/77191" target="_blank" class="journey"><div class="i-tabler-school text-base text-violet-500 shrink-0" /> 1 · Learn Aura Agent</a>
+  <span class="flow-arrow text-base">→</span>
+  <span class="journey"><div class="i-tabler-coin-euro text-base text-amber-500 shrink-0" /> 2 · Earn €100 credits</span>
+  <span class="flow-arrow text-base">→</span>
+  <span class="journey"><div class="i-tabler-tool text-base text-sky-500 shrink-0" /> 3 · Aura Hackathon, June</span>
+  <span class="flow-arrow text-base">→</span>
+  <a href="https://community.neo4j.com/t/aura-agent-hackathon-project-showcase/79285" target="_blank" class="journey"><div class="i-tabler-trophy text-base text-emerald-500 shrink-0" /> 4 · Placed 5th of 40</a>
 </div>
 
 </v-click>
@@ -104,8 +110,12 @@ eat, I take supplements, I travel, I get sick — six kinds of events, each
 logged in a different app, and I want to know what each one does to my
 recovery, HRV, resting heart rate, VO2max. Three reasons I can't answer it
 today: the silos don't talk, the effects chain across days so tables hide
-them, and an LLM without the data just guesses. One graph on one timeline
-is the developer-shaped fix.
+them, and an LLM without the data just guesses.
+
+And my story: I learned Aura Agent through the Neo4j community's starter
+thread, earned the €100 Aura credits, built this at the Aura Agent
+Hackathon last month — and placed 5th of 40 submissions in the project
+showcase. Both chips are live links to the community threads.
 -->
 
 ---

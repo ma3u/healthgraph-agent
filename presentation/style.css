@@ -205,6 +205,28 @@
   border-radius: 16px;
 }
 
+/* Journey chips — the personal-story strip on the problem slide.
+ * <a> chips are live links to the Neo4j community threads. */
+.journey,
+.slidev-layout a.journey {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border: 1px solid rgba(127, 127, 127, 0.28);
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-decoration: none;
+  color: inherit;
+  white-space: nowrap;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+a.journey:hover {
+  border-color: var(--slidev-theme-primary, #2563eb);
+  background: rgba(127, 127, 127, 0.06);
+}
+
 /* Numbered step badge for recipe lists */
 .step-no {
   display: inline-flex;
