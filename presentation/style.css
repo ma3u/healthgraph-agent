@@ -205,20 +205,35 @@
   border-radius: 16px;
 }
 
-/* Phone screenshot trio — full-height portraits with caption overlays.
+/* Phone screenshot trio — full-bleed portraits pinned to the right edge,
+ * spanning the whole slide height; the headline sits in the left column.
  * px, not vh: Slidev renders on a fixed 980×552 canvas (see .img-row). */
-.phone-row {
+.phone-strip {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
   display: flex;
+  gap: 6px;
+}
+.phone-strip-lead {
+  display: flex;
+  flex-direction: column;
   justify-content: center;
-  gap: 18px;
+  height: 100%;
+  margin-right: 790px;
+}
+.phone-strip-lead h1 {
+  line-height: 1.2;
+  font-size: 1.65rem;
 }
 .phone {
   position: relative;
+  height: 100%;
 }
 .phone img {
-  max-height: 400px;
+  height: 100%;
   width: auto;
-  border-radius: 14px;
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.18);
 }
 .phone .cap {

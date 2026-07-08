@@ -362,26 +362,26 @@ the ingest mutations the iPhone app writes through.
 
 ---
 
+<div class="phone-strip">
+  <div class="phone">
+    <img src="/images/06-iphone-healthkit-sync-delta-upload.jpeg" />
+    <div class="cap"><strong>Sync.</strong> HealthKit → upload only the delta.</div>
+  </div>
+  <div class="phone">
+    <img src="/images/08-iphone-agent-answer-overlay-markdown.jpeg" />
+    <div class="cap"><strong>Ask.</strong> Chips → grounded answer overlay, ~15 s.</div>
+  </div>
+  <div class="phone">
+    <img src="/images/07-iphone-dashboard-today.jpg" />
+    <div class="cap"><strong>Dashboard.</strong> Recovery · Strain · Sleep, on-device.</div>
+  </div>
+</div>
+
+<div class="phone-strip-lead">
+
 <div class="kicker"><div class="i-tabler-device-mobile inline-block align-text-bottom mr-1" /> iPhone</div>
 
 # HealthKit sync + "Ask your graph"
-
-<div class="phone-row mt-3">
-
-<div class="phone">
-  <img src="/images/06-iphone-healthkit-sync-delta-upload.jpeg" />
-  <div class="cap"><strong>Sync.</strong> HealthKit → upload only the delta.</div>
-</div>
-
-<div class="phone">
-  <img src="/images/08-iphone-agent-answer-overlay-markdown.jpeg" />
-  <div class="cap"><strong>Ask.</strong> Chips → grounded answer overlay, ~15 s end-to-end.</div>
-</div>
-
-<div class="phone">
-  <img src="/images/07-iphone-dashboard-today.jpg" />
-  <div class="cap"><strong>Dashboard.</strong> Recovery · Strain · Sleep, Whoop-style on-device.</div>
-</div>
 
 </div>
 
